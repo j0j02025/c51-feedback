@@ -115,7 +115,7 @@ button{font:inherit;border:0;border-radius:10px;cursor:pointer;color:var(--ink);
 </div>
 <script>
 // 红绿灯规则(skill josh-traffic-light §2):黄 = 没判,或判后课件改了(sha 不等)· 绿 = 通过 · 红 = 不通过
-const DATA={"page": {"id": "c51-feedback", "title": "C51 看课反馈"}, "form": "https://01ai.feishu.cn/share/base/shrcnqr2MJH0FjuNxhGtrpsxvmd", "lessons": [{"id": "kk69-rook", "short": "Қаз 69", "title": "为什么保护白嘴鸦？", "titles": {"zh": "为什么保护白嘴鸦？", "kk": "Ұзақты неге қорғау керек?", "ru": "Почему нужно защищать грачей?"}, "file": "lessons/kk69-rook.html", "sha": "6b05dbf5e97f143c90e2211da56b489daf034f09f6cb0a1efb29875eed00408f"}, {"id": "ru16-slides", "short": "Рус 16", "title": "俄语第 16 课 · 环保演示", "titles": {"zh": "俄语第 16 课 · 环保演示", "kk": "Орыс тілі · 16-сабақ", "ru": "Русский язык · урок 16"}, "file": "lessons/ru16-slides.html", "sha": "9776595b3591bec7de811555d39768752632f95737010b2a7b20ab93fa588fd2"}, {"id": "kk-fruits", "short": "Жемістер", "title": "Жемістер", "titles": {"zh": "Жемістер", "kk": "Жемістер", "ru": "Фрукты"}, "file": "lessons/kk-fruits.html", "sha": "718376019e918a98905a6c211396847fd90d8cf793ca58748894a62ebc09a9ee"}]};   // {page:{id,title}, form, lessons:[{id,short,title,titles?,file,sha}]}
+const DATA={"page": {"id": "c51-feedback", "title": "C51 看课反馈"}, "form": "https://01ai.feishu.cn/share/base/shrcnqr2MJH0FjuNxhGtrpsxvmd", "lessons": [{"id": "kk69-rook", "short": "Қаз 69", "title": "为什么保护白嘴鸦？", "titles": {"zh": "为什么保护白嘴鸦？", "kk": "Ұзақты неге қорғау керек?", "ru": "Почему нужно защищать грачей?"}, "file": "lessons/kk69-rook.html", "sha": "6034e2d5f9e5781b2df4e26d270d7bd19390c089cce17854af1ed26df4362f87"}, {"id": "ru16-slides", "short": "Рус 16", "title": "俄语第 16 课 · 环保演示", "titles": {"zh": "俄语第 16 课 · 环保演示", "kk": "Орыс тілі · 16-сабақ", "ru": "Русский язык · урок 16"}, "file": "lessons/ru16-slides.html", "sha": "68a9243dc06d13db0cc2543a0898a6e488daaa0437551276cdd97fc11b91df8b"}]};   // {page:{id,title}, form, lessons:[{id,short,title,titles?,file,sha}]}
 const $=id=>document.getElementById(id);
 const UI={
   zh:{title:"看课反馈",name:"姓名",nmTtl:"请先填你的名字",nmSub:"名字由老师自己填写",start:"→ 开始",add:"⏸ 评论",empty:"在出错的地方暂停,写下意见",send:"✓ 提交",fs:"⛶ 全屏",save:"✓ 保存",ph:"哪里不对?",pass:"✓ 通过",fail:"✕ 不通过",lgG:"通过",lgR:"不通过",lgY:"还没判",load:"正在加载,请稍等",slow:"网络慢,请稍候,或刷新页面",rot:"请把手机横过来"},
@@ -157,9 +157,17 @@ function applyLang(){
 const W=()=>$("lesson").contentWindow;
 function curT(){try{const s=W().__state&&W().__state();if(s&&isFinite(s.t))return s.t}catch(e){}
   try{const a=W().document.querySelector("audio");if(a)return a.currentTime}catch(e){}return 0}
-function pause(){try{W().document.querySelectorAll("audio,video").forEach(a=>{if(!a.paused)a.pause()})}catch(e){}}
-function resume(){try{const b=W().document.querySelector('[data-cv-ctl="play"]');const a=W().document.querySelector("audio");
-  if(b&&a&&a.paused)b.click();else if(a&&a.paused)a.play().catch(()=>{})}catch(e){}}
+// 旁白可能是 video；背景音乐不是播放态的可靠依据。
+function playback(){try{const w=W(),s=typeof w.__state==="function"?w.__state():null;
+  if(s&&typeof s.playing==="boolean")return s.playing;
+  if(s&&typeof s.paused==="boolean")return !s.paused;
+  const a=w.document.querySelector("#narration")||w.document.querySelector("video,audio");
+  return a?!a.paused:null}catch(e){return null}}
+function pause(){try{const d=W().document,b=d.querySelector('[data-cv-ctl="play"]'),on=playback();
+  if(b&&on===true)b.click();else if(!b)d.querySelectorAll("audio,video").forEach(a=>{if(!a.paused)a.pause()});
+  return on===true}catch(e){return false}}
+function resume(){try{const d=W().document,b=d.querySelector('[data-cv-ctl="play"]'),on=playback();
+  if(b&&on===false)b.click();else if(!b){const a=d.querySelector("#narration")||d.querySelector("video,audio");if(a&&a.paused)a.play().catch(()=>{})}}catch(e){}}
 function seek(s){try{if(W().__setTime)W().__setTime(s)}catch(e){}}
 const fmt=s=>{s=Math.max(0,Math.floor(s));return String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0")};
 $("lesson").addEventListener("load",()=>{try{
@@ -197,11 +205,11 @@ function render(){
 }
 $("verdict").querySelectorAll("button").forEach(b=>b.onclick=()=>{const L=byId[st.cur];const v=st.v[L.id];
   if(v&&v.sha===L.sha&&v.v===b.dataset.v)delete st.v[L.id];else st.v[L.id]={v:b.dataset.v,sha:L.sha};save();render()});
-let pendingS=0;
-$("add").onclick=()=>{pause();pendingS=curT();$("dlgAt").textContent="⏸ "+fmt(pendingS)+" · "+byId[st.cur].short;$("txt").value="";$("dlg").style.display="flex";setTimeout(()=>$("txt").focus(),50)};
-$("cancel").onclick=()=>{$("dlg").style.display="none";resume()};
+let pendingS=0, resumeAfterComment=false;
+$("add").onclick=()=>{resumeAfterComment=pause();pendingS=curT();$("dlgAt").textContent="⏸ "+fmt(pendingS)+" · "+byId[st.cur].short;$("txt").value="";$("dlg").style.display="flex";setTimeout(()=>$("txt").focus(),50)};
+$("cancel").onclick=()=>{$("dlg").style.display="none";if(resumeAfterComment)resume()};
 $("save").onclick=()=>{const c=$("txt").value.trim();if(!c){$("txt").focus();return}const L=byId[st.cur];
-  (st.c[L.id]=st.c[L.id]||[]).push({s:Math.round(pendingS*10)/10,c,sha:L.sha,lang});save();render();$("dlg").style.display="none";resume()};
+  (st.c[L.id]=st.c[L.id]||[]).push({s:Math.round(pendingS*10)/10,c,sha:L.sha,lang});save();render();$("dlg").style.display="none";if(resumeAfterComment)resume()};
 $("fs").onclick=async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else{await document.documentElement.requestFullscreen();
   if(screen.orientation&&screen.orientation.lock)await screen.orientation.lock("landscape").catch(()=>{})}}catch(e){}};
 $("rotok").onclick=()=>{document.body.classList.add("rot-ok");maybeEnter()};
