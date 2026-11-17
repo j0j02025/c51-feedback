@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>看课反馈</title>
+<style>
+:root{--bg:#14161a;--panel:#1f2329;--ink:#f2f3f5;--mute:#9aa3ad;--acc:#ffb020;--ok:#3fbf7f;--bad:#e5534b}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font:15px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overflow:hidden}
+#wrap{display:flex;height:100dvh;width:100vw}
+#stage{flex:1 1 auto;position:relative;background:#000;min-width:0}
+#stage iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+#side{flex:0 0 30%;max-width:340px;min-width:200px;background:var(--panel);display:flex;flex-direction:column;padding:8px;gap:6px;padding-right:max(8px,env(safe-area-inset-right))}
+#side h1{font-size:14px;margin:0;color:var(--mute);font-weight:500}
+#name{width:100%;padding:7px 8px;border-radius:8px;border:1px solid #39404a;background:#0f1114;color:var(--ink);font-size:16px;min-height:44px}
+#name.miss{border-color:var(--bad)}
+button{font:inherit;border:0;border-radius:10px;cursor:pointer}
+#add,#send{min-height:44px;height:auto;white-space:normal;line-height:1.25;overflow:visible;font-weight:700;padding:8px 6px;font-size:clamp(13px,1.7vw,16px)}
+#add{background:var(--acc);color:#1a1300}
+#list{flex:1 1 auto;overflow-y:auto;display:flex;flex-direction:column;gap:5px;min-height:0}
+.it{background:#2a2f37;border-radius:8px;padding:6px 8px;font-size:14px;display:flex;gap:6px;align-items:flex-start}
+.it .tm{min-width:44px;min-height:44px;background:none;color:var(--acc);font-weight:700;font-variant-numeric:tabular-nums;cursor:pointer;white-space:nowrap;padding:0 4px}
+.it .tx{flex:1;word-break:break-word}
+.it .x{min-width:44px;min-height:44px;background:none;color:var(--mute);padding:0 4px;font-size:16px}
+#empty{color:var(--mute);font-size:14px}
+#send{background:var(--ok);color:#06210f}
+#send:disabled{opacity:.4}
+#fs{min-height:44px;background:#39404a;color:var(--ink);padding:6px;font-size:14px}
+#err{color:var(--bad);font-size:14px;display:none}
+#done{color:var(--ok);font-size:14px;display:none}
+#dlg{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:10}
+#dlg .box{background:var(--panel);border-radius:12px;padding:12px;width:min(560px,92vw);display:flex;flex-direction:column;gap:8px}
+#dlg .at{color:var(--acc);font-weight:700}
+#dlg textarea{width:100%;height:clamp(50px,24dvh,110px);min-height:50px;border-radius:8px;border:1px solid #39404a;background:#0f1114;color:var(--ink);font:16px/1.4 system-ui,-apple-system,sans-serif;padding:8px;resize:none}
+#dlg .row{display:flex;gap:8px}
+#dlg .row button{flex:1;min-height:44px;padding:8px}
+#save{background:var(--acc);color:#1a1300;font-weight:700}
+#cancel{background:#39404a;color:var(--ink)}
+/* 开场 / 竖屏:全屏,盖住一切 */
+#rot{position:fixed;inset:0;background:var(--bg);display:none;flex-direction:column;align-items:center;justify-content:center;gap:18px;z-index:30;text-align:center;padding:24px}
+#rot.on{display:flex}
+#rot .phone{width:min(35vw,220px);aspect-ratio:1;position:relative;display:flex;align-items:center;justify-content:center}
+#rot .ring{position:absolute;inset:0;border-radius:50%;border:6px dashed var(--acc);animation:spin 2.4s linear infinite}
+#rot .ic{font-size:clamp(72px,18vw,140px);line-height:1;animation:tilt 2.2s ease-in-out infinite;transform-origin:50% 60%}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes tilt{0%,18%{transform:rotate(0deg)}45%,68%{transform:rotate(90deg)}100%{transform:rotate(0deg)}}
+#rot .msg{font-size:clamp(22px,4.2vw,34px);font-weight:800;line-height:1.35;max-width:18em}
+#rot .sub{font-size:clamp(16px,2.6vw,22px);color:var(--mute);line-height:1.45;max-width:22em}
+#rot button{background:#39404a;color:var(--ink);padding:8px 14px;min-height:44px}
+#rotLoad{display:none;align-items:center;gap:10px;font-size:18px;font-weight:700}
+#rot.wait #rotLoad{display:flex}
+#rot .spin.sm{width:28px;height:28px;border-width:4px;border-style:solid;border-color:#39404a;border-top-color:var(--acc);border-radius:50%;animation:spin .8s linear infinite;flex:0 0 auto}
+/* 加载遮罩:盖住课件区,含「测试用中文字幕」占位 */
+#load{position:absolute;inset:0;z-index:5;background:#0c0e12;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;text-align:center;padding:16px;opacity:1;transition:opacity .35s ease}
+#load.off{opacity:0;pointer-events:none}
+#load .spin{width:72px;height:72px;border-radius:50%;border:7px solid #39404a;border-top-color:var(--acc);animation:spin .8s linear infinite}
+#load .tx{font-size:clamp(18px,2.4vw,26px);font-weight:700;line-height:1.35}
+#load .slow{display:none;color:var(--mute);font-size:15px;line-height:1.4}
+#load.slow .slow{display:block}
+</style>
+</head>
+<body>
+<div id="wrap">
+  <div id="stage">
+    <iframe id="lesson" allow="autoplay; fullscreen" title="lesson"></iframe>
+    <div id="load" aria-live="polite">
+      <div class="spin"></div>
+      <div class="tx" id="loadTx"></div>
+      <div class="slow" id="loadSlow"></div>
+    </div>
+  </div>
+  <div id="side">
+    <h1 id="ttl"></h1>
+    <input id="name" autocomplete="name">
+    <button id="add"></button>
+    <div id="list"><div id="empty"></div></div>
+    <div id="err"></div><div id="done"></div>
+    <button id="send" disabled></button>
+    <button id="fs"></button>
+  </div>
+</div>
+<div id="dlg"><div class="box">
+  <div class="at" id="dlgAt"></div>
+  <textarea id="txt"></textarea>
+  <div class="row"><button id="cancel">✕</button><button id="save"></button></div>
+</div></div>
+<div id="rot">
+  <div class="phone"><div class="ring"></div><div class="ic" aria-hidden="true">📱</div></div>
+  <div class="msg" id="rotMsg"></div>
+  <div class="sub" id="rotSub"></div>
+  <div id="rotLoad"><span class="spin sm"></span><span id="rotLoadTx"></span></div>
+  <button id="rotok">OK</button>
+</div>
+<script>
+const FORM="https://01ai.feishu.cn/share/base/shrcnPfB4jYFdsuYvVTZT22f0Mc";
+const LESSONS={"kk69-rook": {"file": "lessons/kk69-rook.html", "title": "为什么保护白嘴鸦？", "titles": {"zh": "为什么保护白嘴鸦？", "kk": "Ұзақты неге қорғау керек?", "ru": "Почему нужно защищать грачей?"}}, "kk-fruits": {"file": "lessons/kk-fruits.html", "title": "Жемістер · Фрукты · Fruits"}};
+const qs=new URLSearchParams(location.search);
+const LID=LESSONS[qs.get("l")]?qs.get("l"):Object.keys(LESSONS)[0];
+const L=LESSONS[LID];
+const KEY="c51fb:"+LID;
+const $=id=>document.getElementById(id);
+const UI={
+  zh:{title:"看课反馈",name:"姓名",add:"⏸ 评论",empty:"在出错的地方暂停,写下意见",send:n=>"✓ 提交 ("+n+")",fs:"⛶ 全屏",save:"✓ 保存",ph:"哪里不对?",need:"请填写姓名",load:"正在加载,请稍等",slow:"网络慢,请稍候,或刷新页面",rot:"请把手机横过来",rotSub:"转成横屏后进入课程"},
+  kk:{title:"Сабақ пікірі",name:"Аты-жөні",add:"⏸ Пікір",empty:"Қате жерде кідіртіп, пікір жазыңыз",send:n=>"✓ Жіберу ("+n+")",fs:"⛶ Толық экран",save:"✓ Сақтау",ph:"Не дұрыс емес?",need:"Атыңызды жазыңыз",load:"Жүктелуде, күте тұрыңыз",slow:"Желі баяу, күте тұрыңыз немесе жаңартыңыз",rot:"Телефонды көлденең ұстаңыз",rotSub:"Көлденең бұрған соң сабақ ашылады"},
+  ru:{title:"Отзыв об уроке",name:"Имя",add:"⏸ Комментарий",empty:"Поставьте паузу там, где ошибка, и напишите",send:n=>"✓ Отправить ("+n+")",fs:"⛶ Полный экран",save:"✓ Сохранить",ph:"Что не так?",need:"Укажите имя",load:"Загрузка, подождите",slow:"Сеть медленная, подождите или обновите",rot:"Поверните телефон горизонтально",rotSub:"После поворота откроется урок"}
+};
+const lessonLang=()=>{const q=new URLSearchParams((L.file.split("?")[1]||""));return UI[q.get("lang")]?q.get("lang"):"zh"};
+let lang=lessonLang();
+function applyLang(){
+  const u=UI[lang]||UI.zh;
+  document.documentElement.lang=lang;
+  document.title=u.title;
+  $("ttl").textContent=u.title+" · "+(L.titles&&L.titles[lang]?L.titles[lang]:L.title)+" · "+LID;
+  $("name").placeholder=u.name;
+  $("add").textContent=u.add;
+  $("empty").textContent=u.empty;
+  $("fs").textContent=u.fs;
+  $("save").textContent=u.save;
+  $("txt").placeholder=u.ph;
+  $("loadTx").textContent=u.load;
+  $("loadSlow").textContent=u.slow;
+  $("rotMsg").textContent=u.rot;
+  $("rotSub").textContent=(UI.kk.rot+" · "+UI.ru.rot);
+  $("rotLoadTx").textContent=u.load;
+  render();
+}
+let st={name:qs.get("t")||"",items:[],submittedAt:null,lang:lang};
+try{const s=JSON.parse(localStorage.getItem(KEY)||"null");if(s&&Array.isArray(s.items))st=Object.assign(st,s,qs.get("t")?{name:qs.get("t")}:{})}catch(e){}
+const save=()=>{st.lang=lang;try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}};
+$("lesson").addEventListener("load",()=>{try{
+  const doc=$("lesson").contentDocument, css=doc.createElement("style");
+  css.textContent=`#soundHint{font-size:14px!important}@media(max-width:600px){#cvBar{gap:3px!important;padding:0 2px!important}#cvBar button{min-width:44px!important;height:44px!important}#cvBar .cv-txt{padding:0 4px!important}#cvSeg{display:none!important}#cvTrack{min-width:24px}}`;
+  doc.head.appendChild(css);
+}catch(e){}});
+$("lesson").src=L.file+(L.file.indexOf("?")>=0?"&":"?")+"lang=zh";
+$("name").value=st.name;
+$("name").addEventListener("input",()=>{st.name=$("name").value.trim();$("name").classList.remove("miss");save()});
+
+const W=()=>$("lesson").contentWindow;
+function curT(){try{const s=W().__state&&W().__state();if(s&&isFinite(s.t))return s.t}catch(e){}
+  try{const a=W().document.querySelector("audio");if(a)return a.currentTime}catch(e){}return 0}
+function pause(){try{W().document.querySelectorAll("audio,video").forEach(a=>{if(!a.paused)a.pause()})}catch(e){}}
+function resume(){try{const b=W().document.querySelector('[data-cv-ctl="play"]');const a=W().document.querySelector("audio");
+  if(b&&a&&a.paused)b.click();else if(a&&a.paused)a.play().catch(()=>{})}catch(e){}}
+function seek(s){try{if(W().__setTime)W().__setTime(s)}catch(e){}}
+const fmt=s=>{s=Math.max(0,Math.floor(s));return String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0")};
+
+function render(){
+  const u=UI[lang]||UI.zh;
+  const list=$("list");list.querySelectorAll(".it").forEach(e=>e.remove());
+  $("empty").style.display=st.items.length?"none":"";
+  st.items.slice().sort((a,b)=>a.s-b.s).forEach(it=>{
+    const d=document.createElement("div");d.className="it";
+    d.innerHTML='<button class="tm" aria-label="Seek to comment time"></button><span class="tx"></span><button class="x" aria-label="delete">✕</button>';
+    d.querySelector(".tm").textContent=fmt(it.s);d.querySelector(".tx").textContent=it.c;
+    d.querySelector(".tm").onclick=()=>{seek(it.s);pause()};
+    d.querySelector(".x").onclick=()=>{st.items=st.items.filter(x=>x!==it);save();render()};
+    list.appendChild(d)});
+  $("send").disabled=!st.items.length;
+  $("send").textContent=u.send(st.items.length);
+}
+let pendingS=0;
+$("add").onclick=()=>{pause();pendingS=curT();$("dlgAt").textContent="⏸ "+fmt(pendingS);$("txt").value="";$("dlg").style.display="flex";setTimeout(()=>$("txt").focus(),50)};
+$("cancel").onclick=()=>{$("dlg").style.display="none";resume()};
+$("save").onclick=()=>{const c=$("txt").value.trim();if(!c){$("txt").focus();return}
+  st.items.push({s:Math.round(pendingS*10)/10,c,lang});save();render();$("dlg").style.display="none";resume()};
+$("fs").onclick=async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else{await document.documentElement.requestFullscreen();
+  if(screen.orientation&&screen.orientation.lock)await screen.orientation.lock("landscape").catch(()=>{})}}catch(e){}};
+$("rotok").onclick=()=>{$("rot").style.display="none";document.body.classList.add("rot-ok")};
+
+function readLessonLang(){
+  try{
+    const w=W();
+    if(w.__lang&&w.__lang.cur&&UI[w.__lang.cur])return w.__lang.cur;
+    const lg=w.document.documentElement.lang;
+    if(UI[lg])return lg;
+  }catch(e){}
+  return null;
+}
+setInterval(()=>{const lg=readLessonLang();if(lg&&lg!==lang){lang=lg;applyLang();save()}},400);
+
+const t0=Date.now();
+let lessonReady=false, introDone=false;
+function lessonLoaded(){
+  try{const s=W().__state&&W().__state();if(s&&isFinite(s.t))return true}catch(e){}
+  try{if($("lesson").contentDocument&&$("lesson").contentDocument.querySelector("canvas,audio,#c"))return true}catch(e){}
+  return false;
+}
+setTimeout(()=>$("load").classList.add("slow"),20000);
+const tick=setInterval(()=>{
+  if(!lessonReady&&lessonLoaded()){lessonReady=true;$("load").classList.add("off");setTimeout(()=>$("load").style.display="none",400)}
+  if(Date.now()-t0>20000)$("load").classList.add("slow");
+  maybeEnter();
+},200);
+$("lesson").addEventListener("load",()=>{if(lessonLoaded()){lessonReady=true;$("load").classList.add("off")}});
+
+const isPhone=()=>Math.min(screen.width,screen.height)<=820 || navigator.maxTouchPoints>0 && Math.min(innerWidth,innerHeight)<=500;
+function portrait(){return matchMedia("(orientation:portrait)").matches && innerHeight>innerWidth && !document.body.classList.contains("rot-ok")}
+function showRot(on){$("rot").classList.toggle("on",!!on)}
+function maybeEnter(){
+  const waited=Date.now()-t0>=2500;
+  const must=portrait()&&isPhone()&&!document.body.classList.contains("rot-ok");
+  $("rot").classList.toggle("wait",!lessonReady);
+  if(!waited||must){showRot(true);return}
+  introDone=true;
+  showRot(false);
+}
+addEventListener("resize",maybeEnter);
+matchMedia("(orientation:portrait)").addEventListener("change",maybeEnter);
+showRot(true);
+applyLang();
+if(st.submittedAt){$("done").textContent="✓ "+st.submittedAt.slice(0,16).replace("T"," ")+" UTC";$("done").style.display="block"}
+render();
+
+$("send").onclick=()=>{
+  const u=UI[lang]||UI.zh;
+  const name=$("name").value.trim();
+  if(!name){$("name").classList.add("miss");$("name").focus();$("err").textContent=u.need;$("err").style.display="block";return}
+  $("err").style.display="none";
+  const items=st.items.slice().sort((a,b)=>a.s-b.s);
+  const p=new URLSearchParams();
+  p.set("prefill_Аты-жөні · Имя · Name",name);
+  p.set("prefill_课号",LID);
+  p.set("prefill_秒数",items.map(i=>i.s).join(", "));
+  p.set("prefill_Пікір · Комментарий · Comment",items.map(i=>"["+fmt(i.s)+"] "+i.c).join("\n"));
+  p.set("prefill_条数",String(items.length));
+  p.set("prefill_原始答案",JSON.stringify({lesson:LID,name,lang,items,link_t:qs.get("t")||"",ts:new Date().toISOString(),ua:navigator.userAgent.slice(0,120)}));
+  ["课号","秒数","条数","原始答案"].forEach(f=>p.set("hide_"+f,"1"));
+  st.submittedAt=new Date().toISOString();save();
+  location.href=FORM+"?"+p.toString();
+};
+</script>
+</body>
+</html>
