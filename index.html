@@ -130,7 +130,7 @@ const save=()=>{st.lang=lang;try{localStorage.setItem(KEY,JSON.stringify(st))}ca
 const qs=new URLSearchParams(location.search);
 if(byId[qs.get("l")])st.cur=qs.get("l");
 if(!byId[st.cur])st.cur=DATA.lessons[0].id;
-let lang=UI[st.lang]?st.lang:"zh";
+let lang="zh"; // J 261117 863.18「右边要有中文的」:右侧面板固定中文,不跟课件切语言
 const u=()=>UI[lang]||UI.zh;
 const titleOf=l=>(l.titles&&l.titles[lang])||l.title;
 
@@ -217,7 +217,7 @@ $("rotok").onclick=()=>{document.body.classList.add("rot-ok");maybeEnter()};
 // 界面语言跟课件的语言按钮走
 function readLessonLang(){try{const w=W();if(w.__lang&&w.__lang.cur&&UI[w.__lang.cur])return w.__lang.cur;
   const lg=w.document.documentElement.lang;if(UI[lg])return lg}catch(e){}return null}
-setInterval(()=>{const lg=readLessonLang();if(lg&&lg!==lang){lang=lg;applyLang();save()}},400);
+// 面板不再跟课件语言走(J 261117 863.18);readLessonLang 留着备用
 
 // 加载遮罩 + 开场横屏提示(照 t2298)
 function lessonLoaded(){try{const s=W().__state&&W().__state();if(s&&isFinite(s.t))return true}catch(e){}
