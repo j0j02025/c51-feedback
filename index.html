@@ -203,10 +203,13 @@ function render(){
   $("send").disabled=!(n.g+n.r+nc);
   $("send").textContent=t.send+" · "+(n.g+n.r)+"/"+DATA.lessons.length+({zh:" 课已判 · 意见 ",kk:" сабақ · пікір ",ru:" урок · замечаний "}[lang]||" · ")+nc; // J 863.23:分母是课数不是错误数;意见条数不设上限
 }
+// J 863.28:看到一个问题就点一次「不通过」= 在当前秒暂停、记一条新问题;再看到再点,条数不限。红色只有点「通过」才撤
 $("verdict").querySelectorAll("button").forEach(b=>b.onclick=()=>{const L=byId[st.cur];const v=st.v[L.id];
-  if(v&&v.sha===L.sha&&v.v===b.dataset.v)delete st.v[L.id];else st.v[L.id]={v:b.dataset.v,sha:L.sha};save();render()});
+  if(b.dataset.v==="r"){st.v[L.id]={v:"r",sha:L.sha};save();render();openComment();return}
+  if(v&&v.sha===L.sha&&v.v==="g")delete st.v[L.id];else st.v[L.id]={v:"g",sha:L.sha};save();render()});
 let pendingS=0, resumeAfterComment=false;
-$("add").onclick=()=>{resumeAfterComment=pause();pendingS=curT();$("dlgAt").textContent="⏸ "+fmt(pendingS)+" · "+byId[st.cur].short;$("txt").value="";$("dlg").style.display="flex";setTimeout(()=>$("txt").focus(),50)};
+$("add").onclick=()=>openComment();
+function openComment(){resumeAfterComment=pause();pendingS=curT();$("dlgAt").textContent="⏸ "+fmt(pendingS)+" · "+byId[st.cur].short;$("txt").value="";$("dlg").style.display="flex";setTimeout(()=>$("txt").focus(),50)};
 $("cancel").onclick=()=>{$("dlg").style.display="none";if(resumeAfterComment)resume()};
 $("save").onclick=()=>{const c=$("txt").value.trim();if(!c){$("txt").focus();return}const L=byId[st.cur];
   (st.c[L.id]=st.c[L.id]||[]).push({s:Math.round(pendingS*10)/10,c,sha:L.sha,lang});save();render();$("dlg").style.display="none";if(resumeAfterComment)resume()};
