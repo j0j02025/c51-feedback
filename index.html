@@ -252,10 +252,14 @@ $("send").onclick=()=>{
   p.set("prefill_页面",DATA.page.id);
   p.set("prefill_判定JSON",JSON.stringify({v:1,page:DATA.page.id,r,c,lang,ts:new Date().toISOString(),ua:navigator.userAgent.slice(0,120)}));
   p.set("prefill_备注",lines.join("\n\n"));
-  st.submittedAt=new Date().toISOString();save();
-  location.href=DATA.form+"?"+p.toString();
+  // J 863.27:提交一批就清空判定与评论(名字保留),可以接着交下一批;表单开新标签页,课件页不离开
+  st.submittedAt=new Date().toISOString();st.v={};st.c={};save();render();showDone();
+  const url=DATA.form+"?"+p.toString(),w=window.open(url,"_blank");
+  if(!w)location.href=url;
 };
-if(st.submittedAt){$("done").textContent="✓ "+st.submittedAt.slice(0,16).replace("T"," ")+" UTC";$("done").style.display="block"}
+function showDone(){if(!st.submittedAt)return;const hm=new Date(st.submittedAt).toTimeString().slice(0,5);
+  $("done").textContent="✓ "+hm+" "+({zh:"已提交,可以接着写下一条",kk:"Жіберілді, келесісін жаза беріңіз",ru:"Отправлено, можно писать следующее"}[lang]||"✓");$("done").style.display="block"}
+showDone();
 $("rot").classList.add("on");
 applyLang();
 load(st.cur);
