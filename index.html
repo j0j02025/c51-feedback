@@ -5,39 +5,56 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>看课反馈</title>
 <style>
-:root{--bg:#14161a;--panel:#1f2329;--ink:#f2f3f5;--mute:#9aa3ad;--acc:#ffb020;--ok:#3fbf7f;--bad:#e5534b}
+:root{--bg:#14161a;--panel:#1f2329;--ink:#f2f3f5;--mute:#9aa3ad;--acc:#ffb020;--g:#2ea043;--r:#e5534b;--y:#d4a72c;--btn:#39404a}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font:15px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overflow:hidden}
 #wrap{display:flex;height:100dvh;width:100vw}
 #stage{flex:1 1 auto;position:relative;background:#000;min-width:0}
 #stage iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
-#side{flex:0 0 30%;max-width:340px;min-width:200px;background:var(--panel);display:flex;flex-direction:column;padding:8px;gap:6px;padding-right:max(8px,env(safe-area-inset-right))}
-#side h1{font-size:14px;margin:0;color:var(--mute);font-weight:500}
-#name{width:100%;padding:7px 8px;border-radius:8px;border:1px solid #39404a;background:#0f1114;color:var(--ink);font-size:16px;min-height:44px}
-#name.miss{border-color:var(--bad)}
-button{font:inherit;border:0;border-radius:10px;cursor:pointer}
-#add,#send{min-height:44px;height:auto;white-space:normal;line-height:1.25;overflow:visible;font-weight:700;padding:8px 6px;font-size:clamp(13px,1.7vw,16px)}
+#side{flex:0 0 32%;max-width:360px;min-width:210px;background:var(--panel);display:flex;flex-direction:column;padding:8px;gap:6px;padding-right:max(8px,env(safe-area-inset-right));overflow:hidden}
+button{font:inherit;border:0;border-radius:10px;cursor:pointer;color:var(--ink);background:var(--btn)}
+#who{display:flex;gap:6px;align-items:center;font-size:14px;color:var(--mute)}
+#who b{color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+#who button{min-height:36px;min-width:44px;font-size:14px}
+#lessons{display:flex;flex-wrap:wrap;gap:5px}
+.ls{min-height:40px;padding:4px 9px;font-size:14px;border-left:6px solid var(--y);text-align:left}
+.ls.g{border-left-color:var(--g)}.ls.r{border-left-color:var(--r)}
+.ls.on{outline:2px solid var(--ink);font-weight:700}
+#ttl{font-size:13px;color:var(--mute);margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#legend{display:flex;gap:10px;font-size:12px;color:var(--mute);flex-wrap:wrap}
+.dot{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px;vertical-align:middle}
+#verdict{display:flex;gap:6px}
+#verdict button{flex:1;min-height:44px;padding:6px 4px;font-weight:700;font-size:clamp(13px,1.7vw,16px);white-space:normal;line-height:1.2}
+#verdict button.on[data-v=g]{background:var(--g);color:#04210c}
+#verdict button.on[data-v=r]{background:var(--r);color:#2a0504}
+#add,#send{min-height:44px;height:auto;white-space:normal;line-height:1.25;font-weight:700;padding:8px 6px;font-size:clamp(13px,1.7vw,16px)}
 #add{background:var(--acc);color:#1a1300}
 #list{flex:1 1 auto;overflow-y:auto;display:flex;flex-direction:column;gap:5px;min-height:0}
-.it{background:#2a2f37;border-radius:8px;padding:6px 8px;font-size:14px;display:flex;gap:6px;align-items:flex-start}
-.it .tm{min-width:44px;min-height:44px;background:none;color:var(--acc);font-weight:700;font-variant-numeric:tabular-nums;cursor:pointer;white-space:nowrap;padding:0 4px}
+.it{background:#2a2f37;border-radius:8px;padding:2px 6px;font-size:14px;display:flex;gap:6px;align-items:center}
+.it .tm{min-width:44px;min-height:44px;background:none;color:var(--acc);font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap;padding:0 4px}
 .it .tx{flex:1;word-break:break-word}
 .it .x{min-width:44px;min-height:44px;background:none;color:var(--mute);padding:0 4px;font-size:16px}
 #empty{color:var(--mute);font-size:14px}
-#send{background:var(--ok);color:#06210f}
+#cnt{font-size:13px;color:var(--mute)}
+#send{background:var(--g);color:#04210c}
 #send:disabled{opacity:.4}
-#fs{min-height:44px;background:#39404a;color:var(--ink);padding:6px;font-size:14px}
-#err{color:var(--bad);font-size:14px;display:none}
-#done{color:var(--ok);font-size:14px;display:none}
-#dlg{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:10}
-#dlg .box{background:var(--panel);border-radius:12px;padding:12px;width:min(560px,92vw);display:flex;flex-direction:column;gap:8px}
-#dlg .at{color:var(--acc);font-weight:700}
-#dlg textarea{width:100%;height:clamp(50px,24dvh,110px);min-height:50px;border-radius:8px;border:1px solid #39404a;background:#0f1114;color:var(--ink);font:16px/1.4 system-ui,-apple-system,sans-serif;padding:8px;resize:none}
-#dlg .row{display:flex;gap:8px}
-#dlg .row button{flex:1;min-height:44px;padding:8px}
-#save{background:var(--acc);color:#1a1300;font-weight:700}
-#cancel{background:#39404a;color:var(--ink)}
-/* 开场 / 竖屏:全屏,盖住一切 */
+#fs{min-height:44px;padding:6px;font-size:14px;flex:0 0 52px}
+#foot{display:flex;gap:6px}#foot #send{flex:1}
+@media (max-height:460px){#side{gap:4px;padding-top:6px}#legend,#ttl{display:none}#who button{min-height:32px}.ls{min-height:36px}}
+#err{color:var(--r);font-size:14px;display:none}
+#done{color:var(--g);font-size:14px;display:none}
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.72);display:none;align-items:center;justify-content:center;z-index:10}
+.box{background:var(--panel);border-radius:12px;padding:14px;width:min(560px,92vw);display:flex;flex-direction:column;gap:9px}
+.box .at{color:var(--acc);font-weight:700;font-size:17px}
+.box p{margin:0;color:var(--mute);font-size:14px}
+.box textarea,.box input{width:100%;border-radius:8px;border:1px solid #4a525d;background:#0f1114;color:var(--ink);font:16px/1.4 system-ui,-apple-system,sans-serif;padding:9px;min-height:44px}
+.box input.miss{border-color:var(--r)}
+.box textarea{height:clamp(50px,24dvh,110px);resize:none}
+.box .row{display:flex;gap:8px}
+.box .row button{flex:1;min-height:44px;padding:8px}
+.box .pri{background:var(--acc);color:#1a1300;font-weight:700}
+#nameDlg{z-index:25}
+#nameDlg.on{display:flex}
 #rot{position:fixed;inset:0;background:var(--bg);display:none;flex-direction:column;align-items:center;justify-content:center;gap:18px;z-index:30;text-align:center;padding:24px}
 #rot.on{display:flex}
 #rot .phone{width:min(35vw,220px);aspect-ratio:1;position:relative;display:flex;align-items:center;justify-content:center}
@@ -47,11 +64,10 @@ button{font:inherit;border:0;border-radius:10px;cursor:pointer}
 @keyframes tilt{0%,18%{transform:rotate(0deg)}45%,68%{transform:rotate(90deg)}100%{transform:rotate(0deg)}}
 #rot .msg{font-size:clamp(22px,4.2vw,34px);font-weight:800;line-height:1.35;max-width:18em}
 #rot .sub{font-size:clamp(16px,2.6vw,22px);color:var(--mute);line-height:1.45;max-width:22em}
-#rot button{background:#39404a;color:var(--ink);padding:8px 14px;min-height:44px}
+#rot button{padding:8px 14px;min-height:44px}
 #rotLoad{display:none;align-items:center;gap:10px;font-size:18px;font-weight:700}
 #rot.wait #rotLoad{display:flex}
-#rot .spin.sm{width:28px;height:28px;border-width:4px;border-style:solid;border-color:#39404a;border-top-color:var(--acc);border-radius:50%;animation:spin .8s linear infinite;flex:0 0 auto}
-/* 加载遮罩:盖住课件区,含「测试用中文字幕」占位 */
+.spin.sm{width:28px;height:28px;border:4px solid #39404a;border-top-color:var(--acc);border-radius:50%;animation:spin .8s linear infinite;flex:0 0 auto}
 #load{position:absolute;inset:0;z-index:5;background:#0c0e12;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;text-align:center;padding:16px;opacity:1;transition:opacity .35s ease}
 #load.off{opacity:0;pointer-events:none}
 #load .spin{width:72px;height:72px;border-radius:50%;border:7px solid #39404a;border-top-color:var(--acc);animation:spin .8s linear infinite}
@@ -64,26 +80,31 @@ button{font:inherit;border:0;border-radius:10px;cursor:pointer}
 <div id="wrap">
   <div id="stage">
     <iframe id="lesson" allow="autoplay; fullscreen" title="lesson"></iframe>
-    <div id="load" aria-live="polite">
-      <div class="spin"></div>
-      <div class="tx" id="loadTx"></div>
-      <div class="slow" id="loadSlow"></div>
-    </div>
+    <div id="load" aria-live="polite"><div class="spin"></div><div class="tx" id="loadTx"></div><div class="slow" id="loadSlow"></div></div>
   </div>
   <div id="side">
-    <h1 id="ttl"></h1>
-    <input id="name" autocomplete="name">
+    <div id="who">👤 <b id="whoName"></b><button id="whoEdit" aria-label="edit name">✎</button></div>
+    <div id="lessons"></div>
+    <p id="ttl"></p>
+    <div id="legend"><span><i class="dot" style="background:var(--g)"></i><span id="lgG"></span></span><span><i class="dot" style="background:var(--r)"></i><span id="lgR"></span></span><span><i class="dot" style="background:var(--y)"></i><span id="lgY"></span></span></div>
+    <div id="verdict"><button data-v="g" id="vG"></button><button data-v="r" id="vR"></button></div>
     <button id="add"></button>
     <div id="list"><div id="empty"></div></div>
+    <div id="cnt"></div>
     <div id="err"></div><div id="done"></div>
-    <button id="send" disabled></button>
-    <button id="fs"></button>
+    <div id="foot"><button id="fs" aria-label="full screen">⛶</button><button id="send" disabled></button></div>
   </div>
 </div>
-<div id="dlg"><div class="box">
+<div class="ov" id="nameDlg"><div class="box">
+  <div class="at">👤 <span id="nmTtl"></span></div>
+  <p id="nmSub"></p>
+  <input id="nameIn" autocomplete="name">
+  <div class="row"><button class="pri" id="nameOk"></button></div>
+</div></div>
+<div class="ov" id="dlg"><div class="box">
   <div class="at" id="dlgAt"></div>
   <textarea id="txt"></textarea>
-  <div class="row"><button id="cancel">✕</button><button id="save"></button></div>
+  <div class="row"><button id="cancel">✕</button><button class="pri" id="save"></button></div>
 </div></div>
 <div id="rot">
   <div class="phone"><div class="ring"></div><div class="ic" aria-hidden="true">📱</div></div>
@@ -93,50 +114,46 @@ button{font:inherit;border:0;border-radius:10px;cursor:pointer}
   <button id="rotok">OK</button>
 </div>
 <script>
-const FORM="https://01ai.feishu.cn/share/base/shrcnPfB4jYFdsuYvVTZT22f0Mc";
-const LESSONS={"kk69-rook": {"file": "lessons/kk69-rook.html", "title": "为什么保护白嘴鸦？", "titles": {"zh": "为什么保护白嘴鸦？", "kk": "Ұзақты неге қорғау керек?", "ru": "Почему нужно защищать грачей?"}}, "kk-fruits": {"file": "lessons/kk-fruits.html", "title": "Жемістер · Фрукты · Fruits"}};
-const qs=new URLSearchParams(location.search);
-const LID=LESSONS[qs.get("l")]?qs.get("l"):Object.keys(LESSONS)[0];
-const L=LESSONS[LID];
-const KEY="c51fb:"+LID;
+// 红绿灯规则(skill josh-traffic-light §2):黄 = 没判,或判后课件改了(sha 不等)· 绿 = 通过 · 红 = 不通过
+const DATA={"page": {"id": "c51-feedback", "title": "C51 看课反馈"}, "form": "https://01ai.feishu.cn/share/base/shrcnqr2MJH0FjuNxhGtrpsxvmd", "lessons": [{"id": "kk69-rook", "short": "Қаз 69", "title": "为什么保护白嘴鸦？", "titles": {"zh": "为什么保护白嘴鸦？", "kk": "Ұзақты неге қорғау керек?", "ru": "Почему нужно защищать грачей?"}, "file": "lessons/kk69-rook.html", "sha": "6b05dbf5e97f143c90e2211da56b489daf034f09f6cb0a1efb29875eed00408f"}, {"id": "ru16-slides", "short": "Рус 16", "title": "俄语第 16 课 · 环保演示", "titles": {"zh": "俄语第 16 课 · 环保演示", "kk": "Орыс тілі · 16-сабақ", "ru": "Русский язык · урок 16"}, "file": "lessons/ru16-slides.html", "sha": "9776595b3591bec7de811555d39768752632f95737010b2a7b20ab93fa588fd2"}, {"id": "kk-fruits", "short": "Жемістер", "title": "Жемістер", "titles": {"zh": "Жемістер", "kk": "Жемістер", "ru": "Фрукты"}, "file": "lessons/kk-fruits.html", "sha": "718376019e918a98905a6c211396847fd90d8cf793ca58748894a62ebc09a9ee"}]};   // {page:{id,title}, form, lessons:[{id,short,title,titles?,file,sha}]}
 const $=id=>document.getElementById(id);
 const UI={
-  zh:{title:"看课反馈",name:"姓名",add:"⏸ 评论",empty:"在出错的地方暂停,写下意见",send:n=>"✓ 提交 ("+n+")",fs:"⛶ 全屏",save:"✓ 保存",ph:"哪里不对?",need:"请填写姓名",load:"正在加载,请稍等",slow:"网络慢,请稍候,或刷新页面",rot:"请把手机横过来",rotSub:"转成横屏后进入课程"},
-  kk:{title:"Сабақ пікірі",name:"Аты-жөні",add:"⏸ Пікір",empty:"Қате жерде кідіртіп, пікір жазыңыз",send:n=>"✓ Жіберу ("+n+")",fs:"⛶ Толық экран",save:"✓ Сақтау",ph:"Не дұрыс емес?",need:"Атыңызды жазыңыз",load:"Жүктелуде, күте тұрыңыз",slow:"Желі баяу, күте тұрыңыз немесе жаңартыңыз",rot:"Телефонды көлденең ұстаңыз",rotSub:"Көлденең бұрған соң сабақ ашылады"},
-  ru:{title:"Отзыв об уроке",name:"Имя",add:"⏸ Комментарий",empty:"Поставьте паузу там, где ошибка, и напишите",send:n=>"✓ Отправить ("+n+")",fs:"⛶ Полный экран",save:"✓ Сохранить",ph:"Что не так?",need:"Укажите имя",load:"Загрузка, подождите",slow:"Сеть медленная, подождите или обновите",rot:"Поверните телефон горизонтально",rotSub:"После поворота откроется урок"}
+  zh:{title:"看课反馈",name:"姓名",nmTtl:"请先填你的名字",nmSub:"名字由老师自己填写",start:"→ 开始",add:"⏸ 评论",empty:"在出错的地方暂停,写下意见",send:"✓ 提交",fs:"⛶ 全屏",save:"✓ 保存",ph:"哪里不对?",pass:"✓ 通过",fail:"✕ 不通过",lgG:"通过",lgR:"不通过",lgY:"还没判",load:"正在加载,请稍等",slow:"网络慢,请稍候,或刷新页面",rot:"请把手机横过来"},
+  kk:{title:"Сабақ пікірі",name:"Аты-жөні",nmTtl:"Алдымен атыңызды жазыңыз",nmSub:"Атыңызды өзіңіз жазыңыз",start:"→ Бастау",add:"⏸ Пікір",empty:"Қате жерде кідіртіп, пікір жазыңыз",send:"✓ Жіберу",fs:"⛶ Толық экран",save:"✓ Сақтау",ph:"Не дұрыс емес?",pass:"✓ Өтті",fail:"✕ Өтпеді",lgG:"Өтті",lgR:"Өтпеді",lgY:"Бағаланбаған",load:"Жүктелуде, күте тұрыңыз",slow:"Желі баяу, күте тұрыңыз немесе жаңартыңыз",rot:"Телефонды көлденең ұстаңыз"},
+  ru:{title:"Отзыв об уроке",name:"Имя",nmTtl:"Сначала введите своё имя",nmSub:"Имя вводит сам учитель",start:"→ Начать",add:"⏸ Комментарий",empty:"Поставьте паузу там, где ошибка, и напишите",send:"✓ Отправить",fs:"⛶ Полный экран",save:"✓ Сохранить",ph:"Что не так?",pass:"✓ Принято",fail:"✕ Не принято",lgG:"Принято",lgR:"Не принято",lgY:"Не оценено",load:"Загрузка, подождите",slow:"Сеть медленная, подождите или обновите",rot:"Поверните телефон горизонтально"}
 };
-const lessonLang=()=>{const q=new URLSearchParams((L.file.split("?")[1]||""));return UI[q.get("lang")]?q.get("lang"):"zh"};
-let lang=lessonLang();
+const KEY="c51tl:"+DATA.page.id;
+const byId=Object.fromEntries(DATA.lessons.map(l=>[l.id,l]));
+let st={name:"",cur:DATA.lessons[0].id,v:{},c:{},submittedAt:null,lang:"zh"};   // v[课]={v:"g"|"r",sha} · c[课]=[{s,c,sha,lang}]
+try{const s=JSON.parse(localStorage.getItem(KEY)||"null");if(s&&s.v&&s.c)st=Object.assign(st,s)}catch(e){}
+const save=()=>{st.lang=lang;try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}};
+const qs=new URLSearchParams(location.search);
+if(byId[qs.get("l")])st.cur=qs.get("l");
+if(!byId[st.cur])st.cur=DATA.lessons[0].id;
+let lang=UI[st.lang]?st.lang:"zh";
+const u=()=>UI[lang]||UI.zh;
+const titleOf=l=>(l.titles&&l.titles[lang])||l.title;
+
+// ---- 名字:老师自己填,不从链接预填(J 261117「名字需要老师自己填，需要加上这个环节」)----
+function askName(){$("nameIn").value=st.name;$("nameDlg").classList.add("on");setTimeout(()=>$("nameIn").focus(),50)}
+$("nameOk").onclick=()=>{const n=$("nameIn").value.trim();if(!n){$("nameIn").classList.add("miss");$("nameIn").focus();return}
+  $("nameIn").classList.remove("miss");st.name=n;save();$("nameDlg").classList.remove("on");$("whoName").textContent=n;$("err").style.display="none"};
+$("nameIn").addEventListener("keydown",e=>{if(e.key==="Enter")$("nameOk").click()});
+$("whoEdit").onclick=askName;
+$("whoName").textContent=st.name;
+
 function applyLang(){
-  const u=UI[lang]||UI.zh;
-  document.documentElement.lang=lang;
-  document.title=u.title;
-  $("ttl").textContent=u.title+" · "+(L.titles&&L.titles[lang]?L.titles[lang]:L.title)+" · "+LID;
-  $("name").placeholder=u.name;
-  $("add").textContent=u.add;
-  $("empty").textContent=u.empty;
-  $("fs").textContent=u.fs;
-  $("save").textContent=u.save;
-  $("txt").placeholder=u.ph;
-  $("loadTx").textContent=u.load;
-  $("loadSlow").textContent=u.slow;
-  $("rotMsg").textContent=u.rot;
-  $("rotSub").textContent=(UI.kk.rot+" · "+UI.ru.rot);
-  $("rotLoadTx").textContent=u.load;
+  const t=u();
+  document.documentElement.lang=lang;document.title=t.title;
+  ["add","empty","save","nmTtl","nmSub","lgG","lgR","lgY"].forEach(k=>$(k).textContent=t[k]);
+  $("nameOk").textContent=t.start;$("nameIn").placeholder=t.name;$("txt").placeholder=t.ph;
+  $("vG").textContent=t.pass;$("vR").textContent=t.fail;
+  $("loadTx").textContent=t.load;$("loadSlow").textContent=t.slow;$("rotMsg").textContent=t.rot;$("rotLoadTx").textContent=t.load;
+  $("rotSub").textContent=UI.kk.rot+" · "+UI.ru.rot;
   render();
 }
-let st={name:qs.get("t")||"",items:[],submittedAt:null,lang:lang};
-try{const s=JSON.parse(localStorage.getItem(KEY)||"null");if(s&&Array.isArray(s.items))st=Object.assign(st,s,qs.get("t")?{name:qs.get("t")}:{})}catch(e){}
-const save=()=>{st.lang=lang;try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}};
-$("lesson").addEventListener("load",()=>{try{
-  const doc=$("lesson").contentDocument, css=doc.createElement("style");
-  css.textContent=`#soundHint{font-size:14px!important}@media(max-width:600px){#cvBar{gap:3px!important;padding:0 2px!important}#cvBar button{min-width:44px!important;height:44px!important}#cvBar .cv-txt{padding:0 4px!important}#cvSeg{display:none!important}#cvTrack{min-width:24px}}`;
-  doc.head.appendChild(css);
-}catch(e){}});
-$("lesson").src=L.file+(L.file.indexOf("?")>=0?"&":"?")+"lang=zh";
-$("name").value=st.name;
-$("name").addEventListener("input",()=>{st.name=$("name").value.trim();$("name").classList.remove("miss");save()});
 
+// ---- 课件接口(同源 iframe):唯一时钟 = 配音 narration.currentTime ----
 const W=()=>$("lesson").contentWindow;
 function curT(){try{const s=W().__state&&W().__state();if(s&&isFinite(s.t))return s.t}catch(e){}
   try{const a=W().document.querySelector("audio");if(a)return a.currentTime}catch(e){}return 0}
@@ -145,91 +162,95 @@ function resume(){try{const b=W().document.querySelector('[data-cv-ctl="play"]')
   if(b&&a&&a.paused)b.click();else if(a&&a.paused)a.play().catch(()=>{})}catch(e){}}
 function seek(s){try{if(W().__setTime)W().__setTime(s)}catch(e){}}
 const fmt=s=>{s=Math.max(0,Math.floor(s));return String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0")};
+$("lesson").addEventListener("load",()=>{try{
+  const doc=$("lesson").contentDocument, css=doc.createElement("style");
+  css.textContent=`#soundHint{font-size:14px!important}@media(max-width:600px){#cvBar{gap:3px!important;padding:0 2px!important}#cvBar button{min-width:44px!important;height:44px!important}#cvBar .cv-txt{padding:0 4px!important}#cvSeg{display:none!important}#cvTrack{min-width:24px}}`;
+  doc.head.appendChild(css);
+}catch(e){}});
 
+const color=l=>{const v=st.v[l.id];return !v||v.sha!==l.sha?"y":v.v};
+const comments=l=>(st.c[l.id]||[]).filter(x=>x.sha===l.sha).sort((a,b)=>a.s-b.s);
+let lessonReady=false,t0=Date.now();
+function load(id){st.cur=id;save();lessonReady=false;t0=Date.now();$("load").style.display="";$("load").classList.remove("off","slow");
+  const f=byId[id].file;$("lesson").src=f+(f.indexOf("?")>=0?"&":"?")+"lang=zh";render()}
 function render(){
-  const u=UI[lang]||UI.zh;
+  const L=byId[st.cur],t=u();
+  $("lessons").innerHTML="";
+  DATA.lessons.forEach((l,i)=>{const b=document.createElement("button");b.className="ls "+color(l)+(l.id===st.cur?" on":"");
+    b.textContent=(i+1)+". "+l.short;b.title=titleOf(l);b.onclick=()=>{if(l.id!==st.cur)load(l.id)};$("lessons").appendChild(b)});
+  $("ttl").textContent=titleOf(L);$("ttl").title=titleOf(L);
+  const c=color(L);
+  $("verdict").querySelectorAll("button").forEach(b=>b.classList.toggle("on",b.dataset.v===c));
   const list=$("list");list.querySelectorAll(".it").forEach(e=>e.remove());
-  $("empty").style.display=st.items.length?"none":"";
-  st.items.slice().sort((a,b)=>a.s-b.s).forEach(it=>{
-    const d=document.createElement("div");d.className="it";
-    d.innerHTML='<button class="tm" aria-label="Seek to comment time"></button><span class="tx"></span><button class="x" aria-label="delete">✕</button>';
+  const cs=comments(L);$("empty").style.display=cs.length?"none":"";
+  cs.forEach(it=>{const d=document.createElement("div");d.className="it";
+    d.innerHTML='<button class="tm" aria-label="seek"></button><span class="tx"></span><button class="x" aria-label="delete">✕</button>';
     d.querySelector(".tm").textContent=fmt(it.s);d.querySelector(".tx").textContent=it.c;
     d.querySelector(".tm").onclick=()=>{seek(it.s);pause()};
-    d.querySelector(".x").onclick=()=>{st.items=st.items.filter(x=>x!==it);save();render()};
+    d.querySelector(".x").onclick=()=>{st.c[L.id]=(st.c[L.id]||[]).filter(x=>x!==it);save();render()};
     list.appendChild(d)});
-  $("send").disabled=!st.items.length;
-  $("send").textContent=u.send(st.items.length);
+  const n={g:0,r:0,y:0};DATA.lessons.forEach(l=>n[color(l)]++);
+  const nc=DATA.lessons.reduce((a,l)=>a+comments(l).length,0);
+  $("cnt").innerHTML='<i class="dot" style="background:var(--g)"></i>'+n.g+' · <i class="dot" style="background:var(--r)"></i>'+n.r+' · <i class="dot" style="background:var(--y)"></i>'+n.y+" · 💬 "+nc;
+  $("send").disabled=!(n.g+n.r+nc);
+  $("send").textContent=t.send+" ("+(n.g+n.r)+"/"+DATA.lessons.length+")";
 }
+$("verdict").querySelectorAll("button").forEach(b=>b.onclick=()=>{const L=byId[st.cur];const v=st.v[L.id];
+  if(v&&v.sha===L.sha&&v.v===b.dataset.v)delete st.v[L.id];else st.v[L.id]={v:b.dataset.v,sha:L.sha};save();render()});
 let pendingS=0;
-$("add").onclick=()=>{pause();pendingS=curT();$("dlgAt").textContent="⏸ "+fmt(pendingS);$("txt").value="";$("dlg").style.display="flex";setTimeout(()=>$("txt").focus(),50)};
+$("add").onclick=()=>{pause();pendingS=curT();$("dlgAt").textContent="⏸ "+fmt(pendingS)+" · "+byId[st.cur].short;$("txt").value="";$("dlg").style.display="flex";setTimeout(()=>$("txt").focus(),50)};
 $("cancel").onclick=()=>{$("dlg").style.display="none";resume()};
-$("save").onclick=()=>{const c=$("txt").value.trim();if(!c){$("txt").focus();return}
-  st.items.push({s:Math.round(pendingS*10)/10,c,lang});save();render();$("dlg").style.display="none";resume()};
+$("save").onclick=()=>{const c=$("txt").value.trim();if(!c){$("txt").focus();return}const L=byId[st.cur];
+  (st.c[L.id]=st.c[L.id]||[]).push({s:Math.round(pendingS*10)/10,c,sha:L.sha,lang});save();render();$("dlg").style.display="none";resume()};
 $("fs").onclick=async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else{await document.documentElement.requestFullscreen();
   if(screen.orientation&&screen.orientation.lock)await screen.orientation.lock("landscape").catch(()=>{})}}catch(e){}};
-$("rotok").onclick=()=>{$("rot").style.display="none";document.body.classList.add("rot-ok")};
+$("rotok").onclick=()=>{document.body.classList.add("rot-ok");maybeEnter()};
 
-function readLessonLang(){
-  try{
-    const w=W();
-    if(w.__lang&&w.__lang.cur&&UI[w.__lang.cur])return w.__lang.cur;
-    const lg=w.document.documentElement.lang;
-    if(UI[lg])return lg;
-  }catch(e){}
-  return null;
-}
+// 界面语言跟课件的语言按钮走
+function readLessonLang(){try{const w=W();if(w.__lang&&w.__lang.cur&&UI[w.__lang.cur])return w.__lang.cur;
+  const lg=w.document.documentElement.lang;if(UI[lg])return lg}catch(e){}return null}
 setInterval(()=>{const lg=readLessonLang();if(lg&&lg!==lang){lang=lg;applyLang();save()}},400);
 
-const t0=Date.now();
-let lessonReady=false, introDone=false;
-function lessonLoaded(){
-  try{const s=W().__state&&W().__state();if(s&&isFinite(s.t))return true}catch(e){}
-  try{if($("lesson").contentDocument&&$("lesson").contentDocument.querySelector("canvas,audio,#c"))return true}catch(e){}
-  return false;
+// 加载遮罩 + 开场横屏提示(照 t2298)
+function lessonLoaded(){try{const s=W().__state&&W().__state();if(s&&isFinite(s.t))return true}catch(e){}
+  try{if($("lesson").contentDocument&&$("lesson").contentDocument.querySelector("canvas,audio,#c"))return true}catch(e){}return false}
+const isPhone=()=>Math.min(screen.width,screen.height)<=820||navigator.maxTouchPoints>0&&Math.min(innerWidth,innerHeight)<=500;
+const portrait=()=>matchMedia("(orientation:portrait)").matches&&innerHeight>innerWidth&&!document.body.classList.contains("rot-ok");
+const tStart=Date.now();
+function maybeEnter(){
+  const must=portrait()&&isPhone();
+  $("rot").classList.toggle("wait",!lessonReady);
+  const on=Date.now()-tStart<2500||must;
+  $("rot").classList.toggle("on",on);
+  if(!on&&!st.name&&!$("nameDlg").classList.contains("on"))askName();
 }
-setTimeout(()=>$("load").classList.add("slow"),20000);
-const tick=setInterval(()=>{
-  if(!lessonReady&&lessonLoaded()){lessonReady=true;$("load").classList.add("off");setTimeout(()=>$("load").style.display="none",400)}
-  if(Date.now()-t0>20000)$("load").classList.add("slow");
+setInterval(()=>{
+  if(!lessonReady&&lessonLoaded()){lessonReady=true;$("load").classList.add("off");setTimeout(()=>{if(lessonReady)$("load").style.display="none"},400)}
+  if(!lessonReady&&Date.now()-t0>20000)$("load").classList.add("slow");
   maybeEnter();
 },200);
-$("lesson").addEventListener("load",()=>{if(lessonLoaded()){lessonReady=true;$("load").classList.add("off")}});
-
-const isPhone=()=>Math.min(screen.width,screen.height)<=820 || navigator.maxTouchPoints>0 && Math.min(innerWidth,innerHeight)<=500;
-function portrait(){return matchMedia("(orientation:portrait)").matches && innerHeight>innerWidth && !document.body.classList.contains("rot-ok")}
-function showRot(on){$("rot").classList.toggle("on",!!on)}
-function maybeEnter(){
-  const waited=Date.now()-t0>=2500;
-  const must=portrait()&&isPhone()&&!document.body.classList.contains("rot-ok");
-  $("rot").classList.toggle("wait",!lessonReady);
-  if(!waited||must){showRot(true);return}
-  introDone=true;
-  showRot(false);
-}
 addEventListener("resize",maybeEnter);
-matchMedia("(orientation:portrait)").addEventListener("change",maybeEnter);
-showRot(true);
-applyLang();
-if(st.submittedAt){$("done").textContent="✓ "+st.submittedAt.slice(0,16).replace("T"," ")+" UTC";$("done").style.display="block"}
-render();
 
 $("send").onclick=()=>{
-  const u=UI[lang]||UI.zh;
-  const name=$("name").value.trim();
-  if(!name){$("name").classList.add("miss");$("name").focus();$("err").textContent=u.need;$("err").style.display="block";return}
-  $("err").style.display="none";
-  const items=st.items.slice().sort((a,b)=>a.s-b.s);
+  if(!st.name){askName();return}
+  const r={},c={},lines=[];
+  DATA.lessons.forEach(l=>{const col=color(l),cs=comments(l);
+    const txt=cs.map(x=>"["+fmt(x.s)+"] "+x.c).join("\n");
+    if(col!=="y")r[l.id]=[col,l.sha.slice(0,8),txt];
+    if(cs.length)c[l.id]=cs.map(x=>({s:x.s,c:x.c,lang:x.lang}));
+    if(col!=="y"||cs.length)lines.push(l.id+" "+({g:"🟩",r:"🟥",y:"🟨"}[col])+(txt?"\n"+txt:""))});
   const p=new URLSearchParams();
-  p.set("prefill_Аты-жөні · Имя · Name",name);
-  p.set("prefill_课号",LID);
-  p.set("prefill_秒数",items.map(i=>i.s).join(", "));
-  p.set("prefill_Пікір · Комментарий · Comment",items.map(i=>"["+fmt(i.s)+"] "+i.c).join("\n"));
-  p.set("prefill_条数",String(items.length));
-  p.set("prefill_原始答案",JSON.stringify({lesson:LID,name,lang,items,link_t:qs.get("t")||"",ts:new Date().toISOString(),ua:navigator.userAgent.slice(0,120)}));
-  ["课号","秒数","条数","原始答案"].forEach(f=>p.set("hide_"+f,"1"));
+  p.set("prefill_评审人",st.name);                 // 表单预填认题目名;改题目名要同步改这四处
+  p.set("prefill_页面",DATA.page.id);
+  p.set("prefill_判定JSON",JSON.stringify({v:1,page:DATA.page.id,r,c,lang,ts:new Date().toISOString(),ua:navigator.userAgent.slice(0,120)}));
+  p.set("prefill_备注",lines.join("\n\n"));
   st.submittedAt=new Date().toISOString();save();
-  location.href=FORM+"?"+p.toString();
+  location.href=DATA.form+"?"+p.toString();
 };
+if(st.submittedAt){$("done").textContent="✓ "+st.submittedAt.slice(0,16).replace("T"," ")+" UTC";$("done").style.display="block"}
+$("rot").classList.add("on");
+applyLang();
+load(st.cur);
 </script>
 </body>
 </html>

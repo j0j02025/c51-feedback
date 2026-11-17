@@ -111,10 +111,6 @@ function drawSprite(name,cx,ground,maxW,maxH,opt={}){
 // 画面内容全部来自 problem.json 的 scene.steps(课 JSON 经 make_config.py 换算:时刻已是秒数 *_t,round 已展开成 picture/ask/turn)。本文件不写任何一课的内容。
 // 主体位图(引导角色 4 个姿势、问答物件)由 build 内嵌成 <img data-slot>;哪个槽没图,就用本文件里的代码画占位(PIC / guideCode),流程照跑。
 // 写法见同目录 LESSON-SPEC.md。外壳 = templates/shell.html(唯一时钟、字幕、__audit、reg、SLOTS)。
-// paper-toon(纸艺卡通问答)风格包的通用场景引擎:暖色毛毡底 + 圆点,圆角毛毡卡片,固定卡通引导角色 Бүршік,看图→提问→停顿让学生说→揭晓→跟读。
-// 画面内容全部来自 problem.json 的 scene.steps(课 JSON 经 make_config.py 换算:时刻已是秒数 *_t,round 已展开成 picture/ask/turn)。本文件不写任何一课的内容。
-// 主体位图(引导角色 4 个姿势、问答物件)由 build 内嵌成 <img data-slot>;哪个槽没图,就用本文件里的代码画占位(PIC / guideCode),流程照跑。
-// 写法见同目录 LESSON-SPEC.md。外壳 = templates/shell.html(唯一时钟、字幕、__audit、reg、SLOTS)。
 // 组件:title text chip picture ask turn gallery;引导角色、页眉、轮次进度点、静音按钮由引擎自己管。
 document.body.style.fontFamily=FONT;
 const SC=CFG.scene,STEPS=SC.steps||[],AR=SC.area||{x:90,y:150,w:1740,h:690},CX=AR.x+AR.w/2,HD=SC.header||{meta_y:62,chapter_y:112};
@@ -377,9 +373,7 @@ const MUTE={on:false,bgmv:null};
  function set(on){MUTE.on=on;narration.volume=on?0:1;if(on){if(MUTE.bgmv==null){MUTE.bgmv=BGMV;BGMV=0}}else if(MUTE.bgmv!=null){BGMV=MUTE.bgmv;MUTE.bgmv=null}
   if(typeof live==='object'&&live&&live.master&&live.ctx)live.master.gain.setTargetAtTime(on||narration.muted?0:1,live.ctx.currentTime,.01);paint()}
  let btn=null,own=null;
- // 图标跟真实静音走:自动播放被拦时外壳只把 narration.muted 置 true(volume 仍是 1),按钮必须一起显示静音;volumechange 覆盖 muted 与 volume 两种静音。
- function silent(){return !!(narration.muted||MUTE.on||narration.volume===0)}
- function paint(){if(!btn)return;const on=silent();btn.innerHTML=ic(on);const s=on?'开声':'静音';btn.setAttribute('aria-label',s);btn.title=s;btn.setAttribute('aria-pressed',String(on))}
+ function paint(){if(!btn)return;btn.innerHTML=ic(MUTE.on);const s=MUTE.on?'开声':'静音';btn.setAttribute('aria-label',s);btn.title=s;btn.setAttribute('aria-pressed',String(MUTE.on))}
  function install(){
   const bar=document.querySelector('#cvBar');btn=document.createElement('button');btn.type='button';btn.dataset.cvCtl='mute';
   if(bar){bar.insertBefore(btn,bar.querySelector('#cvMin'))}
@@ -388,13 +382,13 @@ const MUTE={on:false,bgmv:null};
    own.appendChild(btn);document.querySelector('.card').appendChild(own)}
   btn.addEventListener('pointerdown',e=>e.stopPropagation());btn.addEventListener('keydown',e=>e.stopPropagation());
   btn.addEventListener('click',e=>{e.stopPropagation();if(narration.muted){resume();set(false);return}set(!MUTE.on)});
-  narration.addEventListener('volumechange',paint);
   paint();
   const R0=window.render;window.render=s=>{if(own){own.remove();own=null}return R0(s)};
   window.__ptMute={set,state:()=>({on:MUTE.on,volume:narration.volume,bgmv:typeof BGMV==='number'?BGMV:null,bgm_volume:typeof bgm!=='undefined'&&bgm?bgm.volume:null})};
  }
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install);else setTimeout(install,0);
 })();
+
 // paper-toon 声效层:合成器与实时 / 离线两条路照 warm-paper/sfx.js(同一套 tone / burst / OfflineAudioContext / __renderStems),只换配方,另接静音按钮:
 // 每种音效解释什么 —— pop = 一张毛毡卡 / 一个物件贴上来(软「噗」);query = 提问(上行两音);tick = 学生开口的停顿里每过三分之一响一下(木鱼轻敲);
 // ding = 揭晓答案(木琴三音);boing = 引导角色跳起来欢呼(弹簧);chime = 片头标题;swish = 换一屏(毛毡在纸上滑过)。环境底音 room = 很轻的室内空气声。
