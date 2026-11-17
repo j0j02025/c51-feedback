@@ -115,7 +115,7 @@ button{font:inherit;border:0;border-radius:10px;cursor:pointer;color:var(--ink);
 </div>
 <script>
 // 红绿灯规则(skill josh-traffic-light §2):黄 = 没判,或判后课件改了(sha 不等)· 绿 = 通过 · 红 = 不通过
-const DATA={"page": {"id": "c51-feedback", "title": "C51 看课反馈"}, "form": "https://01ai.feishu.cn/share/base/shrcnqr2MJH0FjuNxhGtrpsxvmd", "lessons": [{"id": "kk69-rook", "short": "Қаз 69", "title": "为什么保护白嘴鸦？", "titles": {"zh": "为什么保护白嘴鸦？", "kk": "Ұзақты неге қорғау керек?", "ru": "Почему нужно защищать грачей?"}, "file": "lessons/kk69-rook.html", "sha": "6034e2d5f9e5781b2df4e26d270d7bd19390c089cce17854af1ed26df4362f87"}, {"id": "ru16-slides", "short": "Рус 16", "title": "俄语第 16 课 · 环保演示", "titles": {"zh": "俄语第 16 课 · 环保演示", "kk": "Орыс тілі · 16-сабақ", "ru": "Русский язык · урок 16"}, "file": "lessons/ru16-slides.html", "sha": "68a9243dc06d13db0cc2543a0898a6e488daaa0437551276cdd97fc11b91df8b"}]};   // {page:{id,title}, form, lessons:[{id,short,title,titles?,file,sha}]}
+const DATA={"page": {"id": "c51-feedback", "title": "C51 看课反馈"}, "form": "https://01ai.feishu.cn/share/base/shrcnqr2MJH0FjuNxhGtrpsxvmd", "lessons": [{"id": "kk69-rook", "short": "哈语课 69 · 白嘴鸦", "shorts": {"zh": "哈语课 69 · 白嘴鸦", "kk": "Қазақ тілі 69 · Ұзақ", "ru": "Каз. язык 69 · Грачи"}, "title": "为什么保护白嘴鸦？", "titles": {"zh": "为什么保护白嘴鸦？", "kk": "Ұзақты неге қорғау керек?", "ru": "Почему нужно защищать грачей?"}, "file": "lessons/kk69-rook.html", "sha": "b71d658876c2dddd5a69a2c23ed27ac0a51d5446570312c1e898430178cd2d12"}, {"id": "ru16-slides", "short": "俄语课 16 · 环保演示", "shorts": {"zh": "俄语课 16 · 环保演示", "kk": "Орыс тілі 16 · Экология", "ru": "Рус. язык 16 · Экология"}, "title": "俄语第 16 课 · 环保演示", "titles": {"zh": "俄语第 16 课 · 环保演示", "kk": "Орыс тілі · 16-сабақ", "ru": "Русский язык · урок 16"}, "file": "lessons/ru16-slides.html", "sha": "f9bf8c264c0888f04ef2aa58ae5e7fb4cb6a91b175315153de6aab72e71cfa7c"}]};   // {page:{id,title}, form, lessons:[{id,short,title,titles?,file,sha}]}
 const $=id=>document.getElementById(id);
 const UI={
   zh:{title:"看课反馈",name:"姓名",nmTtl:"请先填你的名字",nmSub:"名字由老师自己填写",start:"→ 开始",add:"⏸ 评论",empty:"在出错的地方暂停,写下意见",send:"✓ 提交",fs:"⛶ 全屏",save:"✓ 保存",ph:"哪里不对?",pass:"✓ 通过",fail:"✕ 不通过",lgG:"通过",lgR:"不通过",lgY:"还没判",load:"正在加载,请稍等",slow:"网络慢,请稍候,或刷新页面",rot:"请把手机横过来"},
@@ -130,7 +130,7 @@ const save=()=>{st.lang=lang;try{localStorage.setItem(KEY,JSON.stringify(st))}ca
 const qs=new URLSearchParams(location.search);
 if(byId[qs.get("l")])st.cur=qs.get("l");
 if(!byId[st.cur])st.cur=DATA.lessons[0].id;
-let lang="zh"; // J 261117 863.18「右边要有中文的」:右侧面板固定中文,不跟课件切语言
+let lang=UI[st.lang]?st.lang:"zh"; // J 261117 863.22:右侧面板跟课件所选语言走(中/哈/俄三语)
 const u=()=>UI[lang]||UI.zh;
 const titleOf=l=>(l.titles&&l.titles[lang])||l.title;
 
@@ -185,7 +185,7 @@ function render(){
   const L=byId[st.cur],t=u();
   $("lessons").innerHTML="";
   DATA.lessons.forEach((l,i)=>{const b=document.createElement("button");b.className="ls "+color(l)+(l.id===st.cur?" on":"");
-    b.textContent=(i+1)+". "+l.short;b.title=titleOf(l);b.onclick=()=>{if(l.id!==st.cur)load(l.id)};$("lessons").appendChild(b)});
+    b.textContent=(i+1)+". "+((l.shorts&&l.shorts[lang])||l.short);b.title=titleOf(l);b.onclick=()=>{if(l.id!==st.cur)load(l.id)};$("lessons").appendChild(b)});
   $("ttl").textContent=titleOf(L);$("ttl").title=titleOf(L);
   const c=color(L);
   $("verdict").querySelectorAll("button").forEach(b=>b.classList.toggle("on",b.dataset.v===c));
@@ -201,7 +201,7 @@ function render(){
   const nc=DATA.lessons.reduce((a,l)=>a+comments(l).length,0);
   $("cnt").innerHTML='<i class="dot" style="background:var(--g)"></i>'+n.g+' · <i class="dot" style="background:var(--r)"></i>'+n.r+' · <i class="dot" style="background:var(--y)"></i>'+n.y+" · 💬 "+nc;
   $("send").disabled=!(n.g+n.r+nc);
-  $("send").textContent=t.send+" ("+(n.g+n.r)+"/"+DATA.lessons.length+")";
+  $("send").textContent=t.send+" · "+(n.g+n.r)+"/"+DATA.lessons.length+({zh:" 课已判 · 意见 ",kk:" сабақ · пікір ",ru:" урок · замечаний "}[lang]||" · ")+nc; // J 863.23:分母是课数不是错误数;意见条数不设上限
 }
 $("verdict").querySelectorAll("button").forEach(b=>b.onclick=()=>{const L=byId[st.cur];const v=st.v[L.id];
   if(v&&v.sha===L.sha&&v.v===b.dataset.v)delete st.v[L.id];else st.v[L.id]={v:b.dataset.v,sha:L.sha};save();render()});
@@ -217,7 +217,7 @@ $("rotok").onclick=()=>{document.body.classList.add("rot-ok");maybeEnter()};
 // 界面语言跟课件的语言按钮走
 function readLessonLang(){try{const w=W();if(w.__lang&&w.__lang.cur&&UI[w.__lang.cur])return w.__lang.cur;
   const lg=w.document.documentElement.lang;if(UI[lg])return lg}catch(e){}return null}
-// 面板不再跟课件语言走(J 261117 863.18);readLessonLang 留着备用
+setInterval(()=>{const lg=readLessonLang();if(lg&&lg!==lang){lang=lg;applyLang();save();render()}},400);
 
 // 加载遮罩 + 开场横屏提示(照 t2298)
 function lessonLoaded(){try{const s=W().__state&&W().__state();if(s&&isFinite(s.t))return true}catch(e){}

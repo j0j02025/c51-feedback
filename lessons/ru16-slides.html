@@ -758,7 +758,7 @@ document.documentElement.classList.add('cv-on');
 const $=n=>bar.querySelector(`[data-cv-ctl="${n}"]`);
 // ---- 点控制条不触发外壳「点一下回开头带声重播」;静音中第一次点控制条只顺手开声 ----
 for(const el of[bar,rp]){
- el.addEventListener('pointerdown',e=>{e.stopPropagation();if(narration.muted){narration.muted=false;if(typeof audioKick==='function')audioKick();if(typeof syncHint==='function')syncHint()}});
+ el.addEventListener('pointerdown',e=>{e.stopPropagation();if(narration.muted&&!(window.__cvMute&&window.__cvMute.user())){narration.muted=false;if(typeof audioKick==='function')audioKick();if(typeof syncHint==='function')syncHint()}});
  el.addEventListener('keydown',e=>e.stopPropagation());
 }
 // ---- 动作:全部走外壳的 sync(唯一时钟 narration.currentTime),配音和画面一起跳 ----
@@ -779,7 +779,7 @@ narration.addEventListener('pause',()=>{if(atEnd())return;if(typeof bgm!=='undef
 narration.addEventListener('play',()=>{if(typeof live==='object'&&live&&live.ctx&&live.ctx.state==='suspended')live.ctx.resume().catch(()=>{})});
 // ---- 控件文字:多语切换片(CFG.lang_switch,templates/lang4.js)跟当前语言(<html lang>)走,四语;单语片 / 老片一律中文,与改前相同 ----
 const UI={
- zh:{seg:(k,m)=>`第 ${k} / 共 ${m} 段`,prev:'上一段',next:'下一段',play:'继续',pause:'暂停',replay:'重放',seek:'跳到这里',fs:'全屏',fsx:'退出全屏',min:'收起控制条',max:'展开控制条',bar:'播放控制'},
+ zh:{seg:(k,m)=>`第 ${k} / ${m} 段`,prev:'上一段',next:'下一段',play:'继续',pause:'暂停',replay:'重放',seek:'跳到这里',fs:'全屏',fsx:'退出全屏',min:'收起控制条',max:'展开控制条',bar:'播放控制'},
  kk:{seg:(k,m)=>`Бөлім ${k} / ${m}`,prev:'Алдыңғы бөлім',next:'Келесі бөлім',play:'Жалғастыру',pause:'Кідірту',replay:'Қайта ойнату',seek:'Осы жерге өту',fs:'Толық экран',fsx:'Толық экраннан шығу',min:'Басқару жолағын жасыру',max:'Басқару жолағын көрсету',bar:'Ойнату басқаруы'},
  ru:{seg:(k,m)=>`Часть ${k} / ${m}`,prev:'Предыдущая часть',next:'Следующая часть',play:'Продолжить',pause:'Пауза',replay:'Повторить',seek:'Перейти сюда',fs:'Полный экран',fsx:'Выйти из полного экрана',min:'Скрыть панель',max:'Показать панель',bar:'Управление воспроизведением'},
  en:{seg:(k,m)=>`Part ${k} / ${m}`,prev:'Previous part',next:'Next part',play:'Resume',pause:'Pause',replay:'Replay',seek:'Jump here',fs:'Full screen',fsx:'Exit full screen',min:'Hide controls',max:'Show controls',bar:'Playback controls'}};
@@ -825,9 +825,10 @@ const UI={zh:['静音','开声'],kk:['Дыбысты өшіру','Дыбысты
 const b=document.createElement('button');b.type='button';b.dataset.cvCtl='mute';b.setAttribute('aria-pressed','false');
 const fs=bar.querySelector('[data-cv-ctl="fs"]')||bar.querySelector('#cvMin');bar.insertBefore(b,fs);
 const kick=()=>{if(typeof audioKick==='function')audioKick()};
+function setMedia(on){document.querySelectorAll('audio,video').forEach(el=>el.muted=on);if(live.master&&live.ctx){live.master.gain.cancelScheduledValues(live.ctx.currentTime);live.master.gain.setValueAtTime(on?0:1,live.ctx.currentTime)}}
 function toggle(){
- if(narration.muted){USER_MUTED=false;narration.muted=false;kick();if(typeof syncHint==='function')syncHint();if(narration.paused&&t<AUDIO_DUR-0.05)narration.play().catch(()=>{})}
- else{USER_MUTED=true;narration.muted=true}
+ if(narration.muted){USER_MUTED=false;setMedia(false);kick();if(typeof syncHint==='function')syncHint();if(narration.paused&&t<AUDIO_DUR-0.05)narration.play().catch(()=>{})}
+ else{USER_MUTED=true;setMedia(true)}
  paint(true)}
 // 自己先拦下 pointerdown:不让控制条的「静音中第一次点顺手开声」和外壳的「点一下回开头」碰到这次点击
 b.addEventListener('pointerdown',e=>{e.stopPropagation()});
@@ -840,7 +841,7 @@ window.addEventListener('keydown',e=>{if(USER_MUTED)e.stopImmediatePropagation()
 if(typeof syncHint==='function'){const sh0=syncHint;syncHint=function(){if(USER_MUTED){soundHint.hidden=true;return}sh0()}}
 let last='';
 function paint(force){
- if(USER_MUTED&&!narration.muted)narration.muted=true;   // 控制条别的按钮会顺手开声:用户静音时立刻压回去
+ if(USER_MUTED&&!narration.muted)setMedia(true);   // 控制条别的按钮会顺手开声:用户静音时立刻压回去
  const m=narration.muted,lg=CFG.lang_switch&&UI[document.documentElement.lang]?document.documentElement.lang:'zh',key=m+'|'+lg;
  if(force||key!==last){last=key;b.innerHTML=`<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">${m?ICON.off:ICON.on}</svg>`;const s=UI[lg][m?1:0];b.setAttribute('aria-label',s);b.title=s;b.setAttribute('aria-pressed',String(m))}
  if(!force)requestAnimationFrame(()=>paint(false))}
@@ -944,7 +945,7 @@ html.cv-lang #cvBar,#cvLang{flex:none;width:min(100vw,calc((100vh - var(--cvh,0p
  const stage=document.querySelector('.stage'),card=document.querySelector('.card');stage.insertBefore(bar,card);
  document.documentElement.classList.add('cv-lang');
  // 点语言条不触发外壳「点一下回开头带声重播」;静音中第一次点只顺手开声
- bar.addEventListener('pointerdown',e=>{e.stopPropagation();if(narration.muted){narration.muted=false;if(typeof audioKick==='function')audioKick();if(typeof syncHint==='function')syncHint()}});
+ bar.addEventListener('pointerdown',e=>{e.stopPropagation();if(narration.muted&&!(window.__cvMute&&window.__cvMute.user())){narration.muted=false;if(typeof audioKick==='function')audioKick();if(typeof syncHint==='function')syncHint()}});
  bar.addEventListener('keydown',e=>e.stopPropagation());
  bar.addEventListener('click',e=>{const b=e.target.closest('button[data-lang]');if(b&&!b.disabled)setLang(b.dataset.lang)});
  paint();

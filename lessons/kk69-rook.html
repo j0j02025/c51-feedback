@@ -365,10 +365,11 @@ const MUTE={on:false,bgmv:null};
  const SP='stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"';
  const ic=on=>`<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="${P.gold_fill}" ${SP} d="M4.2 9.3c1.3 0 2.6.1 3.9-.1 1.6-1.4 3.2-2.8 4.9-4.1.2 4.6.1 9.3 0 13.9-1.7-1.3-3.3-2.7-4.9-4.1-1.3-.1-2.6 0-3.9-.1-.2-1.8-.1-3.6 0-5.5z"/>`+
   (on?`<path fill="none" ${SP} d="M15.6 9.1c1.7 1.9 3.5 3.8 5.2 5.8M20.8 9.2c-1.7 1.9-3.4 3.8-5.2 5.7"/>`:`<path fill="none" ${SP} d="M15.8 9.2c1 1.6 1 3.9 0 5.6M18.4 6.9c2.1 2.9 2.1 7.3 0 10.2"/>`)+`</svg>`;
- function set(on){MUTE.on=on;narration.volume=on?0:1;if(on){if(MUTE.bgmv==null){MUTE.bgmv=BGMV;BGMV=0}}else if(MUTE.bgmv!=null){BGMV=MUTE.bgmv;MUTE.bgmv=null}
-  if(typeof live==='object'&&live&&live.master&&live.ctx)live.master.gain.setTargetAtTime(on||narration.muted?0:1,live.ctx.currentTime,.01);paint()}
+ function set(on){MUTE.on=on;document.querySelectorAll('audio,video').forEach(el=>el.muted=on);
+  if(live.master&&live.ctx){live.master.gain.cancelScheduledValues(live.ctx.currentTime);live.master.gain.setValueAtTime(on?0:1,live.ctx.currentTime)}paint()}
  let btn=null,own=null;
- function paint(){if(!btn)return;btn.innerHTML=ic(MUTE.on);const s=MUTE.on?'开声':'静音';btn.setAttribute('aria-label',s);btn.title=s;btn.setAttribute('aria-pressed',String(MUTE.on))}
+ function paint(){if(!btn)return;const m=narration.muted,ui={zh:['静音','开声'],kk:['Дыбысты өшіру','Дыбысты қосу'],ru:['Выключить звук','Включить звук'],en:['Mute','Unmute']},s=(ui[document.documentElement.lang]||ui.zh)[m?1:0];btn.innerHTML=ic(m);btn.setAttribute('aria-label',s);btn.title=s;btn.setAttribute('aria-pressed',String(m))}
+ window.addEventListener('cv-lang',paint);
  function install(){
   const bar=document.querySelector('#cvBar');btn=document.createElement('button');btn.type='button';btn.dataset.cvCtl='mute';
   if(bar){bar.insertBefore(btn,bar.querySelector('#cvMin'))}
@@ -376,7 +377,7 @@ const MUTE={on:false,bgmv:null};
    btn.style.cssText=`appearance:none;width:44px;height:40px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;color:${P.ink};background:${P.card};border:2px solid ${P.ink};border-radius:255px 15px 225px 15px/15px 225px 15px 255px;padding:0`;
    own.appendChild(btn);document.querySelector('.card').appendChild(own)}
   btn.addEventListener('pointerdown',e=>e.stopPropagation());btn.addEventListener('keydown',e=>e.stopPropagation());
-  btn.addEventListener('click',e=>{e.stopPropagation();if(narration.muted){resume();set(false);return}set(!MUTE.on)});
+  btn.addEventListener('click',e=>{e.stopPropagation();set(!narration.muted)});
   paint();
   const R0=window.render;window.render=s=>{if(own){own.remove();own=null}return R0(s)};
   window.__ptMute={set,state:()=>({on:MUTE.on,volume:narration.volume,bgmv:typeof BGMV==='number'?BGMV:null,bgm_volume:typeof bgm!=='undefined'&&bgm?bgm.volume:null})};
@@ -462,7 +463,7 @@ zhCaption.hidden=Q.get('zh')!=='1';                     // 中文字幕默认隐
 function updateText(){const i=sentence(t);zhText.textContent=ZH[i]||'';caption.textContent=NARR[i]||''}
 function frame(){const n=renderScene(t);updateText();return n}
 const MIXG=(CFG.mix&&CFG.mix[LG])||{};
-function syncHint(){soundHint.hidden=!(narration.muted&&L.sound);if(L.sound)soundHint.textContent='🔇 '+L.sound}
+function syncHint(){soundHint.hidden=!(narration.muted&&!MUTE.on&&L.sound);if(L.sound)soundHint.textContent='🔇 '+L.sound}
 function loop(){if(playing)t=Math.min(AUDIO_DUR,TMAP.a2s(narration.currentTime));frame();syncHint();if(t>=AUDIO_DUR&&!narration.paused)narration.pause();bgmTick();if(typeof audioTick==='function')audioTick(t);raf=requestAnimationFrame(loop)}
 const narration=document.querySelector('#narration');
 // BGM:单独一条内嵌音轨,跟旁白同一时钟、同一静音状态;音量来自 problem.mix,播到音轨尾 2 秒淡出
@@ -473,7 +474,7 @@ narration.src=AUDIO[LG];narration.muted=false;
 function sync(s){t=Math.max(0,Math.min(AUDIO_DUR,s));narration.currentTime=TMAP.s2a(t);frame()}
 function begin(){if(playing)return;playing=true;raf=requestAnimationFrame(loop)}
 function startAudio(){narration.play().then(()=>console.log('PLAY-OK')).catch(e=>{console.log('PLAY-BLOCKED',e.name);if(e.name!=='NotAllowedError')return;narration.muted=true;narration.play().then(()=>console.log('MUTED-OK')).catch(err=>{console.log('MUTED-BLOCKED',err.name);document.querySelector('#audioStatus').textContent=L.sound||''})});setTimeout(()=>console.log('AUDIO-CHECK',narration.currentTime),3000)}
-function resume(){const wasMuted=narration.muted;narration.muted=false;if(wasMuted&&t>0)sync(0);if(typeof audioKick==='function')audioKick();document.querySelector('#audioStatus').textContent='';syncHint();if(narration.paused&&t<AUDIO_DUR)narration.play().then(()=>console.log('PLAY-OK-RESUME')).catch(e=>console.log('RESUME-BLOCKED',e.name))}
+function resume(){if(MUTE.on)return;const wasMuted=narration.muted;narration.muted=false;if(wasMuted&&t>0)sync(0);if(typeof audioKick==='function')audioKick();document.querySelector('#audioStatus').textContent='';syncHint();if(narration.paused&&t<AUDIO_DUR)narration.play().then(()=>console.log('PLAY-OK-RESUME')).catch(e=>console.log('RESUME-BLOCKED',e.name))}
 window.addEventListener('pointerdown',resume);window.addEventListener('keydown',resume);
 Object.values(SLOTS).forEach(im=>im.addEventListener('load',()=>frame()));
 frame();syncHint();begin();startAudio();
@@ -590,7 +591,7 @@ document.documentElement.classList.add('cv-on');
 const $=n=>bar.querySelector(`[data-cv-ctl="${n}"]`);
 // ---- 点控制条不触发外壳「点一下回开头带声重播」;静音中第一次点控制条只顺手开声 ----
 for(const el of[bar,rp]){
- el.addEventListener('pointerdown',e=>{e.stopPropagation();if(narration.muted){narration.muted=false;if(typeof audioKick==='function')audioKick();if(typeof syncHint==='function')syncHint()}});
+ el.addEventListener('pointerdown',e=>{e.stopPropagation();if(narration.muted&&!MUTE.on){narration.muted=false;if(typeof audioKick==='function')audioKick();if(typeof syncHint==='function')syncHint()}});
  el.addEventListener('keydown',e=>e.stopPropagation());
 }
 // ---- 动作:全部走外壳的 sync(唯一时钟 narration.currentTime),配音和画面一起跳 ----
@@ -611,7 +612,7 @@ narration.addEventListener('pause',()=>{if(atEnd())return;if(typeof bgm!=='undef
 narration.addEventListener('play',()=>{if(typeof live==='object'&&live&&live.ctx&&live.ctx.state==='suspended')live.ctx.resume().catch(()=>{})});
 // ---- 控件文字:多语切换片(CFG.lang_switch,templates/lang4.js)跟当前语言(<html lang>)走,四语;单语片 / 老片一律中文,与改前相同 ----
 const UI={
- zh:{seg:(k,m)=>`第 ${k} / 共 ${m} 段`,prev:'上一段',next:'下一段',play:'继续',pause:'暂停',replay:'重放',seek:'跳到这里',fs:'全屏',fsx:'退出全屏',min:'收起控制条',max:'展开控制条',bar:'播放控制'},
+ zh:{seg:(k,m)=>`第 ${k} / ${m} 段`,prev:'上一段',next:'下一段',play:'继续',pause:'暂停',replay:'重放',seek:'跳到这里',fs:'全屏',fsx:'退出全屏',min:'收起控制条',max:'展开控制条',bar:'播放控制'},
  kk:{seg:(k,m)=>`Бөлім ${k} / ${m}`,prev:'Алдыңғы бөлім',next:'Келесі бөлім',play:'Жалғастыру',pause:'Кідірту',replay:'Қайта ойнату',seek:'Осы жерге өту',fs:'Толық экран',fsx:'Толық экраннан шығу',min:'Басқару жолағын жасыру',max:'Басқару жолағын көрсету',bar:'Ойнату басқаруы'},
  ru:{seg:(k,m)=>`Часть ${k} / ${m}`,prev:'Предыдущая часть',next:'Следующая часть',play:'Продолжить',pause:'Пауза',replay:'Повторить',seek:'Перейти сюда',fs:'Полный экран',fsx:'Выйти из полного экрана',min:'Скрыть панель',max:'Показать панель',bar:'Управление воспроизведением'},
  en:{seg:(k,m)=>`Part ${k} / ${m}`,prev:'Previous part',next:'Next part',play:'Resume',pause:'Pause',replay:'Replay',seek:'Jump here',fs:'Full screen',fsx:'Exit full screen',min:'Hide controls',max:'Show controls',bar:'Playback controls'}};
@@ -736,7 +737,7 @@ html.cv-lang #cvBar,#cvLang{flex:none;width:min(100vw,calc((100vh - var(--cvh,0p
  const stage=document.querySelector('.stage'),card=document.querySelector('.card');stage.insertBefore(bar,card);
  document.documentElement.classList.add('cv-lang');
  // 点语言条不触发外壳「点一下回开头带声重播」;静音中第一次点只顺手开声
- bar.addEventListener('pointerdown',e=>{e.stopPropagation();if(narration.muted){narration.muted=false;if(typeof audioKick==='function')audioKick();if(typeof syncHint==='function')syncHint()}});
+ bar.addEventListener('pointerdown',e=>{e.stopPropagation();if(narration.muted&&!MUTE.on){narration.muted=false;if(typeof audioKick==='function')audioKick();if(typeof syncHint==='function')syncHint()}});
  bar.addEventListener('keydown',e=>e.stopPropagation());
  bar.addEventListener('click',e=>{const b=e.target.closest('button[data-lang]');if(b&&!b.disabled)setLang(b.dataset.lang)});
  paint();
