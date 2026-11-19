@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>看课评审</title>
+<style>
+:root{--bg:#f4f6f8;--panel:#fff;--ink:#1c2330;--mute:#6b7480;--line:#e3e7ec;--acc:#2563eb;--g:#16803c;--r:#d23b32;--y:#b8860b}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+button,input,textarea{font:inherit}
+button{border:0;border-radius:12px;cursor:pointer;background:#eef1f5;color:var(--ink)}
+.top{display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--panel);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+.top b{font-size:18px}
+.top .sp{flex:1}
+#whoBtn{min-height:44px;padding:6px 14px;font-weight:700}
+.grp{padding:6px 16px 2px;font-size:13px;color:var(--mute);font-weight:700;letter-spacing:.04em}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px;padding:8px 16px 24px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 14px;text-align:left;display:flex;flex-direction:column;gap:4px;min-height:92px}
+.card .hd{display:flex;gap:8px;align-items:center}
+.card .no{font-weight:800}
+.card .st{margin-left:auto;font-size:12px;font-weight:700;border-radius:999px;padding:2px 8px}
+.st.done{background:#e5f6ea;color:var(--g)}
+.st.todo{background:#fff6db;color:var(--y)}
+.st.make{background:#eef1f5;color:var(--mute)}
+.card .tt{font-size:15px}
+.card .meta{font-size:12px;color:var(--mute)}
+.card.off{opacity:.55}
+.card.on{outline:2px solid var(--acc)}
+#player{display:none;position:fixed;inset:0;background:#0e1116;z-index:20;flex-direction:column}
+#player.on{display:flex}
+#main{flex:1;display:flex;flex-direction:column;min-width:0;min-height:0}
+#bar{display:flex;gap:8px;align-items:center;padding:6px 8px;background:#171c24;color:#fff;flex:0 0 auto}
+#bar .back{min-height:40px;min-width:64px;background:#2a3240;color:#fff;font-weight:700}
+#bar .ttl{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14px}
+#bar .sec{font-variant-numeric:tabular-nums;min-width:52px;text-align:right}
+#stage{flex:1;position:relative;min-height:0}
+#stage iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:#000}
+#ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#9aa3ad;font-size:20px;text-align:center;padding:20px}
+#dock{display:flex;gap:8px;padding:6px 8px;background:#171c24;flex:0 0 auto}
+#dock button{flex:1;min-height:48px;font-weight:800;font-size:16px;color:#fff}
+@media(max-height:460px){#bar{padding:2px 6px}#bar .back,#dock button{min-height:40px;font-size:14px}#dock{padding:4px 6px}}
+#bNote{background:#d4a017;color:#1a1300}
+#bPass{background:var(--g)}
+#bFail{background:var(--r)}
+#dock button.on{outline:3px solid #fff}
+.desk{display:none}
+body.wide #player{flex-direction:row}
+body.wide .desk{display:flex;flex-direction:column;width:380px;background:#171c24;color:#fff;border-left:1px solid #2a3240}
+.desk h3{margin:12px 14px 4px;font-size:14px;color:#9aa3ad}
+#deskList{flex:1;overflow:auto;padding:6px 12px;font-size:14px}
+#deskList .it{padding:6px 0;border-bottom:1px solid #2a3240}
+#deskList .tm{color:#ffd56a;font-weight:700;margin-right:6px}
+.ov{position:fixed;inset:0;background:rgba(8,10,14,.72);z-index:40;display:none;align-items:center;justify-content:center}
+.ov.on{display:flex}
+.box{background:#fff;border-radius:16px;width:min(760px,96vw);height:min(860px,94dvh);display:flex;flex-direction:column;overflow:hidden}
+@media(max-height:460px){.box{height:96dvh}}
+.box .hd{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid var(--line)}
+.box .hd b{flex:1}
+.box .hd button{min-height:44px;min-width:64px;font-weight:700}
+.box iframe{flex:1;width:100%;border:0}
+#nameBox{width:min(460px,94vw);height:auto;padding:18px;gap:10px}
+#nameBox p{margin:0;color:var(--mute)}
+#nameIn{border:1px solid #c9d0d8;border-radius:10px;padding:10px;min-height:48px;font-size:17px}
+#nameOk{min-height:52px;background:var(--acc);color:#fff;font-weight:800}
+#rot{position:fixed;inset:0;background:#0e1116;color:#fff;z-index:60;display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:24px}
+#rot.on{display:flex}
+#rot .ic{font-size:84px}
+#rot .msg{font-size:26px;font-weight:800}
+#rot .sub{color:#9aa3ad;font-size:16px}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#12351f;color:#fff;border-radius:12px;padding:12px 18px;font-weight:700;display:none;z-index:70}
+#toast.on{display:block}
+</style>
+</head>
+<body>
+<div class="top"><b>看课评审</b><span class="sp"></span><button id="whoBtn">填名字</button></div>
+<div id="home"></div>
+
+<div id="player">
+  <div id="main">
+    <div id="bar"><button class="back" id="back">← 返回</button><span class="ttl" id="pTtl"></span><span class="sec" id="pSec">00:00</span></div>
+    <div id="stage"><iframe id="lesson" allow="autoplay; fullscreen" title="lesson"></iframe><div id="ph">制作中</div></div>
+    <div id="dock"><button id="bNote">⏸ 提意见</button><button id="bPass">✓ 整课通过</button><button id="bFail">✕ 整课要改</button></div>
+  </div>
+  <aside class="desk"><h3 id="deskHd">本课意见</h3><div id="deskList"></div></aside>
+</div>
+
+<div class="ov" id="formOv"><div class="box">
+  <div class="hd"><b id="formHd">提交</b><button id="formClose">✕ 关闭</button></div>
+  <iframe id="formFrame" title="form"></iframe>
+</div></div>
+
+<div class="ov" id="nameOv"><div class="box" id="nameBox">
+  <b>先填你的名字</b>
+  <p>只填一次,存在这台设备上。每条意见都会带上这个名字。</p>
+  <input id="nameIn" autocomplete="name" placeholder="你的名字">
+  <button id="nameOk">✓ 开始</button>
+</div></div>
+
+<div id="rot"><div class="ic">📱</div><div class="msg">请把手机横过来</div><div class="sub">横屏看课,按钮更大</div></div>
+<div id="toast"></div>
+
+<script>
+const KEY="c51v3";
+let DATA=null, st={name:"",done:{},notes:{},cur:null};
+try{const s=JSON.parse(localStorage.getItem(KEY)||"null");if(s)st=Object.assign(st,s)}catch(e){}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}};
+const $ =id=>document.getElementById(id);
+const keyOf=l=>l.subject+"#"+l.no;
+const fmt=s=>{s=Math.max(0,Math.floor(s||0));return String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0")};
+
+function device(){
+  const ua=navigator.userAgent;
+  const touch=navigator.maxTouchPoints>0;
+  const w=Math.min(screen.width,innerWidth), h=Math.min(screen.height,innerHeight);
+  const short=Math.min(w,h), long=Math.max(w,h);
+  if(/iPad|Tablet/i.test(ua)||(touch&&short>500&&short<=1024))return "tablet";
+  if(/Mobi|iPhone|Android/i.test(ua)||(touch&&short<=500)||(short<=500&&long<=940))return "phone";
+  return "desktop";
+}
+function applyDevice(){
+  const d=device();
+  document.body.classList.toggle("wide",d!=="phone");
+  const must=d==="phone"&&matchMedia("(orientation:portrait)").matches&&$("player").classList.contains("on");
+  $("rot").classList.toggle("on",must);
+}
+addEventListener("resize",applyDevice);
+
+function renderHome(){
+  $("whoBtn").textContent=st.name?("👤 "+st.name):"填名字";
+  const groups=[];
+  DATA.lessons.forEach(l=>{let g=groups.find(x=>x.s===l.subject);if(!g)groups.push(g={s:l.subject,ls:[]});g.ls.push(l)});
+  const h=$("home");h.innerHTML="";
+  let done=0;
+  groups.forEach(g=>{
+    const t=document.createElement("div");t.className="grp";t.textContent=g.s;h.appendChild(t);
+    const c=document.createElement("div");c.className="cards";
+    g.ls.forEach(l=>{
+      const made=l.status!=="制作中"&&l.file;
+      const k=keyOf(l); if(st.done[k])done++;
+      const b=document.createElement("button");
+      b.className="card"+(made?"":" off")+(st.cur&&keyOf(st.cur)===k?" on":"");
+      const badge=made?(st.done[k]?'<span class="st done">已审</span>':'<span class="st todo">未审</span>'):'<span class="st make">制作中</span>';
+      b.innerHTML='<div class="hd"><span class="no">第 '+l.no+' 课</span>'+badge+'</div><div class="tt"></div><div class="meta"></div>';
+      b.querySelector(".tt").textContent=l.title;
+      const ns=(st.notes[k]||[]).length;
+      b.querySelector(".meta").textContent=l.style+(ns?" · 意见 "+ns+" 条":"");
+      b.disabled=!made;
+      b.onclick=()=>openLesson(l);
+      c.appendChild(b);
+    });
+    h.appendChild(c);
+  });
+  document.title="看课评审 · "+done+"/"+DATA.lessons.filter(l=>l.status!=="制作中"&&l.file).length+" 已审";
+}
+
+let tick=null;
+function curT(){try{const w=$("lesson").contentWindow,s=w.__state&&w.__state();if(s&&isFinite(s.t))return s.t;
+  const a=w.document.querySelector("audio,video");if(a)return a.currentTime}catch(e){}return 0}
+function pauseLesson(){try{const d=$("lesson").contentDocument,b=d.querySelector('[data-cv-ctl="play"]');
+  if(b){const w=$("lesson").contentWindow,s=w.__state&&w.__state();if(!s||s.playing!==false)b.click()}
+  else d.querySelectorAll("audio,video").forEach(a=>{if(!a.paused)a.pause()})}catch(e){}}
+
+function openLesson(l){
+  st.cur={subject:l.subject,no:l.no};save();
+  $("player").classList.add("on");$("home").style.display="none";
+  document.querySelector(".top").style.display="none";
+  void $("player").offsetHeight;
+  $("pTtl").textContent=l.subject+" · 第 "+l.no+" 课 · "+l.title;
+  const made=l.status!=="制作中"&&l.file;
+  $("ph").style.display=made?"none":"flex";
+  $("lesson").style.display=made?"":"none";
+  if(made)$("lesson").src=l.file;
+  ["bNote","bPass","bFail"].forEach(id=>$(id).disabled=!made);
+  markVerdict();renderDesk();applyDevice();
+  clearInterval(tick);tick=setInterval(()=>$("pSec").textContent=fmt(curT()),500);
+}
+function curLesson(){return DATA.lessons.find(l=>l.subject===st.cur.subject&&l.no===st.cur.no)}
+function closeLesson(){
+  clearInterval(tick);$("player").classList.remove("on");$("lesson").src="about:blank";
+  document.querySelector(".top").style.display="";$("home").style.display="";$("rot").classList.remove("on");renderHome();
+}
+function markVerdict(){const v=st.done[keyOf(curLesson())];
+  $("bPass").classList.toggle("on",v==="通过");$("bFail").classList.toggle("on",v==="要改")}
+function renderDesk(){
+  const l=curLesson();const ns=st.notes[keyOf(l)]||[];
+  $("deskHd").textContent="本课意见 · "+ns.length+" 条"+(st.done[keyOf(l)]?(" · "+st.done[keyOf(l)]):"");
+  $("deskList").innerHTML=ns.map(n=>'<div class="it"><span class="tm">'+fmt(n.s)+'</span>'+esc(n.c)+'</div>').join("")||'<div class="it">还没有意见</div>';
+}
+const esc=s=>s.replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+
+function formUrl(extra){
+  const l=curLesson();
+  const p=new URLSearchParams();
+  p.set("prefill_课号",String(l.no));
+  p.set("prefill_老师",st.name);
+  p.set("prefill_科目",l.subject);
+  Object.entries(extra).forEach(([k,v])=>p.set(k,v));
+  return DATA.form+"?"+p.toString();
+}
+let formOpenedAt=0;
+function openForm(extra,title){
+  if(!st.name){$("nameOv").classList.add("on");return}
+  pauseLesson();
+  $("formHd").textContent=title;
+  const url=formUrl(extra);
+  $("formFrame").src=url;
+  $("formOv").classList.add("on");
+  formOpenedAt=Date.now();
+  setTimeout(()=>{if(Date.now()-formOpenedAt<9000&&$("formOv").classList.contains("on")&&!$("formFrame").dataset.ok){
+    $("formOv").classList.remove("on");const w=window.open(url,"_blank");if(!w)location.href=url}},8000);
+}
+$("formFrame").addEventListener("load",()=>{$("formFrame").dataset.ok="1"});
+function toast(t){$("toast").textContent=t;$("toast").classList.add("on");setTimeout(()=>$("toast").classList.remove("on"),2400)}
+
+$("back").onclick=closeLesson;
+$("bNote").onclick=()=>openForm({"prefill_秒":String(Math.round(curT())),"prefill_结论":"要改"},"提意见 · "+$("pSec").textContent);
+$("bPass").onclick=()=>openForm({"prefill_结论":"通过"},"整课通过");
+$("bFail").onclick=()=>openForm({"prefill_结论":"要改"},"整课要改");
+$("formClose").onclick=()=>{$("formOv").classList.remove("on");$("formFrame").src="about:blank"};
+
+function noteVerdict(kind){
+  const l=curLesson(),k=keyOf(l);
+  if(kind==="note"){(st.notes[k]=st.notes[k]||[]).push({s:Math.round(curT()),c:"(已提交)"})}
+  else st.done[k]=kind;
+  save();markVerdict();renderDesk();renderHome();toast(kind==="note"?"意见已提交":"已标记 "+kind);
+}
+window.addEventListener("message",e=>{
+  const d=e.data;if(!d)return;
+  const s=typeof d==="string"?d:JSON.stringify(d);
+  if(/success|submitted|提交成功/i.test(s))noteVerdict($("formHd").textContent.indexOf("通过")>=0?"通过":$("formHd").textContent.indexOf("整课要改")>=0?"要改":"note");
+});
+
+$("whoBtn").onclick=()=>{$("nameIn").value=st.name;$("nameOv").classList.add("on")};
+$("nameOk").onclick=()=>{const n=$("nameIn").value.trim();if(!n){$("nameIn").focus();return}st.name=n;save();$("nameOv").classList.remove("on");renderHome()};
+$("nameIn").addEventListener("keydown",e=>{if(e.key==="Enter")$("nameOk").click()});
+
+fetch("lessons.json").then(r=>r.json()).then(d=>{DATA=d;
+  const q=new URLSearchParams(location.search);
+  if(q.get("demo")==="1")DATA.lessons.forEach(l=>{if(l.subject==="俄语"&&l.no===65){l.status="待评审";l.file="demo.html"}});
+  renderHome();applyDevice();
+  if(!st.name)$("nameOv").classList.add("on");
+});
+</script>
+</body>
+</html>
