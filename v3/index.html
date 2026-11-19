@@ -141,7 +141,7 @@ function renderHome(){
       const b=document.createElement("button");
       b.className="card"+(made?"":" off")+(st.cur&&keyOf(st.cur)===k?" on":"");
       const badge=made?(st.done[k]?'<span class="st done">已审</span>':'<span class="st todo">未审</span>'):'<span class="st make">制作中</span>';
-      b.innerHTML='<div class="hd"><span class="no">第 '+l.no+' 课</span>'+badge+'</div><div class="tt"></div><div class="meta"></div>';
+      b.innerHTML='<div class="hd"><span class="no">'+(l.label||('第 '+l.no+' 课'))+'</span>'+badge+'</div><div class="tt"></div><div class="meta"></div>';
       b.querySelector(".tt").textContent=l.title;
       const ns=(st.notes[k]||[]).length;
       b.querySelector(".meta").textContent=l.style+(ns?" · 意见 "+ns+" 条":"");
@@ -166,7 +166,7 @@ function openLesson(l){
   $("player").classList.add("on");$("home").style.display="none";
   document.querySelector(".top").style.display="none";
   void $("player").offsetHeight;
-  $("pTtl").textContent=l.subject+" · 第 "+l.no+" 课 · "+l.title;
+  $("pTtl").textContent=l.subject+" · "+(l.label||("第 "+l.no+" 课"))+" · "+l.title;
   const made=l.status!=="制作中"&&l.file;
   $("ph").style.display=made?"none":"flex";
   $("lesson").style.display=made?"":"none";

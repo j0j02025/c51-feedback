@@ -4,10 +4,11 @@
   {
    "no": 0,
    "subject": "俄语",
-   "title": "毡纸艺(小绿人 Бүршік)· 颜色 · Kevin 已通过",
+   "title": "毡纸艺(小绿人 Бүршік)· 颜色",
    "style": "毡纸艺",
    "status": "待评审",
-   "file": "lessons/paper-toon-ru-colors.html"
+   "file": "lessons/paper-toon-ru-colors.html",
+   "label": "毡纸艺"
   },
   {
    "no": 65,
@@ -92,10 +93,11 @@
   {
    "no": 0,
    "subject": "哈语",
-   "title": "毡纸艺(小绿人 Бүршік)· 水果 · Kevin 已通过",
+   "title": "毡纸艺(小绿人 Бүршік)· 水果",
    "style": "毡纸艺",
    "status": "待评审",
-   "file": "lessons/paper-toon-kk-fruits.html"
+   "file": "lessons/paper-toon-kk-fruits.html",
+   "label": "毡纸艺"
   },
   {
    "no": 65,
