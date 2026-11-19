@@ -2,6 +2,14 @@
  "form": "https://01ai.feishu.cn/share/base/shrcnh66aNh5pTemXe9b9sk02pd",
  "lessons": [
   {
+   "no": 0,
+   "subject": "俄语",
+   "title": "毡纸艺(小绿人 Бүршік)· 颜色 · Kevin 已通过",
+   "style": "毡纸艺",
+   "status": "待评审",
+   "file": "lessons/paper-toon-ru-colors.html"
+  },
+  {
    "no": 65,
    "subject": "俄语",
    "title": "数词：基数词与序数词｜自然现象有哪些",
@@ -80,6 +88,14 @@
    "style": "小汽车",
    "status": "制作中",
    "file": ""
+  },
+  {
+   "no": 0,
+   "subject": "哈语",
+   "title": "毡纸艺(小绿人 Бүршік)· 水果 · Kevin 已通过",
+   "style": "毡纸艺",
+   "status": "待评审",
+   "file": "lessons/paper-toon-kk-fruits.html"
   },
   {
    "no": 65,
