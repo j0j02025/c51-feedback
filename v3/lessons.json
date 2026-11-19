@@ -2,30 +2,6 @@
  "form": "https://01ai.feishu.cn/share/base/shrcnh66aNh5pTemXe9b9sk02pd",
  "lessons": [
   {
-   "no": 1,
-   "subject": "样式样课",
-   "title": "小兔子样式 · 过审样课",
-   "style": "小兔子",
-   "status": "待评审",
-   "file": "samples/xiaotuzi.html"
-  },
-  {
-   "no": 2,
-   "subject": "样式样课",
-   "title": "写实小汽车样式 · 过审样课",
-   "style": "小汽车",
-   "status": "待评审",
-   "file": "samples/xiaoqiche.html"
-  },
-  {
-   "no": 3,
-   "subject": "样式样课",
-   "title": "暖纸样式 · 过审样课(数学 81)",
-   "style": "暖纸",
-   "status": "待评审",
-   "file": "samples/nuanzhi.html"
-  },
-  {
    "no": 65,
    "subject": "俄语",
    "title": "数词：基数词与序数词｜自然现象有哪些",
@@ -70,24 +46,24 @@
    "subject": "俄语数学",
    "title": "数量关系与圆形图",
    "style": "暖纸",
-   "status": "制作中",
-   "file": ""
+   "status": "待评审",
+   "file": "lessons/ru-math-81.html"
   },
   {
    "no": 82,
    "subject": "俄语数学",
    "title": "单位面积产量（新知）",
    "style": "暖纸",
-   "status": "制作中",
-   "file": ""
+   "status": "待评审",
+   "file": "lessons/ru-math-82.html"
   },
   {
    "no": 83,
    "subject": "俄语数学",
    "title": "单位面积产量（巩固）",
    "style": "暖纸",
-   "status": "制作中",
-   "file": ""
+   "status": "待评审",
+   "file": "lessons/ru-math-83.html"
   },
   {
    "no": 84,
@@ -166,16 +142,16 @@
    "subject": "哈语数学",
    "title": "单位面积产量（巩固）",
    "style": "暖纸",
-   "status": "制作中",
-   "file": ""
+   "status": "待评审",
+   "file": "lessons/kk-math-83.html"
   },
   {
    "no": 84,
    "subject": "哈语数学",
    "title": "图像",
    "style": "暖纸",
-   "status": "制作中",
-   "file": ""
+   "status": "待评审",
+   "file": "lessons/kk-math-84.html"
   },
   {
    "no": 85,
