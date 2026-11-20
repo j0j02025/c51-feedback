@@ -36,13 +36,17 @@ button{border:0;border-radius:12px;cursor:pointer;background:#eef1f5;color:var(-
 #bar{display:flex;gap:8px;align-items:center;padding:6px 10px;background:#171c24;color:#fff;flex:0 0 auto}
 #bar .ttl{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14px}
 #bar .sec{font-variant-numeric:tabular-nums;min-width:52px;text-align:right}
-#stage{flex:1;position:relative;min-height:0}
+#stage{flex:1;position:relative;min-height:0;min-width:0}
 #stage iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:#000}
 #ph{position:absolute;inset:0;display:none;align-items:center;justify-content:center;color:#9aa3ad;font-size:20px}
-#clist{flex:0 0 auto;max-height:28%;overflow:auto;background:#12171f;color:#fff;padding:4px 10px;font-size:14px}
-#clist .it{display:flex;gap:8px;align-items:flex-start;padding:6px 0;border-bottom:1px solid #2a3240}
-#clist .tm{color:#ffd56a;font-weight:800;background:transparent;min-width:52px;min-height:36px}
-#clist .tx{flex:1;padding-top:6px}
+#pbody{flex:1;display:flex;min-height:0}
+#side{flex:0 0 30%;max-width:420px;min-width:260px;display:flex;flex-direction:column;background:#12171f;color:#fff;border-left:1px solid #2a3240;min-height:0}
+#side .sh{padding:10px 12px;font-weight:800;font-size:15px;border-bottom:1px solid #2a3240}
+#side .sh small{display:block;font-weight:400;color:#9aa3ad;font-size:12px;margin-top:2px}
+#clist{flex:1 1 auto;min-height:0;overflow-y:auto;padding:4px 12px;font-size:16px;line-height:1.45}
+#clist .it{display:flex;gap:8px;align-items:flex-start;padding:8px 0;border-bottom:1px solid #2a3240}
+#clist .tm{color:#ffd56a;font-weight:800;background:transparent;min-width:56px;min-height:36px}
+#clist .tx{flex:1;padding-top:6px;white-space:pre-wrap;word-break:break-word}
 #clist .x{background:transparent;color:#fff;min-width:36px;min-height:36px}
 #clist .empty{color:#9aa3ad;padding:6px 0}
 #dock{display:flex;flex-wrap:wrap;gap:6px;padding:6px 8px;background:#171c24;flex:0 0 auto}
@@ -72,8 +76,10 @@ button{border:0;border-radius:12px;cursor:pointer;background:#eef1f5;color:var(-
 
 <div id="player">
   <div id="bar"><span class="ttl" id="pTtl"></span><span class="sec" id="pSec">00:00</span></div>
-  <div id="stage"><iframe id="lesson" title="lesson"></iframe><div id="ph">制作中</div></div>
-  <div id="clist"></div>
+  <div id="pbody">
+    <div id="stage"><iframe id="lesson" title="lesson"></iframe><div id="ph">制作中</div></div>
+    <div id="side"><div class="sh">本课评论<small>点时间跳到那一秒;✕ 删除</small></div><div id="clist"></div></div>
+  </div>
   <div id="dock">
     <button id="bNote" type="button">评论</button>
     <button id="bPass" type="button">通过</button>
