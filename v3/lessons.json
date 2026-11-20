@@ -5,7 +5,7 @@
    "no": 65,
    "subject": "俄语",
    "title": "数词：基数词与序数词｜自然现象有哪些",
-   "style": "小兔子",
+   "style": "毡纸艺小绿人",
    "status": "制作中",
    "file": ""
   },
@@ -14,24 +14,24 @@
    "subject": "俄语",
    "title": "基数词与序数词的拼写（第一课）｜瀑布",
    "style": "小兔子",
-   "status": "制作中",
-   "file": ""
+   "status": "待评审",
+   "file": "lessons/ru-lang-66.html"
   },
   {
    "no": 67,
    "subject": "俄语",
    "title": "基数词与序数词的拼写（第二课）｜瀑布",
    "style": "小兔子",
-   "status": "制作中",
-   "file": ""
+   "status": "待评审",
+   "file": "lessons/ru-lang-67.html"
   },
   {
    "no": 68,
    "subject": "俄语",
    "title": "数词词组、句子与形态分析（第一课，含抄写）｜风的力量",
    "style": "小兔子",
-   "status": "制作中",
-   "file": ""
+   "status": "待评审",
+   "file": "lessons/ru-lang-68.html"
   },
   {
    "no": 16,
@@ -46,24 +46,24 @@
    "subject": "俄语数学",
    "title": "数量关系与圆形图",
    "style": "暖纸",
-   "status": "待评审",
-   "file": "lessons/ru-math-81.html"
+   "status": "制作中",
+   "file": ""
   },
   {
    "no": 82,
    "subject": "俄语数学",
    "title": "单位面积产量（新知）",
-   "style": "暖纸",
-   "status": "待评审",
-   "file": "lessons/ru-math-82.html"
+   "style": "小兔子",
+   "status": "制作中",
+   "file": ""
   },
   {
    "no": 83,
    "subject": "俄语数学",
    "title": "单位面积产量（巩固）",
-   "style": "暖纸",
-   "status": "待评审",
-   "file": "lessons/ru-math-83.html"
+   "style": "小兔子",
+   "status": "制作中",
+   "file": ""
   },
   {
    "no": 84,
@@ -77,7 +77,7 @@
    "no": 85,
    "subject": "俄语数学",
    "title": "解决问题",
-   "style": "小汽车",
+   "style": "骑自行车",
    "status": "制作中",
    "file": ""
   },
@@ -85,7 +85,7 @@
    "no": 65,
    "subject": "哈语",
    "title": "词法世界之旅",
-   "style": "小兔子",
+   "style": "毡纸艺小绿人",
    "status": "制作中",
    "file": ""
   },
@@ -93,25 +93,25 @@
    "no": 66,
    "subject": "哈语",
    "title": "词类",
-   "style": "毡纸艺",
-   "status": "制作中",
-   "file": ""
+   "style": "羊毛毡",
+   "status": "待评审",
+   "file": "lessons/kk-lang-66.html"
   },
   {
    "no": 67,
    "subject": "哈语",
    "title": "名词（第一课）",
-   "style": "毡纸艺",
-   "status": "制作中",
-   "file": ""
+   "style": "羊毛毡",
+   "status": "待评审",
+   "file": "lessons/kk-lang-67.html"
   },
   {
    "no": 68,
    "subject": "哈语",
    "title": "名词（第二课）",
    "style": "小兔子",
-   "status": "制作中",
-   "file": ""
+   "status": "待评审",
+   "file": "lessons/kk-lang-68.html"
   },
   {
    "no": 17,
@@ -126,22 +126,22 @@
    "subject": "哈语数学",
    "title": "数量关系与圆形图",
    "style": "暖纸",
-   "status": "制作中",
-   "file": ""
+   "status": "待评审",
+   "file": "lessons/kk-math-81.html"
   },
   {
    "no": 82,
    "subject": "哈语数学",
    "title": "单位面积产量（新知）",
-   "style": "暖纸",
-   "status": "制作中",
-   "file": ""
+   "style": "小兔子",
+   "status": "待评审",
+   "file": "lessons/kk-math-82.html"
   },
   {
    "no": 83,
    "subject": "哈语数学",
    "title": "单位面积产量（巩固）",
-   "style": "暖纸",
+   "style": "小兔子",
    "status": "待评审",
    "file": "lessons/kk-math-83.html"
   },
@@ -157,9 +157,9 @@
    "no": 85,
    "subject": "哈语数学",
    "title": "解决问题",
-   "style": "火车",
-   "status": "制作中",
-   "file": ""
+   "style": "骑自行车",
+   "status": "待评审",
+   "file": "lessons/kk-math-85.html"
   }
  ]
 }
