@@ -237,8 +237,7 @@ function submitLesson(){
   if(col!=="y")r[id]=[col,sha.slice(0,8),txt];
   if(cs.length)c[id]=cs.map(x=>({s:x.s,c:x.c,lang:x.lang||"zh"}));
   const mark={g:"🟩",r:"🟥",y:"🟨"}[col];
-  const rec={v:1,page:PAGE_ID,reviewer:st.name,lesson:id,sha:sha.slice(0,8),verdict:col,comments:cs.map(x=>({s:x.s,c:x.c,lang:x.lang||"zh"})),note:id+" "+mark+(txt?"
-"+txt:""),ts:new Date().toISOString(),ua:navigator.userAgent.slice(0,120)};
+  const rec={v:1,page:PAGE_ID,reviewer:st.name,lesson:id,sha:sha.slice(0,8),verdict:col,comments:cs.map(x=>({s:x.s,c:x.c,lang:x.lang||"zh"})),note:id+" "+mark+(txt?"\n"+txt:""),ts:new Date().toISOString(),ua:navigator.userAgent.slice(0,120)};
   queuePush(rec);
   $("bSend").disabled=true;toast("正在提交…");
   flushQueue().then(ok=>{$("bSend").disabled=false;
