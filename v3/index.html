@@ -56,6 +56,7 @@ button{border:0;border-radius:12px;cursor:pointer;background:#eef1f5;color:var(-
 #bFail{background:var(--r)}
 #bSend{background:var(--acc)}
 #bBack{background:#2a3240}
+#bTop{background:#ffd56a;color:#1a1300;font-weight:800;font-size:15px;min-height:36px;padding:4px 14px;border-radius:8px;margin-right:12px;flex:0 0 auto}
 #dock button.on{outline:3px solid #fff}
 .ov{position:fixed;inset:0;background:rgba(8,10,14,.72);z-index:40;display:none;align-items:center;justify-content:center;padding:12px}
 .ov.on{display:flex}
@@ -75,7 +76,7 @@ button{border:0;border-radius:12px;cursor:pointer;background:#eef1f5;color:var(-
 <div id="home"></div>
 
 <div id="player">
-  <div id="bar"><span class="ttl" id="pTtl"></span><span class="sec" id="pSec">00:00</span></div>
+  <div id="bar"><button id="bTop" type="button">← 返回课程列表</button><span class="ttl" id="pTtl"></span><span class="sec" id="pSec">00:00</span></div>
   <div id="pbody">
     <div id="stage"><iframe id="lesson" title="lesson"></iframe><div id="ph">制作中</div></div>
     <div id="side"><div class="sh">本课评论<small>点时间跳到那一秒;✕ 删除</small></div><div id="clist"></div></div>
@@ -85,7 +86,7 @@ button{border:0;border-radius:12px;cursor:pointer;background:#eef1f5;color:var(-
     <button id="bPass" type="button">通过</button>
     <button id="bFail" type="button">不通过</button>
     <button id="bSend" type="button">提交本课反馈</button>
-    <button id="bBack" type="button">返回</button>
+    <button id="bBack" type="button">← 返回列表</button>
   </div>
 </div>
 
@@ -268,6 +269,9 @@ $("bPass").onclick=()=>setVerdict("g");
 $("bFail").onclick=()=>setVerdict("r");
 $("bSend").onclick=submitLesson;
 $("bBack").onclick=closeLesson;
+$("bTop").onclick=closeLesson;
+/* J 261120 980.4:课里要有明显的回列表按钮;Esc 同效(评论框开着时 Esc 先关评论框) */
+document.addEventListener("keydown",e=>{if(e.key!=="Escape")return;if($("cmtOv").classList.contains("on")||$("nameOv").classList.contains("on"))return;if($("player").classList.contains("on"))closeLesson()});
 $("cCancel").onclick=closeComment;
 $("cSave").onclick=saveComment;
 $("txt").addEventListener("keydown",e=>{if(e.key==="Enter"&&(e.metaKey||e.ctrlKey))$("cSave").click()});
