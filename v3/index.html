@@ -17,6 +17,7 @@ button{border:0;border-radius:12px;cursor:pointer;background:#eef1f5;color:var(-
 .grp{padding:6px 16px 2px;font-size:13px;color:var(--mute);font-weight:700;letter-spacing:.04em}
 .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px;padding:8px 16px 24px}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 14px;text-align:left;display:flex;flex-direction:column;gap:4px;min-height:92px}
+.card .th{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:9px;border:1px solid var(--line);display:block;margin-bottom:4px}
 .card .hd{display:flex;gap:8px;align-items:center}
 .card .no{font-weight:800}
 .card .st{margin-left:auto;font-size:12px;font-weight:700;border-radius:999px;padding:2px 8px}
@@ -141,7 +142,7 @@ function renderHome(){
       const b=document.createElement("button");
       b.className="card"+(made?"":" off")+(st.cur&&keyOf(st.cur)===k?" on":"");
       const badge=made?(st.done[k]?'<span class="st done">已审</span>':'<span class="st todo">未审</span>'):'<span class="st make">制作中</span>';
-      b.innerHTML='<div class="hd"><span class="no">'+(l.label||('第 '+l.no+' 课'))+'</span>'+badge+'</div><div class="tt"></div><div class="meta"></div>';
+      b.innerHTML=(made&&l.thumb?'<img class="th" alt="" src="'+l.thumb+'">':'')+'<div class="hd"><span class="no">'+(l.label||('第 '+l.no+' 课'))+'</span>'+badge+'</div><div class="tt"></div><div class="meta"></div>';
       b.querySelector(".tt").textContent=l.title;
       const ns=(st.notes[k]||[]).length;
       b.querySelector(".meta").textContent=l.style+(ns?" · 意见 "+ns+" 条":"");
