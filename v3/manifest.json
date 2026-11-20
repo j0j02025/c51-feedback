@@ -34,7 +34,7 @@
    "subject": "俄语数字素养",
    "title": "演示文稿所需的信息",
    "file": "lessons/ru-dl-16.html",
-   "sha": "cffb79a9d9e14d81ac891b67e9a108363608bc3411255ba39b047b854ddb503f"
+   "sha": "3e7718012580e0a8b9dabef2f11a740e31c2ae3a5aebcbc7664b889f900ad42a"
   },
   {
    "id": "ru-math-81",
@@ -42,7 +42,7 @@
    "subject": "俄语数学",
    "title": "数量关系与圆形图",
    "file": "lessons/ru-math-81.html",
-   "sha": "1ad87654f7652e8552320be6f601169825b88b8337f29a27ed7f499cd7b6b2fb"
+   "sha": "815e5525a679010b460bb7b78b05448b4b1a7410d0b5aca44fd9e81ae6fb68cf"
   },
   {
    "id": "ru-math-84",
@@ -50,7 +50,7 @@
    "subject": "俄语数学",
    "title": "图像",
    "file": "lessons/ru-math-84.html",
-   "sha": "15decec87c39f4f39d64b2c3c061904c838032e9c16fa3756845e79a28a344c0"
+   "sha": "1d5a697800382562e9bfbd58363abe8c00a9f33e299299fbb46cb00b5817fa87"
   },
   {
    "id": "kk-lang-65",
@@ -58,7 +58,7 @@
    "subject": "哈语",
    "title": "词法世界之旅",
    "file": "lessons/kk-lang-65.html",
-   "sha": "df992e14f7e6d326486d58e9a8297ba88ace109795bfb18d798845614937da6d"
+   "sha": "c649d6b368a39aa6c8bf771f093c6c6f5ed0630178f825d0dde2b7c747645bc7"
   },
   {
    "id": "kk-lang-66",
@@ -90,7 +90,7 @@
    "subject": "哈语数字素养",
    "title": "演示文稿所需的信息",
    "file": "lessons/kk-dl-17.html",
-   "sha": "f347f4fe02caec4bc93b6186a85343f75d1afdb817fd9c30ce3cc511ca47196a"
+   "sha": "aa0e41f755dd12484ee29969aaa1d520a8809b606a40cc798bda15bae2d89b0c"
   },
   {
    "id": "kk-math-81",
@@ -98,7 +98,7 @@
    "subject": "哈语数学",
    "title": "数量关系与圆形图",
    "file": "lessons/kk-math-81.html",
-   "sha": "ae6aee2b8bfaac5598d867d3de0c130160c68565c6cfd9cb22b22ec6b9755c5a"
+   "sha": "a8a31226c50d2980954901cfa037c6b1c45e801e192cbe0a5c152b85b0c74845"
   },
   {
    "id": "kk-math-82",
@@ -114,7 +114,7 @@
    "subject": "哈语数学",
    "title": "单位面积产量（巩固）",
    "file": "lessons/kk-math-83.html",
-   "sha": "453370d359f168792906ca5f35d5946755078b197db43b9dc25b04c8585f4090"
+   "sha": "df7681b8ab5505cbbdd6d0f2b2ca049d78c7905b19fa048294e6f5e7d9a13411"
   },
   {
    "id": "kk-math-84",
@@ -122,7 +122,7 @@
    "subject": "哈语数学",
    "title": "图像",
    "file": "lessons/kk-math-84.html",
-   "sha": "ce7a3fe27f21b4fee0f61a004feda6dc42ee8c842bf4f28e7df0eaee828f31ea"
+   "sha": "9b3092e0195fa07f779b17968465b5f7c0d2dbca29592344d16a03f8661fb726"
   },
   {
    "id": "kk-math-85",
