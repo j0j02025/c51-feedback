@@ -58,6 +58,11 @@ button{border:0;border-radius:12px;cursor:pointer;background:#eef1f5;color:var(-
 #bBack{background:#2a3240}
 #bTop{background:#ffd56a;color:#1a1300;font-weight:800;font-size:15px;min-height:36px;padding:4px 14px;border-radius:8px;margin-right:12px;flex:0 0 auto}
 #dock button.on{outline:3px solid #fff}
+.lng{display:flex;gap:4px;flex:0 0 auto}
+.lng button{min-height:36px;min-width:44px;padding:4px 8px;font-weight:800;font-size:14px;border-radius:8px}
+.lng button.on{background:var(--acc);color:#fff}
+#bar .lng button{background:#2a3240;color:#fff}
+#bar .lng button.on{background:var(--acc)}
 .ov{position:fixed;inset:0;background:rgba(8,10,14,.72);z-index:40;display:none;align-items:center;justify-content:center;padding:12px}
 .ov.on{display:flex}
 .box{background:#fff;border-radius:16px;width:min(460px,96vw);padding:16px;display:flex;flex-direction:column;gap:10px}
@@ -72,36 +77,36 @@ button{border:0;border-radius:12px;cursor:pointer;background:#eef1f5;color:var(-
 </style>
 </head>
 <body>
-<div class="top"><b>看课评审</b><span class="sp"></span><button id="whoBtn" type="button">填名字</button></div>
+<div class="top"><b data-i="title">看课评审</b><span class="sp"></span><div class="lng"></div><button id="whoBtn" type="button">填名字</button></div>
 <div id="home"></div>
 
 <div id="player">
-  <div id="bar"><button id="bTop" type="button">← 返回课程列表</button><span class="ttl" id="pTtl"></span><span class="sec" id="pSec">00:00</span></div>
+  <div id="bar"><button id="bTop" type="button" data-i="top">← 返回课程列表</button><span class="ttl" id="pTtl"></span><div class="lng"></div><span class="sec" id="pSec">00:00</span></div>
   <div id="pbody">
-    <div id="stage"><iframe id="lesson" title="lesson"></iframe><div id="ph">制作中</div></div>
-    <div id="side"><div class="sh">本课评论<small>点时间跳到那一秒;✕ 删除</small></div><div id="clist"></div></div>
+    <div id="stage"><iframe id="lesson" title="lesson"></iframe><div id="ph" data-i="making">制作中</div></div>
+    <div id="side"><div class="sh"><span data-i="cmts">本课评论</span><small data-i="cmtsHint">点时间跳到那一秒;✕ 删除</small></div><div id="clist"></div></div>
   </div>
   <div id="dock">
-    <button id="bNote" type="button">评论</button>
-    <button id="bPass" type="button">通过</button>
-    <button id="bFail" type="button">不通过</button>
-    <button id="bSend" type="button">提交本课反馈</button>
-    <button id="bBack" type="button">← 返回列表</button>
+    <button id="bNote" type="button" data-i="note">评论</button>
+    <button id="bPass" type="button" data-i="pass">通过</button>
+    <button id="bFail" type="button" data-i="fail">不通过</button>
+    <button id="bSend" type="button" data-i="send">提交本课反馈</button>
+    <button id="bBack" type="button" data-i="back">← 返回列表</button>
   </div>
 </div>
 
 <div class="ov" id="cmtOv"><div class="box">
   <b id="cmtAt">评论</b>
-  <p>课件已暂停。写一句就行,可以写多条。</p>
-  <textarea id="txt" placeholder="哪里不对?"></textarea>
-  <div class="row"><button id="cCancel" type="button">取消</button><button id="cSave" type="button">保存</button></div>
+  <p data-i="cmtSub">课件已暂停。写一句就行,可以写多条。</p>
+  <textarea id="txt" placeholder="哪里不对?" data-ph="cmtPh"></textarea>
+  <div class="row"><button id="cCancel" type="button" data-i="cancel">取消</button><button id="cSave" type="button" data-i="save">保存</button></div>
 </div></div>
 
 <div class="ov" id="nameOv"><div class="box">
-  <b>先填你的名字</b>
-  <p>只在第一次提交前问一次,存在这台设备上,之后不再问。</p>
-  <input id="nameIn" autocomplete="name" placeholder="你的名字">
-  <button id="nameOk" type="button">确定</button>
+  <b data-i="nmTtl">先填你的名字</b>
+  <p data-i="nmSub">只在第一次提交前问一次,存在这台设备上,之后不再问。</p>
+  <input id="nameIn" autocomplete="name" placeholder="你的名字" data-ph="nmPh">
+  <button id="nameOk" type="button" data-i="ok">确定</button>
 </div></div>
 
 <div id="toast"></div>
@@ -119,17 +124,73 @@ const made=l=>l.status!=="制作中"&&!!l.file;
 const shaOf=l=>SHA[lid(l)]||"";
 const color=l=>{const v=st.v[lid(l)];const sha=shaOf(l);if(v&&sha&&v.sha===sha)return v.v;/* J 261120 980:只写评论不点按钮 = 不通过 */return sha&&(st.c[lid(l)]||[]).some(x=>x.sha===sha)?"r":"y"};
 const comments=l=>(st.c[lid(l)]||[]).filter(x=>x.sha&&x.sha===shaOf(l)).sort((a,b)=>a.s-b.s);
+/* J 261120 982:整页界面四语(中 / 英 / 俄 / 哈)切换;课件自己的语言按钮不归这里管 */
+const LANGS=[["zh","中"],["en","EN"],["ru","РУ"],["kk","ҚАЗ"]];
+const UI={
+ zh:{title:"看课评审",who:"填名字",top:"← 返回课程列表",making:"制作中",cmts:"本课评论",cmtsHint:"点时间跳到那一秒;✕ 删除",note:"评论",pass:"通过",fail:"不通过",send:"提交本课反馈",back:"← 返回列表",cmtSub:"课件已暂停。写一句就行,可以写多条。",cmtPh:"哪里不对?",cancel:"取消",save:"保存",nmTtl:"先填你的名字",nmSub:"只在第一次提交前问一次,存在这台设备上,之后不再问。",nmPh:"你的名字",ok:"确定",stG:"通过",stR:"不通过",stY:"没判",stM:"制作中",empty:"还没有评论",del:"删除",lesson:n=>"第 "+n+" 课",nc:n=>"意见 "+n+" 条",docT:(g,r,a)=>"看课评审 · 通过 "+g+" · 不通过 "+r+" / "+a,noSha:"这节课的校验还没载入,稍后再试",needV:"先点通过或不通过,或写一条评论",sending:"正在提交…",sent:"已提交,谢谢",offline:"网络不通,已存在本机,恢复后自动补交"},
+ en:{title:"Lesson review",who:"Enter name",top:"← Back to lesson list",making:"In production",cmts:"Comments on this lesson",cmtsHint:"Tap a time to jump there; ✕ deletes",note:"Comment",pass:"Pass",fail:"Fail",send:"Submit feedback",back:"← Back to list",cmtSub:"The lesson is paused. One sentence is enough; you can add several.",cmtPh:"What is wrong?",cancel:"Cancel",save:"Save",nmTtl:"Enter your name first",nmSub:"Asked only once before your first submission and saved on this device.",nmPh:"Your name",ok:"OK",stG:"Passed",stR:"Failed",stY:"Not rated",stM:"In production",empty:"No comments yet",del:"Delete",lesson:n=>"Lesson "+n,nc:n=>n+(n===1?" comment":" comments"),docT:(g,r,a)=>"Lesson review · passed "+g+" · failed "+r+" / "+a,noSha:"This lesson's checksum has not loaded yet. Try again shortly.",needV:"Tap Pass or Fail, or write a comment first",sending:"Submitting…",sent:"Submitted. Thank you!",offline:"Offline. Saved on this device and will be sent automatically."},
+ ru:{title:"Отзыв об уроках",who:"Введите имя",top:"← К списку уроков",making:"В работе",cmts:"Комментарии к уроку",cmtsHint:"Нажмите на время, чтобы перейти; ✕ удалить",note:"Комментарий",pass:"Принято",fail:"Не принято",send:"Отправить отзыв",back:"← К списку",cmtSub:"Урок на паузе. Достаточно одной фразы, можно написать несколько.",cmtPh:"Что не так?",cancel:"Отмена",save:"Сохранить",nmTtl:"Сначала введите своё имя",nmSub:"Спросим один раз перед первой отправкой, имя сохранится на этом устройстве.",nmPh:"Ваше имя",ok:"Готово",stG:"Принято",stR:"Не принято",stY:"Не оценено",stM:"В работе",empty:"Пока нет комментариев",del:"Удалить",lesson:n=>"Урок "+n,nc:n=>"замечаний: "+n,docT:(g,r,a)=>"Отзыв об уроках · принято "+g+" · не принято "+r+" / "+a,noSha:"Проверка урока ещё не загрузилась, попробуйте чуть позже",needV:"Сначала нажмите «Принято» или «Не принято» либо напишите комментарий",sending:"Отправляем…",sent:"Отправлено, спасибо!",offline:"Нет сети. Сохранено на устройстве, отправится автоматически."},
+ kk:{title:"Сабақтарды бағалау",who:"Атыңызды жазыңыз",top:"← Сабақтар тізіміне",making:"Дайындалуда",cmts:"Сабаққа пікірлер",cmtsHint:"Уақытты бассаңыз, сол секундқа өтеді; ✕ өшіру",note:"Пікір",pass:"Өтті",fail:"Өтпеді",send:"Пікірді жіберу",back:"← Тізімге",cmtSub:"Сабақ кідіртілді. Бір сөйлем жеткілікті, бірнешеуін жазуға болады.",cmtPh:"Не дұрыс емес?",cancel:"Болдырмау",save:"Сақтау",nmTtl:"Алдымен атыңызды жазыңыз",nmSub:"Алғашқы жіберу алдында бір рет қана сұралады, осы құрылғыда сақталады.",nmPh:"Атыңыз",ok:"Дайын",stG:"Өтті",stR:"Өтпеді",stY:"Бағаланбаған",stM:"Дайындалуда",empty:"Әзірге пікір жоқ",del:"Өшіру",lesson:n=>n+"-сабақ",nc:n=>"пікір: "+n,docT:(g,r,a)=>"Сабақтарды бағалау · өтті "+g+" · өтпеді "+r+" / "+a,noSha:"Сабақ тексерісі әлі жүктелмеді, сәлден кейін қайталаңыз",needV:"Алдымен «Өтті» не «Өтпеді» басыңыз немесе пікір жазыңыз",sending:"Жіберілуде…",sent:"Жіберілді, рахмет!",offline:"Желі жоқ. Құрылғыда сақталды, желі қосылғанда өзі жіберіледі."}
+};
+/* 分组名 / 风格 / 课名:按中文原值查表,查不到显示中文原值(新加的课先显示中文,在这里补一行即可) */
+const TR={
+ "俄语":{en:"Russian",ru:"Русский язык",kk:"Орыс тілі"},
+ "哈语":{en:"Kazakh",ru:"Казахский язык",kk:"Қазақ тілі"},
+ "俄语数学":{en:"Math (Russian)",ru:"Математика (рус.)",kk:"Математика (орыс тілінде)"},
+ "哈语数学":{en:"Math (Kazakh)",ru:"Математика (каз.)",kk:"Математика (қазақ тілінде)"},
+ "俄语数字素养":{en:"Digital literacy (Russian)",ru:"Цифровая грамотность (рус.)",kk:"Цифрлық сауаттылық (орыс тілінде)"},
+ "哈语数字素养":{en:"Digital literacy (Kazakh)",ru:"Цифровая грамотность (каз.)",kk:"Цифрлық сауаттылық (қазақ тілінде)"},
+ "小兔子":{en:"Bunny",ru:"Зайчик",kk:"Қоян"},
+ "暖纸":{en:"Warm paper",ru:"Тёплая бумага",kk:"Жылы қағаз"},
+ "毡纸艺·别克小剧场":{en:"Felt paper · Bek theater",ru:"Фетр · театр Бека",kk:"Фетр · Бектің театры"},
+ "羊毛毡":{en:"Wool felt",ru:"Валяная шерсть",kk:"Киіз"},
+ "骑自行车":{en:"Bicycle",ru:"Велосипед",kk:"Велосипед"},
+ "三语新版 11-20":{en:"Trilingual · 11-20",ru:"Трёхъязычная версия · 11-20",kk:"Үш тілді нұсқа · 11-20"},
+ "草原驿路新版 11-20":{en:"Steppe Road · 11-20",ru:"Степной путь · 11-20",kk:"Дала жолы · 11-20"},
+ "数词：基数词与序数词｜自然现象有哪些":{en:"Numerals: cardinal and ordinal | What natural phenomena are there",ru:"Числительные: количественные и порядковые | Какие бывают явления природы",kk:"Сан есім: есептік және реттік сан есімдер | Қандай табиғат құбылыстары бар"},
+ "基数词与序数词的拼写（第一课）｜瀑布":{en:"Spelling cardinal and ordinal numerals (Lesson 1) | Waterfall",ru:"Правописание количественных и порядковых числительных (урок 1) | Водопад",kk:"Есептік және реттік сан есімдердің жазылуы (1-сабақ) | Сарқырама"},
+ "基数词与序数词的拼写（第二课）｜瀑布":{en:"Spelling cardinal and ordinal numerals (Lesson 2) | Waterfall",ru:"Правописание количественных и порядковых числительных (урок 2) | Водопад",kk:"Есептік және реттік сан есімдердің жазылуы (2-сабақ) | Сарқырама"},
+ "数词词组、句子与形态分析（第一课，含抄写）｜风的力量":{en:"Numeral phrases, sentences and morphological analysis (Lesson 1, with copying) | The power of wind",ru:"Словосочетания с числительными, предложения и морфологический разбор (урок 1, со списыванием) | Сила ветра",kk:"Сан есімді сөз тіркестері, сөйлемдер және морфологиялық талдау (1-сабақ, көшіріп жазу) | Желдің күші"},
+ "演示文稿所需的信息":{en:"Information needed for a presentation",ru:"Информация для презентации",kk:"Презентацияға қажетті ақпарат"},
+ "数量关系与圆形图":{en:"Relationships between quantities and pie charts",ru:"Зависимости между величинами и круговые диаграммы",kk:"Шамалар арасындағы тәуелділік және дөңгелек диаграмма"},
+ "单位面积产量（新知）":{en:"Yield per unit area (new material)",ru:"Урожайность с единицы площади (новый материал)",kk:"Бірлік аудандағы өнімділік (жаңа тақырып)"},
+ "单位面积产量（巩固）":{en:"Yield per unit area (practice)",ru:"Урожайность с единицы площади (закрепление)",kk:"Бірлік аудандағы өнімділік (бекіту)"},
+ "图像":{en:"Graphs",ru:"Графики",kk:"Графиктер"},
+ "解决问题":{en:"Problem solving",ru:"Решение задач",kk:"Есептер шығару"},
+ "词法世界之旅":{en:"A journey into the world of morphology",ru:"Путешествие в мир морфологии",kk:"Морфология әлеміне саяхат"},
+ "词类":{en:"Parts of speech",ru:"Части речи",kk:"Сөз таптары"},
+ "名词（第一课）":{en:"Nouns (Lesson 1)",ru:"Имя существительное (урок 1)",kk:"Зат есім (1-сабақ)"},
+ "名词（第二课）":{en:"Nouns (Lesson 2)",ru:"Имя существительное (урок 2)",kk:"Зат есім (2-сабақ)"}
+};
+const pickLang=()=>{try{const q=new URLSearchParams(location.search).get("lang");if(q&&UI[q])return q}catch(e){}
+  try{const s=localStorage.getItem("c51tl:lang");if(s&&UI[s])return s}catch(e){}
+  const n=(navigator.language||"").toLowerCase().slice(0,2);return UI[n]?n:"zh"};
+let LANG=pickLang();
+const T=k=>UI[LANG][k]!==undefined?UI[LANG][k]:UI.zh[k];
+const tr=z=>{if(!z||LANG==="zh")return z||"";const m=TR[z];return m&&m[LANG]?m[LANG]:z};
+const trStyle=z=>String(z||"").split(" · ").map(tr).join(" · ");
+const lbl=l=>l.label||T("lesson")(l.no);
+function applyLang(){
+  document.documentElement.lang=LANG;
+  document.querySelectorAll("[data-i]").forEach(n=>n.textContent=T(n.dataset.i));
+  document.querySelectorAll("[data-ph]").forEach(n=>n.placeholder=T(n.dataset.ph));
+  document.querySelectorAll(".lng").forEach(box=>{box.innerHTML="";LANGS.forEach(([k,t])=>{const b=document.createElement("button");b.type="button";b.textContent=t;b.className=k===LANG?"on":"";b.onclick=()=>setLang(k);box.appendChild(b)})});
+  if(!DATA)document.title=T("title");
+}
+function setLang(k){if(!UI[k])return;LANG=k;try{localStorage.setItem("c51tl:lang",k)}catch(e){}applyLang();
+  if(DATA){renderHome();const l=curLesson();if($("player").classList.contains("on")&&l){setTtl(l);renderList()}}}
+function setTtl(l){$("pTtl").textContent=tr(l.subject)+" · "+lbl(l)+" · "+tr(l.title)}
 
 function toast(t){const n=$("toast");n.textContent=t;n.classList.add("on");clearTimeout(toast._t);toast._t=setTimeout(()=>n.classList.remove("on"),2400)}
 function renderHome(){
-  $("whoBtn").textContent=st.name?("👤 "+st.name):"填名字";
+  $("whoBtn").textContent=st.name?("👤 "+st.name):T("who");
   const groups=[];
   DATA.lessons.forEach(l=>{let g=groups.find(x=>x.s===l.subject);if(!g)groups.push(g={s:l.subject,ls:[]});g.ls.push(l)});
   const h=$("home");h.innerHTML="";
   const ready=DATA.lessons.filter(made);
   let ng=0,nr=0;
   groups.forEach(g=>{
-    const t=document.createElement("div");t.className="grp";t.textContent=g.s;h.appendChild(t);
+    const t=document.createElement("div");t.className="grp";t.textContent=tr(g.s);h.appendChild(t);
     const c=document.createElement("div");c.className="cards";
     g.ls.forEach(l=>{
       const ok=made(l), col=ok?color(l):"";
@@ -138,18 +199,18 @@ function renderHome(){
       b.type="button";
       b.className="card"+(ok?" "+col:" off");
       b.dataset.file=l.file||"";
-      const badge=ok?(col==="g"?'<span class="st g">通过</span>':col==="r"?'<span class="st r">不通过</span>':'<span class="st y">没判</span>'):'<span class="st make">制作中</span>';
-      b.innerHTML=(ok&&l.thumb?'<img class="th" alt="" src="'+l.thumb+'">':'')+'<div class="hd"><span class="no">'+(l.label||("第 "+l.no+" 课"))+'</span>'+badge+'</div><div class="tt"></div><div class="meta"></div>';
-      b.querySelector(".tt").textContent=l.title||"";
+      const badge=ok?(col==="g"?'<span class="st g">'+esc(T("stG"))+'</span>':col==="r"?'<span class="st r">'+esc(T("stR"))+'</span>':'<span class="st y">'+esc(T("stY"))+'</span>'):'<span class="st make">'+esc(T("stM"))+'</span>';
+      b.innerHTML=(ok&&l.thumb?'<img class="th" alt="" src="'+l.thumb+'">':'')+'<div class="hd"><span class="no">'+esc(lbl(l))+'</span>'+badge+'</div><div class="tt"></div><div class="meta"></div>';
+      b.querySelector(".tt").textContent=tr(l.title);
       const ns=ok?comments(l).length:0;
-      b.querySelector(".meta").textContent=(l.style||"")+(ns?" · 意见 "+ns+" 条":"");
+      b.querySelector(".meta").textContent=trStyle(l.style)+(ns?" · "+T("nc")(ns):"");
       b.disabled=!ok;
       b.onclick=()=>openLesson(l);
       c.appendChild(b);
     });
     h.appendChild(c);
   });
-  document.title="看课评审 · 通过 "+ng+" · 不通过 "+nr+" / "+ready.length;
+  document.title=T("docT")(ng,nr,ready.length);
 }
 
 let tick=null, pendingS=0, resumeAfter=false, afterName=null;
@@ -171,7 +232,7 @@ function openLesson(l){
   $("player").classList.add("on");
   $("home").style.display="none";
   document.querySelector(".top").style.display="none";
-  $("pTtl").textContent=l.subject+" · "+(l.label||("第 "+l.no+" 课"))+" · "+(l.title||"");
+  setTtl(l);
   $("lesson").src=l.file;
   markVerdict();renderList();
   clearInterval(tick);tick=setInterval(()=>$("pSec").textContent=fmt(curT()),500);
@@ -189,12 +250,13 @@ function markVerdict(){const l=curLesson();const v=l&&st.v[lid(l)];const on=v&&v
 function renderList(){
   const l=curLesson();const box=$("clist");if(!l){box.innerHTML="";return}
   const cs=comments(l);
-  box.innerHTML=cs.length?"":'<div class="empty">还没有评论</div>';
+  box.innerHTML=cs.length?"":'<div class="empty">'+esc(T("empty"))+'</div>';
   cs.forEach(it=>{
     const d=document.createElement("div");d.className="it";
-    d.innerHTML='<button class="tm" type="button"></button><span class="tx"></span><button class="x" type="button" aria-label="删除">✕</button>';
+    d.innerHTML='<button class="tm" type="button"></button><span class="tx"></span><button class="x" type="button">✕</button>';
     d.querySelector(".tm").textContent=fmt(it.s);
     d.querySelector(".tx").textContent=it.c;
+    d.querySelector(".x").setAttribute("aria-label",T("del"));
     d.querySelector(".tm").onclick=()=>{seek(it.s);pause()};
     d.querySelector(".x").onclick=()=>{st.c[lid(l)]=(st.c[lid(l)]||[]).filter(x=>x!==it);save();renderList();renderHome()};
     box.appendChild(d);
@@ -203,7 +265,7 @@ function renderList(){
 function openComment(){
   const l=curLesson();if(!l)return;
   resumeAfter=pause();pendingS=curT();
-  $("cmtAt").textContent="⏸ "+fmt(pendingS)+" · "+(l.label||("第 "+l.no+" 课"));
+  $("cmtAt").textContent="⏸ "+fmt(pendingS)+" · "+lbl(l);
   $("txt").value="";
   $("cmtOv").classList.add("on");
   setTimeout(()=>$("txt").focus(),50);
@@ -213,15 +275,15 @@ function saveComment(){
   const text=$("txt").value.trim();if(!text){$("txt").focus();return}
   const l=curLesson();if(!l)return;
   const id=lid(l), sha=shaOf(l);
-  if(!sha){toast("这节课的校验还没载入,稍后再评");return}
-  (st.c[id]=st.c[id]||[]).push({s:Math.round(pendingS*10)/10,c:text,sha,lang:"zh"});
+  if(!sha){toast(T("noSha"));return}
+  (st.c[id]=st.c[id]||[]).push({s:Math.round(pendingS*10)/10,c:text,sha,lang:LANG});
   save();renderList();renderHome();
   $("cmtOv").classList.remove("on");resumeAfter=false;
 }
 function setVerdict(kind){
   const l=curLesson();if(!l)return;
   const id=lid(l), sha=shaOf(l);
-  if(!sha){toast("这节课的校验还没载入,稍后再评");return}
+  if(!sha){toast(T("noSha"));return}
   if(kind==="r"){st.v[id]={v:"r",sha};save();markVerdict();renderHome();openComment();return}
   const v=st.v[id];
   if(v&&v.sha===sha&&v.v==="g")delete st.v[id];else st.v[id]={v:"g",sha};
@@ -237,8 +299,8 @@ function submitLesson(){
   const l=curLesson();if(!l)return;
   if(!st.name){askName(submitLesson);return}
   const id=lid(l), sha=shaOf(l), col=color(l), cs=comments(l);
-  if(!sha){toast("这节课的校验还没载入,稍后再交");return}
-  if(col==="y"&&!cs.length){toast("先点通过或不通过,或写一条评论");return}
+  if(!sha){toast(T("noSha"));return}
+  if(col==="y"&&!cs.length){toast(T("needV"));return}
   const txt=cs.map(x=>"["+fmt(x.s)+"] "+x.c).join("\n");
   const r={},c={};
   if(col!=="y")r[id]=[col,sha.slice(0,8),txt];
@@ -246,10 +308,10 @@ function submitLesson(){
   const mark={g:"🟩",r:"🟥",y:"🟨"}[col];
   const rec={v:1,page:PAGE_ID,reviewer:st.name,lesson:id,sha:sha.slice(0,8),verdict:col,comments:cs.map(x=>({s:x.s,c:x.c,lang:x.lang||"zh"})),note:id+" "+mark+(txt?"\n"+txt:""),ts:new Date().toISOString(),ua:navigator.userAgent.slice(0,120)};
   queuePush(rec);
-  $("bSend").disabled=true;toast("正在提交…");
+  $("bSend").disabled=true;toast(T("sending"));
   flushQueue().then(ok=>{$("bSend").disabled=false;
-    if(ok){toast("已提交,谢谢");setTimeout(closeLesson,900)}
-    else toast("网络不通,已存在本机,恢复后自动补交");});
+    if(ok){toast(T("sent"));setTimeout(closeLesson,900)}
+    else toast(T("offline"));});
 }
 const COLLECT="https://review.ooii.top/submit", QKEY="c51tl:queue";
 function queueGet(){try{return JSON.parse(localStorage.getItem(QKEY)||"[]")}catch(e){return[]}}
@@ -278,6 +340,7 @@ $("txt").addEventListener("keydown",e=>{if(e.key==="Enter"&&(e.metaKey||e.ctrlKe
 $("whoBtn").onclick=()=>askName(null);
 $("nameOk").onclick=confirmName;
 $("nameIn").addEventListener("keydown",e=>{if(e.key==="Enter")confirmName()});
+applyLang();
 
 Promise.all([
   fetch("lessons.json").then(r=>r.json()),
