@@ -17,230 +17,266 @@ button{border:0;border-radius:12px;cursor:pointer;background:#eef1f5;color:var(-
 .grp{padding:6px 16px 2px;font-size:13px;color:var(--mute);font-weight:700;letter-spacing:.04em}
 .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px;padding:8px 16px 24px}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 14px;text-align:left;display:flex;flex-direction:column;gap:4px;min-height:92px}
+.card.g{box-shadow:inset 5px 0 var(--g)}
+.card.r{box-shadow:inset 5px 0 var(--r)}
+.card.y{box-shadow:inset 5px 0 var(--y)}
 .card .th{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:9px;border:1px solid var(--line);display:block;margin-bottom:4px}
 .card .hd{display:flex;gap:8px;align-items:center}
 .card .no{font-weight:800}
 .card .st{margin-left:auto;font-size:12px;font-weight:700;border-radius:999px;padding:2px 8px}
-.st.done{background:#e5f6ea;color:var(--g)}
-.st.todo{background:#fff6db;color:var(--y)}
+.st.g{background:#e5f6ea;color:var(--g)}
+.st.r{background:#fde8e6;color:var(--r)}
+.st.y{background:#fff6db;color:var(--y)}
 .st.make{background:#eef1f5;color:var(--mute)}
 .card .tt{font-size:15px}
 .card .meta{font-size:12px;color:var(--mute)}
 .card.off{opacity:.55}
-.card.on{outline:2px solid var(--acc)}
 #player{display:none;position:fixed;inset:0;background:#0e1116;z-index:20;flex-direction:column}
 #player.on{display:flex}
-#main{flex:1;display:flex;flex-direction:column;min-width:0;min-height:0}
-#bar{display:flex;gap:8px;align-items:center;padding:6px 8px;background:#171c24;color:#fff;flex:0 0 auto}
-#bar .back{min-height:40px;min-width:64px;background:#2a3240;color:#fff;font-weight:700}
+#bar{display:flex;gap:8px;align-items:center;padding:6px 10px;background:#171c24;color:#fff;flex:0 0 auto}
 #bar .ttl{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14px}
 #bar .sec{font-variant-numeric:tabular-nums;min-width:52px;text-align:right}
 #stage{flex:1;position:relative;min-height:0}
 #stage iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:#000}
-#ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#9aa3ad;font-size:20px;text-align:center;padding:20px}
-#dock{display:flex;gap:8px;padding:6px 8px;background:#171c24;flex:0 0 auto}
-#dock button{flex:1;min-height:48px;font-weight:800;font-size:16px;color:#fff}
-@media(max-height:460px){#bar{padding:2px 6px}#bar .back,#dock button{min-height:40px;font-size:14px}#dock{padding:4px 6px}}
+#ph{position:absolute;inset:0;display:none;align-items:center;justify-content:center;color:#9aa3ad;font-size:20px}
+#clist{flex:0 0 auto;max-height:28%;overflow:auto;background:#12171f;color:#fff;padding:4px 10px;font-size:14px}
+#clist .it{display:flex;gap:8px;align-items:flex-start;padding:6px 0;border-bottom:1px solid #2a3240}
+#clist .tm{color:#ffd56a;font-weight:800;background:transparent;min-width:52px;min-height:36px}
+#clist .tx{flex:1;padding-top:6px}
+#clist .x{background:transparent;color:#fff;min-width:36px;min-height:36px}
+#clist .empty{color:#9aa3ad;padding:6px 0}
+#dock{display:flex;flex-wrap:wrap;gap:6px;padding:6px 8px;background:#171c24;flex:0 0 auto}
+#dock button{flex:1 1 90px;min-height:48px;font-weight:800;font-size:15px;color:#fff}
 #bNote{background:#d4a017;color:#1a1300}
 #bPass{background:var(--g)}
 #bFail{background:var(--r)}
+#bSend{background:var(--acc)}
+#bBack{background:#2a3240}
 #dock button.on{outline:3px solid #fff}
-.desk{display:none}
-body.wide #player{flex-direction:row}
-body.wide .desk{display:flex;flex-direction:column;width:380px;background:#171c24;color:#fff;border-left:1px solid #2a3240}
-.desk h3{margin:12px 14px 4px;font-size:14px;color:#9aa3ad}
-#deskList{flex:1;overflow:auto;padding:6px 12px;font-size:14px}
-#deskList .it{padding:6px 0;border-bottom:1px solid #2a3240}
-#deskList .tm{color:#ffd56a;font-weight:700;margin-right:6px}
-.ov{position:fixed;inset:0;background:rgba(8,10,14,.72);z-index:40;display:none;align-items:center;justify-content:center}
+.ov{position:fixed;inset:0;background:rgba(8,10,14,.72);z-index:40;display:none;align-items:center;justify-content:center;padding:12px}
 .ov.on{display:flex}
-.box{background:#fff;border-radius:16px;width:min(760px,96vw);height:min(860px,94dvh);display:flex;flex-direction:column;overflow:hidden}
-@media(max-height:460px){.box{height:96dvh}}
-.box .hd{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid var(--line)}
-.box .hd b{flex:1}
-.box .hd button{min-height:44px;min-width:64px;font-weight:700}
-.box iframe{flex:1;width:100%;border:0}
-#nameBox{width:min(460px,94vw);height:auto;padding:18px;gap:10px}
-#nameBox p{margin:0;color:var(--mute)}
-#nameIn{border:1px solid #c9d0d8;border-radius:10px;padding:10px;min-height:48px;font-size:17px}
-#nameOk{min-height:52px;background:var(--acc);color:#fff;font-weight:800}
-#rot{position:fixed;inset:0;background:#0e1116;color:#fff;z-index:60;display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:24px}
-#rot.on{display:flex}
-#rot .ic{font-size:84px}
-#rot .msg{font-size:26px;font-weight:800}
-#rot .sub{color:#9aa3ad;font-size:16px}
-#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#12351f;color:#fff;border-radius:12px;padding:12px 18px;font-weight:700;display:none;z-index:70}
+.box{background:#fff;border-radius:16px;width:min(460px,96vw);padding:16px;display:flex;flex-direction:column;gap:10px}
+.box p{margin:0;color:var(--mute)}
+.box textarea,#nameIn{border:1px solid #c9d0d8;border-radius:10px;padding:10px;min-height:48px;font-size:17px;width:100%}
+.box textarea{min-height:96px;resize:vertical}
+.row{display:flex;gap:8px}
+.row button{flex:1;min-height:48px;font-weight:800}
+#cSave,#nameOk{background:var(--acc);color:#fff}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#12351f;color:#fff;border-radius:12px;padding:12px 18px;font-weight:700;display:none;z-index:70;max-width:92vw}
 #toast.on{display:block}
 </style>
 </head>
 <body>
-<div class="top"><b>看课评审</b><span class="sp"></span><button id="whoBtn">填名字</button></div>
+<div class="top"><b>看课评审</b><span class="sp"></span><button id="whoBtn" type="button">填名字</button></div>
 <div id="home"></div>
 
 <div id="player">
-  <div id="main">
-    <div id="bar"><button class="back" id="back">← 返回</button><span class="ttl" id="pTtl"></span><span class="sec" id="pSec">00:00</span></div>
-    <div id="stage"><iframe id="lesson" allow="autoplay; fullscreen" title="lesson"></iframe><div id="ph">制作中</div></div>
-    <div id="dock"><button id="bNote">⏸ 提意见</button><button id="bPass">✓ 整课通过</button><button id="bFail">✕ 整课要改</button></div>
+  <div id="bar"><span class="ttl" id="pTtl"></span><span class="sec" id="pSec">00:00</span></div>
+  <div id="stage"><iframe id="lesson" title="lesson"></iframe><div id="ph">制作中</div></div>
+  <div id="clist"></div>
+  <div id="dock">
+    <button id="bNote" type="button">评论</button>
+    <button id="bPass" type="button">通过</button>
+    <button id="bFail" type="button">不通过</button>
+    <button id="bSend" type="button">提交本课反馈</button>
+    <button id="bBack" type="button">返回</button>
   </div>
-  <aside class="desk"><h3 id="deskHd">本课意见</h3><div id="deskList"></div></aside>
 </div>
 
-<div class="ov" id="formOv"><div class="box">
-  <div class="hd"><b id="formHd">提交</b><button id="formClose">✕ 关闭</button></div>
-  <iframe id="formFrame" title="form"></iframe>
+<div class="ov" id="cmtOv"><div class="box">
+  <b id="cmtAt">评论</b>
+  <p>课件已暂停。写一句就行,可以写多条。</p>
+  <textarea id="txt" placeholder="哪里不对?"></textarea>
+  <div class="row"><button id="cCancel" type="button">取消</button><button id="cSave" type="button">保存</button></div>
 </div></div>
 
-<div class="ov" id="nameOv"><div class="box" id="nameBox">
+<div class="ov" id="nameOv"><div class="box">
   <b>先填你的名字</b>
-  <p>只填一次,存在这台设备上。每条意见都会带上这个名字。</p>
+  <p>只在第一次提交前问一次,存在这台设备上,之后不再问。</p>
   <input id="nameIn" autocomplete="name" placeholder="你的名字">
-  <button id="nameOk">✓ 开始</button>
+  <button id="nameOk" type="button">确定</button>
 </div></div>
 
-<div id="rot"><div class="ic">📱</div><div class="msg">请把手机横过来</div><div class="sub">横屏看课,按钮更大</div></div>
 <div id="toast"></div>
-
 <script>
-const KEY="c51v3";
-let DATA=null, st={name:"",done:{},notes:{},cur:null};
-try{const s=JSON.parse(localStorage.getItem(KEY)||"null");if(s)st=Object.assign(st,s)}catch(e){}
+const PAGE_ID="c51-feedback-v3";
+const KEY="c51tl:"+PAGE_ID;
+let DATA=null, SHA={}, st={name:"",v:{},c:{},cur:null};
+try{const s=JSON.parse(localStorage.getItem(KEY)||"null");if(s&&s.v&&s.c)st=Object.assign(st,s)}catch(e){}
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}};
-const $ =id=>document.getElementById(id);
-const keyOf=l=>l.subject+"#"+l.no;
-const fmt=s=>{s=Math.max(0,Math.floor(s||0));return String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0")};
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+const fmt=s=>{s=Math.max(0,Math.floor(+s||0));return String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0")};
+const lid=l=>{const f=l.file||"";const n=f.split("/").pop()||"";return n.replace(/\.html$/,"")};
+const made=l=>l.status!=="制作中"&&!!l.file;
+const shaOf=l=>SHA[lid(l)]||"";
+const color=l=>{const v=st.v[lid(l)];const sha=shaOf(l);return !v||!sha||v.sha!==sha?"y":v.v};
+const comments=l=>(st.c[lid(l)]||[]).filter(x=>x.sha&&x.sha===shaOf(l)).sort((a,b)=>a.s-b.s);
 
-function device(){
-  const ua=navigator.userAgent;
-  const touch=navigator.maxTouchPoints>0;
-  const w=Math.min(screen.width,innerWidth), h=Math.min(screen.height,innerHeight);
-  const short=Math.min(w,h), long=Math.max(w,h);
-  if(/iPad|Tablet/i.test(ua)||(touch&&short>500&&short<=1024))return "tablet";
-  if(/Mobi|iPhone|Android/i.test(ua)||(touch&&short<=500)||(short<=500&&long<=940))return "phone";
-  return "desktop";
-}
-function applyDevice(){
-  const d=device();
-  document.body.classList.toggle("wide",d!=="phone");
-  const must=d==="phone"&&matchMedia("(orientation:portrait)").matches&&$("player").classList.contains("on");
-  $("rot").classList.toggle("on",must);
-}
-addEventListener("resize",applyDevice);
-
+function toast(t){const n=$("toast");n.textContent=t;n.classList.add("on");clearTimeout(toast._t);toast._t=setTimeout(()=>n.classList.remove("on"),2400)}
 function renderHome(){
   $("whoBtn").textContent=st.name?("👤 "+st.name):"填名字";
   const groups=[];
   DATA.lessons.forEach(l=>{let g=groups.find(x=>x.s===l.subject);if(!g)groups.push(g={s:l.subject,ls:[]});g.ls.push(l)});
   const h=$("home");h.innerHTML="";
-  let done=0;
+  const ready=DATA.lessons.filter(made);
+  let ng=0,nr=0;
   groups.forEach(g=>{
     const t=document.createElement("div");t.className="grp";t.textContent=g.s;h.appendChild(t);
     const c=document.createElement("div");c.className="cards";
     g.ls.forEach(l=>{
-      const made=l.status!=="制作中"&&l.file;
-      const k=keyOf(l); if(st.done[k])done++;
+      const ok=made(l), col=ok?color(l):"";
+      if(col==="g")ng++; else if(col==="r")nr++;
       const b=document.createElement("button");
-      b.className="card"+(made?"":" off")+(st.cur&&keyOf(st.cur)===k?" on":"");
-      const badge=made?(st.done[k]?'<span class="st done">已审</span>':'<span class="st todo">未审</span>'):'<span class="st make">制作中</span>';
-      b.innerHTML=(made&&l.thumb?'<img class="th" alt="" src="'+l.thumb+'">':'')+'<div class="hd"><span class="no">'+(l.label||('第 '+l.no+' 课'))+'</span>'+badge+'</div><div class="tt"></div><div class="meta"></div>';
-      b.querySelector(".tt").textContent=l.title;
-      const ns=(st.notes[k]||[]).length;
-      b.querySelector(".meta").textContent=l.style+(ns?" · 意见 "+ns+" 条":"");
-      b.disabled=!made;
+      b.type="button";
+      b.className="card"+(ok?" "+col:" off");
+      b.dataset.file=l.file||"";
+      const badge=ok?(col==="g"?'<span class="st g">通过</span>':col==="r"?'<span class="st r">不通过</span>':'<span class="st y">没判</span>'):'<span class="st make">制作中</span>';
+      b.innerHTML=(ok&&l.thumb?'<img class="th" alt="" src="'+l.thumb+'">':'')+'<div class="hd"><span class="no">'+(l.label||("第 "+l.no+" 课"))+'</span>'+badge+'</div><div class="tt"></div><div class="meta"></div>';
+      b.querySelector(".tt").textContent=l.title||"";
+      const ns=ok?comments(l).length:0;
+      b.querySelector(".meta").textContent=(l.style||"")+(ns?" · 意见 "+ns+" 条":"");
+      b.disabled=!ok;
       b.onclick=()=>openLesson(l);
       c.appendChild(b);
     });
     h.appendChild(c);
   });
-  document.title="看课评审 · "+done+"/"+DATA.lessons.filter(l=>l.status!=="制作中"&&l.file).length+" 已审";
+  document.title="看课评审 · 通过 "+ng+" · 不通过 "+nr+" / "+ready.length;
 }
 
-let tick=null;
+let tick=null, pendingS=0, resumeAfter=false, afterName=null;
 function curT(){try{const w=$("lesson").contentWindow,s=w.__state&&w.__state();if(s&&isFinite(s.t))return s.t;
-  const a=w.document.querySelector("audio,video");if(a)return a.currentTime}catch(e){}return 0}
-function pauseLesson(){try{const d=$("lesson").contentDocument,b=d.querySelector('[data-cv-ctl="play"]');
-  if(b){const w=$("lesson").contentWindow,s=w.__state&&w.__state();if(!s||s.playing!==false)b.click()}
-  else d.querySelectorAll("audio,video").forEach(a=>{if(!a.paused)a.pause()})}catch(e){}}
+  const a=w.document.querySelector("audio,video");if(a&&isFinite(a.currentTime))return a.currentTime}catch(e){}return 0}
+function playing(){try{const w=$("lesson").contentWindow,s=w.__state&&w.__state();
+  if(s&&typeof s.playing==="boolean")return s.playing;
+  const a=w.document.querySelector("audio,video");return a?!a.paused:null}catch(e){return null}}
+function pause(){try{const d=$("lesson").contentDocument,b=d.querySelector('[data-cv-ctl="play"]'),on=playing();
+  if(b&&on===true)b.click();else if(!b)d.querySelectorAll("audio,video").forEach(a=>{if(!a.paused)a.pause()});
+  return on===true}catch(e){return false}}
+function resume(){try{const d=$("lesson").contentDocument,b=d.querySelector('[data-cv-ctl="play"]'),on=playing();
+  if(b&&on===false)b.click();else if(!b){const a=d.querySelector("audio,video");if(a&&a.paused)a.play().catch(()=>{})}}catch(e){}}
+function seek(s){try{const w=$("lesson").contentWindow;if(w.__setTime)w.__setTime(s)}catch(e){}}
 
+function curLesson(){return DATA.lessons.find(l=>lid(l)===st.cur)}
 function openLesson(l){
-  st.cur={subject:l.subject,no:l.no};save();
-  $("player").classList.add("on");$("home").style.display="none";
+  st.cur=lid(l);save();
+  $("player").classList.add("on");
+  $("home").style.display="none";
   document.querySelector(".top").style.display="none";
-  void $("player").offsetHeight;
-  $("pTtl").textContent=l.subject+" · "+(l.label||("第 "+l.no+" 课"))+" · "+l.title;
-  const made=l.status!=="制作中"&&l.file;
-  $("ph").style.display=made?"none":"flex";
-  $("lesson").style.display=made?"":"none";
-  if(made)$("lesson").src=l.file;
-  ["bNote","bPass","bFail"].forEach(id=>$(id).disabled=!made);
-  markVerdict();renderDesk();applyDevice();
+  $("pTtl").textContent=l.subject+" · "+(l.label||("第 "+l.no+" 课"))+" · "+(l.title||"");
+  $("lesson").src=l.file;
+  markVerdict();renderList();
   clearInterval(tick);tick=setInterval(()=>$("pSec").textContent=fmt(curT()),500);
 }
-function curLesson(){return DATA.lessons.find(l=>l.subject===st.cur.subject&&l.no===st.cur.no)}
 function closeLesson(){
-  clearInterval(tick);$("player").classList.remove("on");$("lesson").src="about:blank";
-  document.querySelector(".top").style.display="";$("home").style.display="";$("rot").classList.remove("on");renderHome();
+  clearInterval(tick);
+  $("player").classList.remove("on");
+  $("lesson").src="about:blank";
+  document.querySelector(".top").style.display="";
+  $("home").style.display="";
+  renderHome();
 }
-function markVerdict(){const v=st.done[keyOf(curLesson())];
-  $("bPass").classList.toggle("on",v==="通过");$("bFail").classList.toggle("on",v==="要改")}
-function renderDesk(){
-  const l=curLesson();const ns=st.notes[keyOf(l)]||[];
-  $("deskHd").textContent="本课意见 · "+ns.length+" 条"+(st.done[keyOf(l)]?(" · "+st.done[keyOf(l)]):"");
-  $("deskList").innerHTML=ns.map(n=>'<div class="it"><span class="tm">'+fmt(n.s)+'</span>'+esc(n.c)+'</div>').join("")||'<div class="it">还没有意见</div>';
+function markVerdict(){const l=curLesson();const v=l&&st.v[lid(l)];const on=v&&v.sha===shaOf(l)?v.v:"";
+  $("bPass").classList.toggle("on",on==="g");$("bFail").classList.toggle("on",on==="r")}
+function renderList(){
+  const l=curLesson();const box=$("clist");if(!l){box.innerHTML="";return}
+  const cs=comments(l);
+  box.innerHTML=cs.length?"":'<div class="empty">还没有评论</div>';
+  cs.forEach(it=>{
+    const d=document.createElement("div");d.className="it";
+    d.innerHTML='<button class="tm" type="button"></button><span class="tx"></span><button class="x" type="button" aria-label="删除">✕</button>';
+    d.querySelector(".tm").textContent=fmt(it.s);
+    d.querySelector(".tx").textContent=it.c;
+    d.querySelector(".tm").onclick=()=>{seek(it.s);pause()};
+    d.querySelector(".x").onclick=()=>{st.c[lid(l)]=(st.c[lid(l)]||[]).filter(x=>x!==it);save();renderList();renderHome()};
+    box.appendChild(d);
+  });
 }
-const esc=s=>s.replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
-
-function formUrl(extra){
-  const l=curLesson();
-  const p=new URLSearchParams();
-  p.set("prefill_课号",String(l.no));
-  p.set("prefill_老师",st.name);
-  p.set("prefill_科目",l.subject);
-  Object.entries(extra).forEach(([k,v])=>p.set(k,v));
-  return DATA.form+"?"+p.toString();
+function openComment(){
+  const l=curLesson();if(!l)return;
+  resumeAfter=pause();pendingS=curT();
+  $("cmtAt").textContent="⏸ "+fmt(pendingS)+" · "+(l.label||("第 "+l.no+" 课"));
+  $("txt").value="";
+  $("cmtOv").classList.add("on");
+  setTimeout(()=>$("txt").focus(),50);
 }
-let formOpenedAt=0;
-function openForm(extra,title){
-  if(!st.name){$("nameOv").classList.add("on");return}
-  pauseLesson();
-  $("formHd").textContent=title;
-  const url=formUrl(extra);
-  $("formFrame").src=url;
-  $("formOv").classList.add("on");
-  formOpenedAt=Date.now();
-  setTimeout(()=>{if(Date.now()-formOpenedAt<9000&&$("formOv").classList.contains("on")&&!$("formFrame").dataset.ok){
-    $("formOv").classList.remove("on");const w=window.open(url,"_blank");if(!w)location.href=url}},8000);
+function closeComment(){$("cmtOv").classList.remove("on");if(resumeAfter)resume();resumeAfter=false}
+function saveComment(){
+  const text=$("txt").value.trim();if(!text){$("txt").focus();return}
+  const l=curLesson();if(!l)return;
+  const id=lid(l), sha=shaOf(l);
+  if(!sha){toast("这节课的校验还没载入,稍后再评");return}
+  (st.c[id]=st.c[id]||[]).push({s:Math.round(pendingS*10)/10,c:text,sha,lang:"zh"});
+  save();renderList();renderHome();
+  $("cmtOv").classList.remove("on");resumeAfter=false;
 }
-$("formFrame").addEventListener("load",()=>{$("formFrame").dataset.ok="1"});
-function toast(t){$("toast").textContent=t;$("toast").classList.add("on");setTimeout(()=>$("toast").classList.remove("on"),2400)}
-
-$("back").onclick=closeLesson;
-$("bNote").onclick=()=>openForm({"prefill_秒":String(Math.round(curT())),"prefill_结论":"要改"},"提意见 · "+$("pSec").textContent);
-$("bPass").onclick=()=>openForm({"prefill_结论":"通过"},"整课通过");
-$("bFail").onclick=()=>openForm({"prefill_结论":"要改"},"整课要改");
-$("formClose").onclick=()=>{$("formOv").classList.remove("on");$("formFrame").src="about:blank"};
-
-function noteVerdict(kind){
-  const l=curLesson(),k=keyOf(l);
-  if(kind==="note"){(st.notes[k]=st.notes[k]||[]).push({s:Math.round(curT()),c:"(已提交)"})}
-  else st.done[k]=kind;
-  save();markVerdict();renderDesk();renderHome();toast(kind==="note"?"意见已提交":"已标记 "+kind);
+function setVerdict(kind){
+  const l=curLesson();if(!l)return;
+  const id=lid(l), sha=shaOf(l);
+  if(!sha){toast("这节课的校验还没载入,稍后再评");return}
+  if(kind==="r"){st.v[id]={v:"r",sha};save();markVerdict();renderHome();openComment();return}
+  const v=st.v[id];
+  if(v&&v.sha===sha&&v.v==="g")delete st.v[id];else st.v[id]={v:"g",sha};
+  save();markVerdict();renderHome();
 }
-window.addEventListener("message",e=>{
-  const d=e.data;if(!d)return;
-  const s=typeof d==="string"?d:JSON.stringify(d);
-  if(/success|submitted|提交成功/i.test(s))noteVerdict($("formHd").textContent.indexOf("通过")>=0?"通过":$("formHd").textContent.indexOf("整课要改")>=0?"要改":"note");
-});
+function askName(next){afterName=next||null;$("nameIn").value=st.name||"";$("nameOv").classList.add("on");setTimeout(()=>$("nameIn").focus(),50)}
+function confirmName(){
+  const n=$("nameIn").value.trim();if(!n){$("nameIn").focus();return}
+  st.name=n;save();$("nameOv").classList.remove("on");renderHome();
+  const fn=afterName;afterName=null;if(fn)fn();
+}
+function submitLesson(){
+  const l=curLesson();if(!l)return;
+  if(!st.name){askName(submitLesson);return}
+  const id=lid(l), sha=shaOf(l), col=color(l), cs=comments(l);
+  if(!sha){toast("这节课的校验还没载入,稍后再交");return}
+  if(col==="y"&&!cs.length){toast("先点通过或不通过,或写一条评论");return}
+  const txt=cs.map(x=>"["+fmt(x.s)+"] "+x.c).join("\n");
+  const r={},c={};
+  if(col!=="y")r[id]=[col,sha.slice(0,8),txt];
+  if(cs.length)c[id]=cs.map(x=>({s:x.s,c:x.c,lang:x.lang||"zh"}));
+  const mark={g:"🟩",r:"🟥",y:"🟨"}[col];
+  const rec={v:1,page:PAGE_ID,reviewer:st.name,lesson:id,sha:sha.slice(0,8),verdict:col,comments:cs.map(x=>({s:x.s,c:x.c,lang:x.lang||"zh"})),note:id+" "+mark+(txt?"
+"+txt:""),ts:new Date().toISOString(),ua:navigator.userAgent.slice(0,120)};
+  queuePush(rec);
+  $("bSend").disabled=true;toast("正在提交…");
+  flushQueue().then(ok=>{$("bSend").disabled=false;
+    if(ok){toast("已提交,谢谢");setTimeout(closeLesson,900)}
+    else toast("网络不通,已存在本机,恢复后自动补交");});
+}
+const COLLECT="https://review.ooii.top/submit", QKEY="c51tl:queue";
+function queueGet(){try{return JSON.parse(localStorage.getItem(QKEY)||"[]")}catch(e){return[]}}
+function queueSet(q){try{localStorage.setItem(QKEY,JSON.stringify(q))}catch(e){}}
+function queuePush(r){const q=queueGet();q.push(r);queueSet(q)}
+async function flushQueue(){let q=queueGet();
+  while(q.length){try{const res=await fetch(COLLECT,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify(q[0])});
+      const j=await res.json().catch(()=>({}));if(!res.ok||!j.ok)return false}catch(e){return false}
+    q.shift();queueSet(q)}
+  return true}
+setInterval(()=>{if(queueGet().length)flushQueue()},30000);
+window.addEventListener("online",()=>flushQueue());
+flushQueue();
 
-$("whoBtn").onclick=()=>{$("nameIn").value=st.name;$("nameOv").classList.add("on")};
-$("nameOk").onclick=()=>{const n=$("nameIn").value.trim();if(!n){$("nameIn").focus();return}st.name=n;save();$("nameOv").classList.remove("on");renderHome()};
-$("nameIn").addEventListener("keydown",e=>{if(e.key==="Enter")$("nameOk").click()});
+$("bNote").onclick=openComment;
+$("bPass").onclick=()=>setVerdict("g");
+$("bFail").onclick=()=>setVerdict("r");
+$("bSend").onclick=submitLesson;
+$("bBack").onclick=closeLesson;
+$("cCancel").onclick=closeComment;
+$("cSave").onclick=saveComment;
+$("txt").addEventListener("keydown",e=>{if(e.key==="Enter"&&(e.metaKey||e.ctrlKey))$("cSave").click()});
+$("whoBtn").onclick=()=>askName(null);
+$("nameOk").onclick=confirmName;
+$("nameIn").addEventListener("keydown",e=>{if(e.key==="Enter")confirmName()});
 
-fetch("lessons.json").then(r=>r.json()).then(d=>{DATA=d;
-  const q=new URLSearchParams(location.search);
-  if(q.get("demo")==="1")DATA.lessons.forEach(l=>{if(l.subject==="俄语"&&l.no===65){l.status="待评审";l.file="demo.html"}});
-  renderHome();applyDevice();
-  if(!st.name)$("nameOv").classList.add("on");
+Promise.all([
+  fetch("lessons.json").then(r=>r.json()),
+  fetch("manifest.json").then(r=>r.ok?r.json():{items:[]}).catch(()=>({items:[]}))
+]).then(([d,m])=>{
+  DATA=d;
+  (m.items||[]).forEach(it=>{if(it.id&&it.sha)SHA[it.id]=it.sha});
+  renderHome();
 });
 </script>
 </body>
