@@ -116,7 +116,7 @@ const fmt=s=>{s=Math.max(0,Math.floor(+s||0));return String(Math.floor(s/60)).pa
 const lid=l=>{const f=l.file||"";const n=f.split("/").pop()||"";return n.replace(/\.html$/,"")};
 const made=l=>l.status!=="制作中"&&!!l.file;
 const shaOf=l=>SHA[lid(l)]||"";
-const color=l=>{const v=st.v[lid(l)];const sha=shaOf(l);return !v||!sha||v.sha!==sha?"y":v.v};
+const color=l=>{const v=st.v[lid(l)];const sha=shaOf(l);if(v&&sha&&v.sha===sha)return v.v;/* J 261120 980:只写评论不点按钮 = 不通过 */return sha&&(st.c[lid(l)]||[]).some(x=>x.sha===sha)?"r":"y"};
 const comments=l=>(st.c[lid(l)]||[]).filter(x=>x.sha&&x.sha===shaOf(l)).sort((a,b)=>a.s-b.s);
 
 function toast(t){const n=$("toast");n.textContent=t;n.classList.add("on");clearTimeout(toast._t);toast._t=setTimeout(()=>n.classList.remove("on"),2400)}
