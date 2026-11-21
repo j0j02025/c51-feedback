@@ -258,10 +258,28 @@ button:focus-visible{outline:3px solid var(--gold2);outline-offset:2px}
   *,*::before,*::after{animation:none!important;transition:none!important}
   .card:not(:disabled):hover,.card:not(:disabled):active,.card:not(:disabled):hover .th{transform:none}
 }
+#whoWrap{position:relative;min-width:0}
+#whoBtn{max-width:min(34vw,220px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#whoMenu{position:absolute;z-index:1;right:0;top:calc(100% + 6px);padding:5px;border:1px solid var(--line);
+  border-radius:12px;background:var(--panel);box-shadow:0 8px 24px #0002;white-space:nowrap}
+#whoMenu button{min-height:44px;padding:6px 14px}
+#roleDialog{width:min(480px,calc(100% - 24px));max-height:calc(100% - 24px);padding:18px;
+  color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:16px}
+#roleDialog::backdrop{background:#171c249c}
+.role-langs{display:flex;justify-content:flex-end}
+#roleTitle{font-size:20px;margin:10px 0 12px}
+#roleOptions{display:grid;gap:8px}
+#roleOptions button,#roleRetry{min-height:44px;padding:8px 12px;text-align:left}
+#roleOptions button[aria-pressed="true"]{outline:2px solid var(--acc);outline-offset:-2px}
+#roleError:not(:empty){margin:12px 0 0;color:var(--r)}
+.history-badge.conflict{background:#fce2e1;color:#982a26}
+.history-badge.merged{background:#e3e8ef;color:#384352}
 </style>
 </head>
 <body>
-<div class="top"><svg class="logo" viewBox="4 4 40 26" aria-hidden="true"><path d="M5 14V10Q5 5 10 5H38Q43 5 43 10V14Z" fill="#b8502e"/><rect x="4" y="14" width="40" height="15" rx="2.5" fill="#8c2f1c"/><path d="M4 14H44" stroke="#f2c14e" stroke-width="1.6"/><path d="M24 27V22M24 22C24 18.5 28.5 17 30.5 19C32 20.6 31 23 29 22.7C27.8 22.5 27.8 21 29 21M24 22C24 18.5 19.5 17 17.5 19C16 20.6 17 23 19 22.7C20.2 22.5 20.2 21 19 21" fill="none" stroke="#f2c14e" stroke-width="1.5" stroke-linecap="round"/><rect x="21.5" y="11" width="5" height="5" rx="1" fill="#f2c14e"/></svg><b data-i="title">看课评审</b><span class="sp"></span><label id="preloadSetting" hidden><input id="preloadToggle" type="checkbox"><span data-i="preload"></span></label><div class="lng"></div><button id="whoBtn" type="button">填名字</button></div>
+<div class="top"><svg class="logo" viewBox="4 4 40 26" aria-hidden="true"><path d="M5 14V10Q5 5 10 5H38Q43 5 43 10V14Z" fill="#b8502e"/><rect x="4" y="14" width="40" height="15" rx="2.5" fill="#8c2f1c"/><path d="M4 14H44" stroke="#f2c14e" stroke-width="1.6"/><path d="M24 27V22M24 22C24 18.5 28.5 17 30.5 19C32 20.6 31 23 29 22.7C27.8 22.5 27.8 21 29 21M24 22C24 18.5 19.5 17 17.5 19C16 20.6 17 23 19 22.7C20.2 22.5 20.2 21 19 21" fill="none" stroke="#f2c14e" stroke-width="1.5" stroke-linecap="round"/><rect x="21.5" y="11" width="5" height="5" rx="1" fill="#f2c14e"/></svg><b data-i="title">看课评审</b><span class="sp"></span><label id="preloadSetting" hidden><input id="preloadToggle" type="checkbox"><span data-i="preload"></span></label><div class="lng"></div><div id="whoWrap"><button id="whoBtn" type="button">填名字</button><div id="whoMenu" hidden>
+  <button id="switchRole" type="button" data-i="switchRole"></button>
+</div></div></div>
 <div id="home"></div>
 
 <div id="player">
@@ -298,9 +316,26 @@ button:focus-visible{outline:3px solid var(--gold2);outline-offset:2px}
   <button id="nameOk" type="button" data-i="ok">确定</button>
 </div></div>
 
+<dialog id="roleDialog" aria-labelledby="roleTitle">
+  <div class="role-langs"><div class="lng"></div></div>
+  <h2 id="roleTitle" data-i="roleTitle"></h2>
+  <div id="roleOptions">
+    <button type="button" data-role="kk_ru" data-i="role_kk_ru"></button>
+    <button type="button" data-role="kk" data-i="role_kk"></button>
+    <button type="button" data-role="ru" data-i="role_ru"></button>
+    <button type="button" data-role="zh" data-i="role_zh"></button>
+    <button type="button" data-role="none" data-i="role_none"></button>
+  </div>
+  <p id="roleError" role="status"></p>
+  <button id="roleRetry" type="button" data-i="roleRetry" hidden></button>
+</dialog>
+
 <div id="toast"></div>
 <script>
 const PAGE_ID="c51-feedback-v3";
+const AUTH_SITE=location.hostname==="review.ooii.top" ||
+  (["localhost","127.0.0.1","[::1]"].includes(location.hostname)&&location.pathname.startsWith("/v3/"));
+let reviewerRole=null, reviewerAdmin=false, roleSaving=false, roleError="";
 const KEY="c51tl:"+PAGE_ID;
 let FEISHU_NAME="", DATA=null, SHA={}, st={name:"",v:{},c:{},cur:null};
 try{const s=JSON.parse(localStorage.getItem(KEY)||"null");if(s&&s.v&&s.c)st=Object.assign(st,s)}catch(e){}
@@ -316,12 +351,12 @@ const viewedSha=l=>viewing?.id===lid(l)?viewing.sha:"";
 const color=(l,sha=shaOf(l))=>{const v=st.v[lid(l)];if(v&&sha&&v.sha===sha)return v.v;/* J 261120 980:只写评论不点按钮 = 不通过 */return sha&&(st.c[lid(l)]||[]).some(x=>x.sha===sha)?"r":"y"};
 const comments=(l,sha=shaOf(l))=>(st.c[lid(l)]||[]).filter(x=>x.sha&&x.sha===sha).sort((a,b)=>a.s-b.s);
 /* J 261120 982:整页界面四语(中 / 英 / 俄 / 哈)切换;课件自己的语言按钮不归这里管 */
-const LANGS=[["zh","中"],["en","EN"],["ru","РУ"],["kk","ҚАЗ"]];
+const LANGS=[["zh","中"],["en","EN"],["ru","Рус"],["kk","Қаз"]];
 const UI={
- zh:{newVersion:"有新版",retryLesson:"下载失败，重试",preload:"后台预加载",preloadCached:"已缓存 ✓",preloadDownloading:"正在下载…",preloadPercent:n=>"正在下载 "+n+"%",preloadQueued:"排队中",preloadFailed:"下载失败",preloadLow:"可用空间不足 2 GB，后台预加载已暂停",history:"以往评论",fixed:"已改",nochange:"不改",wip:"处理中",unreplied:"未回复",oldVersion:"旧版",beijing:"北京时间",unrepliedCount:n=>n+" 条未回复评论",title:"看课评审",who:"填名字",top:"← 返回课程列表",making:"制作中",cmts:"本课评论",cmtsHint:"点时间跳到那一秒;✕ 删除",note:"评论",pass:"通过",fail:"不通过",send:"提交本课反馈",back:"← 返回列表",cmtSub:"课件已暂停。写一句就行,可以写多条。",cmtPh:"哪里不对?",cancel:"取消",save:"保存",nmTtl:"先填你的名字",nmSub:"只在第一次提交前问一次,存在这台设备上,之后不再问。",nmPh:"你的名字",ok:"确定",stG:"通过",stR:"不通过",stY:"没判",stM:"制作中",empty:"还没有评论",del:"删除",lesson:n=>"第 "+n+" 课",nc:n=>"意见 "+n+" 条",docT:(g,r,a)=>"看课评审 · 通过 "+g+" · 不通过 "+r+" / "+a,noSha:"这节课的校验还没载入,稍后再试",needV:"先点通过或不通过,或写一条评论",sending:"正在提交…",sent:"已提交,谢谢",offline:"网络不通,已存在本机,恢复后自动补交"},
- en:{newVersion:"New version available",retryLesson:"Download failed. Retry",preload:"Background preload",preloadCached:"Cached ✓",preloadDownloading:"Downloading…",preloadPercent:n=>"Downloading "+n+"%",preloadQueued:"Queued",preloadFailed:"Download failed",preloadLow:"Background preload paused because less than 2 GB is available",history:"Previous comments",fixed:"Fixed",nochange:"No change",wip:"In progress",unreplied:"Awaiting reply",oldVersion:"Older version",beijing:"Beijing time",unrepliedCount:n=>"Comments awaiting reply: "+n,title:"Lesson review",who:"Enter name",top:"← Back to lesson list",making:"In production",cmts:"Comments on this lesson",cmtsHint:"Tap a time to jump there; ✕ deletes",note:"Comment",pass:"Pass",fail:"Fail",send:"Submit feedback",back:"← Back to list",cmtSub:"The lesson is paused. One sentence is enough; you can add several.",cmtPh:"What is wrong?",cancel:"Cancel",save:"Save",nmTtl:"Enter your name first",nmSub:"Asked only once before your first submission and saved on this device.",nmPh:"Your name",ok:"OK",stG:"Passed",stR:"Failed",stY:"Not rated",stM:"In production",empty:"No comments yet",del:"Delete",lesson:n=>"Lesson "+n,nc:n=>n+(n===1?" comment":" comments"),docT:(g,r,a)=>"Lesson review · passed "+g+" · failed "+r+" / "+a,noSha:"This lesson's checksum has not loaded yet. Try again shortly.",needV:"Tap Pass or Fail, or write a comment first",sending:"Submitting…",sent:"Submitted. Thank you!",offline:"Offline. Saved on this device and will be sent automatically."},
- ru:{newVersion:"Доступна новая версия",retryLesson:"Ошибка загрузки. Повторить",preload:"Фоновая загрузка",preloadCached:"В кэше ✓",preloadDownloading:"Загрузка…",preloadPercent:n=>"Загрузка "+n+"%",preloadQueued:"В очереди",preloadFailed:"Ошибка загрузки",preloadLow:"Фоновая загрузка приостановлена, доступно менее 2 ГБ",history:"Предыдущие комментарии",fixed:"Исправлено",nochange:"Без изменений",wip:"В работе",unreplied:"Без ответа",oldVersion:"Старая версия",beijing:"Пекинское время",unrepliedCount:n=>"Комментариев без ответа: "+n,title:"Отзыв об уроках",who:"Введите имя",top:"← К списку уроков",making:"В работе",cmts:"Комментарии к уроку",cmtsHint:"Нажмите на время, чтобы перейти; ✕ удалить",note:"Комментарий",pass:"Принято",fail:"Не принято",send:"Отправить отзыв",back:"← К списку",cmtSub:"Урок на паузе. Достаточно одной фразы, можно написать несколько.",cmtPh:"Что не так?",cancel:"Отмена",save:"Сохранить",nmTtl:"Сначала введите своё имя",nmSub:"Спросим один раз перед первой отправкой, имя сохранится на этом устройстве.",nmPh:"Ваше имя",ok:"Готово",stG:"Принято",stR:"Не принято",stY:"Не оценено",stM:"В работе",empty:"Пока нет комментариев",del:"Удалить",lesson:n=>"Урок "+n,nc:n=>"замечаний: "+n,docT:(g,r,a)=>"Отзыв об уроках · принято "+g+" · не принято "+r+" / "+a,noSha:"Проверка урока ещё не загрузилась, попробуйте чуть позже",needV:"Сначала нажмите «Принято» или «Не принято» либо напишите комментарий",sending:"Отправляем…",sent:"Отправлено, спасибо!",offline:"Нет сети. Сохранено на устройстве, отправится автоматически."},
- kk:{newVersion:"Жаңа нұсқа бар",retryLesson:"Жүктеу сәтсіз. Қайталау",preload:"Фондық жүктеу",preloadCached:"Кэште ✓",preloadDownloading:"Жүктелуде…",preloadPercent:n=>"Жүктелуде "+n+"%",preloadQueued:"Кезекте",preloadFailed:"Жүктеу сәтсіз аяқталды",preloadLow:"Бос орын 2 ГБ-тан аз, фондық жүктеу тоқтатылды",history:"Бұрынғы пікірлер",fixed:"Түзетілді",nochange:"Өзгеріссіз",wip:"Орындалуда",unreplied:"Жауап жоқ",oldVersion:"Бұрынғы нұсқа",beijing:"Бейжің уақыты",unrepliedCount:n=>"Жауапсыз пікірлер: "+n,title:"Сабақтарды бағалау",who:"Атыңызды жазыңыз",top:"← Сабақтар тізіміне",making:"Дайындалуда",cmts:"Сабаққа пікірлер",cmtsHint:"Уақытты бассаңыз, сол секундқа өтеді; ✕ өшіру",note:"Пікір",pass:"Өтті",fail:"Өтпеді",send:"Пікірді жіберу",back:"← Тізімге",cmtSub:"Сабақ кідіртілді. Бір сөйлем жеткілікті, бірнешеуін жазуға болады.",cmtPh:"Не дұрыс емес?",cancel:"Болдырмау",save:"Сақтау",nmTtl:"Алдымен атыңызды жазыңыз",nmSub:"Алғашқы жіберу алдында бір рет қана сұралады, осы құрылғыда сақталады.",nmPh:"Атыңыз",ok:"Дайын",stG:"Өтті",stR:"Өтпеді",stY:"Бағаланбаған",stM:"Дайындалуда",empty:"Әзірге пікір жоқ",del:"Өшіру",lesson:n=>n+"-сабақ",nc:n=>"пікір: "+n,docT:(g,r,a)=>"Сабақтарды бағалау · өтті "+g+" · өтпеді "+r+" / "+a,noSha:"Сабақ тексерісі әлі жүктелмеді, сәлден кейін қайталаңыз",needV:"Алдымен «Өтті» не «Өтпеді» басыңыз немесе пікір жазыңыз",sending:"Жіберілуде…",sent:"Жіберілді, рахмет!",offline:"Желі жоқ. Құрылғыда сақталды, желі қосылғанда өзі жіберіледі."}
+ zh:{roleTitle:"选择你的身份",switchRole:"切换身份",role_kk_ru:"我是俄语和哈语的教师或教研",role_kk:"我是哈语老师或教研",role_ru:"我是俄语老师或教研",role_zh:"我是中文教研",role_none:"我不是老师或教研",roleLoadError:"暂时无法读取登录身份，请重试。",roleSaveError:"暂时无法保存身份，请重试。",roleRetry:"重试",merged:"已合并",conflict:"反馈冲突",conflictWith:name=>"您的反馈和 "+name+" 的修改意见有冲突，请直接联系该用户",fixedIn:v=>"已在 "+v+" 修改",newVersion:"有新版",retryLesson:"下载失败，重试",preload:"后台预加载",preloadCached:"已缓存 ✓",preloadDownloading:"正在下载…",preloadPercent:n=>"正在下载 "+n+"%",preloadQueued:"排队中",preloadFailed:"下载失败",preloadLow:"可用空间不足 2 GB，后台预加载已暂停",history:"以往评论",fixed:"已改",nochange:"不改",wip:"处理中",unreplied:"未回复",oldVersion:"旧版",beijing:"北京时间",unrepliedCount:n=>n+" 条未回复评论",title:"看课评审",who:"填名字",top:"← 返回课程列表",making:"制作中",cmts:"本课评论",cmtsHint:"点时间跳到那一秒;✕ 删除",note:"评论",pass:"通过",fail:"不通过",send:"提交本课反馈",back:"← 返回列表",cmtSub:"课件已暂停。写一句就行,可以写多条。",cmtPh:"哪里不对?",cancel:"取消",save:"保存",nmTtl:"先填你的名字",nmSub:"只在第一次提交前问一次,存在这台设备上,之后不再问。",nmPh:"你的名字",ok:"确定",stG:"通过",stR:"不通过",stY:"没判",stM:"制作中",empty:"还没有评论",del:"删除",lesson:n=>"第 "+n+" 课",nc:n=>"意见 "+n+" 条",docT:(g,r,a)=>"看课评审 · 通过 "+g+" · 不通过 "+r+" / "+a,noSha:"这节课的校验还没载入,稍后再试",needV:"先点通过或不通过,或写一条评论",sending:"正在提交…",sent:"已提交,谢谢",offline:"网络不通,已存在本机,恢复后自动补交"},
+ en:{roleTitle:"Choose your role",switchRole:"Switch role",role_kk_ru:"I teach or develop curricula for both Russian and Kazakh",role_kk:"I teach or develop curricula for Kazakh",role_ru:"I teach or develop curricula for Russian",role_zh:"I develop Chinese-language curricula",role_none:"I am neither a teacher nor a curriculum specialist",roleLoadError:"Could not load your account. Try again.",roleSaveError:"Could not save your role. Try again.",roleRetry:"Try again",merged:"Merged",conflict:"Conflicting feedback",conflictWith:name=>"Your feedback conflicts with "+name+"’s suggested changes. Please contact them directly.",fixedIn:v=>"Fixed in "+v,newVersion:"New version available",retryLesson:"Download failed. Retry",preload:"Background preload",preloadCached:"Cached ✓",preloadDownloading:"Downloading…",preloadPercent:n=>"Downloading "+n+"%",preloadQueued:"Queued",preloadFailed:"Download failed",preloadLow:"Background preload paused because less than 2 GB is available",history:"Previous comments",fixed:"Fixed",nochange:"No change",wip:"In progress",unreplied:"Awaiting reply",oldVersion:"Older version",beijing:"Beijing time",unrepliedCount:n=>"Comments awaiting reply: "+n,title:"Lesson review",who:"Enter name",top:"← Back to lesson list",making:"In production",cmts:"Comments on this lesson",cmtsHint:"Tap a time to jump there; ✕ deletes",note:"Comment",pass:"Pass",fail:"Fail",send:"Submit feedback",back:"← Back to list",cmtSub:"The lesson is paused. One sentence is enough; you can add several.",cmtPh:"What is wrong?",cancel:"Cancel",save:"Save",nmTtl:"Enter your name first",nmSub:"Asked only once before your first submission and saved on this device.",nmPh:"Your name",ok:"OK",stG:"Passed",stR:"Failed",stY:"Not rated",stM:"In production",empty:"No comments yet",del:"Delete",lesson:n=>"Lesson "+n,nc:n=>n+(n===1?" comment":" comments"),docT:(g,r,a)=>"Lesson review · passed "+g+" · failed "+r+" / "+a,noSha:"This lesson's checksum has not loaded yet. Try again shortly.",needV:"Tap Pass or Fail, or write a comment first",sending:"Submitting…",sent:"Submitted. Thank you!",offline:"Offline. Saved on this device and will be sent automatically."},
+ ru:{roleTitle:"Выберите свою роль",switchRole:"Сменить роль",role_kk_ru:"Я учитель или методист по русскому и казахскому языкам",role_kk:"Я учитель или методист по казахскому языку",role_ru:"Я учитель или методист по русскому языку",role_zh:"Я методист по китайскому языку",role_none:"Я не учитель и не методист",roleLoadError:"Не удалось загрузить данные вашей учётной записи. Попробуйте ещё раз.",roleSaveError:"Не удалось сохранить роль. Попробуйте ещё раз.",roleRetry:"Повторить",merged:"Объединено",conflict:"Противоречивые замечания",conflictWith:name=>"Ваше замечание противоречит правкам, которые предложил пользователь "+name+". Пожалуйста, свяжитесь с этим пользователем напрямую.",fixedIn:v=>"Исправлено в версии "+v,newVersion:"Доступна новая версия",retryLesson:"Ошибка загрузки. Повторить",preload:"Фоновая загрузка",preloadCached:"В кэше ✓",preloadDownloading:"Загрузка…",preloadPercent:n=>"Загрузка "+n+"%",preloadQueued:"В очереди",preloadFailed:"Ошибка загрузки",preloadLow:"Фоновая загрузка приостановлена, доступно менее 2 ГБ",history:"Предыдущие комментарии",fixed:"Исправлено",nochange:"Без изменений",wip:"В работе",unreplied:"Без ответа",oldVersion:"Старая версия",beijing:"Пекинское время",unrepliedCount:n=>"Комментариев без ответа: "+n,title:"Отзыв об уроках",who:"Введите имя",top:"← К списку уроков",making:"В работе",cmts:"Комментарии к уроку",cmtsHint:"Нажмите на время, чтобы перейти; ✕ удалить",note:"Комментарий",pass:"Принято",fail:"Не принято",send:"Отправить отзыв",back:"← К списку",cmtSub:"Урок на паузе. Достаточно одной фразы, можно написать несколько.",cmtPh:"Что не так?",cancel:"Отмена",save:"Сохранить",nmTtl:"Сначала введите своё имя",nmSub:"Спросим один раз перед первой отправкой, имя сохранится на этом устройстве.",nmPh:"Ваше имя",ok:"Готово",stG:"Принято",stR:"Не принято",stY:"Не оценено",stM:"В работе",empty:"Пока нет комментариев",del:"Удалить",lesson:n=>"Урок "+n,nc:n=>"замечаний: "+n,docT:(g,r,a)=>"Отзыв об уроках · принято "+g+" · не принято "+r+" / "+a,noSha:"Проверка урока ещё не загрузилась, попробуйте чуть позже",needV:"Сначала нажмите «Принято» или «Не принято» либо напишите комментарий",sending:"Отправляем…",sent:"Отправлено, спасибо!",offline:"Нет сети. Сохранено на устройстве, отправится автоматически."},
+ kk:{roleTitle:"Рөліңізді таңдаңыз",switchRole:"Рөлді ауыстыру",role_kk_ru:"Мен орыс және қазақ тілдерінің мұғалімімін немесе әдіскерімін",role_kk:"Мен қазақ тілінің мұғалімімін немесе әдіскерімін",role_ru:"Мен орыс тілінің мұғалімімін немесе әдіскерімін",role_zh:"Мен қытай тілінің әдіскерімін",role_none:"Мен мұғалім де, әдіскер де емеспін",roleLoadError:"Аккаунт деректері жүктелмеді. Қайталап көріңіз.",roleSaveError:"Рөліңіз сақталмады. Қайталап көріңіз.",roleRetry:"Қайталау",merged:"Біріктірілді",conflict:"Қайшы пікірлер",conflictWith:name=>"Сіздің пікіріңіз "+name+" ұсынған түзетулермен қайшы келеді. Сол пайдаланушымен тікелей байланысыңыз.",fixedIn:v=>v+" нұсқасында түзетілді",newVersion:"Жаңа нұсқа бар",retryLesson:"Жүктеу сәтсіз. Қайталау",preload:"Фондық жүктеу",preloadCached:"Кэште ✓",preloadDownloading:"Жүктелуде…",preloadPercent:n=>"Жүктелуде "+n+"%",preloadQueued:"Кезекте",preloadFailed:"Жүктеу сәтсіз аяқталды",preloadLow:"Бос орын 2 ГБ-тан аз, фондық жүктеу тоқтатылды",history:"Бұрынғы пікірлер",fixed:"Түзетілді",nochange:"Өзгеріссіз",wip:"Орындалуда",unreplied:"Жауап жоқ",oldVersion:"Бұрынғы нұсқа",beijing:"Бейжің уақыты",unrepliedCount:n=>"Жауапсыз пікірлер: "+n,title:"Сабақтарды бағалау",who:"Атыңызды жазыңыз",top:"← Сабақтар тізіміне",making:"Дайындалуда",cmts:"Сабаққа пікірлер",cmtsHint:"Уақытты бассаңыз, сол секундқа өтеді; ✕ өшіру",note:"Пікір",pass:"Өтті",fail:"Өтпеді",send:"Пікірді жіберу",back:"← Тізімге",cmtSub:"Сабақ кідіртілді. Бір сөйлем жеткілікті, бірнешеуін жазуға болады.",cmtPh:"Не дұрыс емес?",cancel:"Болдырмау",save:"Сақтау",nmTtl:"Алдымен атыңызды жазыңыз",nmSub:"Алғашқы жіберу алдында бір рет қана сұралады, осы құрылғыда сақталады.",nmPh:"Атыңыз",ok:"Дайын",stG:"Өтті",stR:"Өтпеді",stY:"Бағаланбаған",stM:"Дайындалуда",empty:"Әзірге пікір жоқ",del:"Өшіру",lesson:n=>n+"-сабақ",nc:n=>"пікір: "+n,docT:(g,r,a)=>"Сабақтарды бағалау · өтті "+g+" · өтпеді "+r+" / "+a,noSha:"Сабақ тексерісі әлі жүктелмеді, сәлден кейін қайталаңыз",needV:"Алдымен «Өтті» не «Өтпеді» басыңыз немесе пікір жазыңыз",sending:"Жіберілуде…",sent:"Жіберілді, рахмет!",offline:"Желі жоқ. Құрылғыда сақталды, желі қосылғанда өзі жіберіледі."}
 };
 /* 分组名 / 风格 / 课名:按中文原值查表,查不到显示中文原值(新加的课先显示中文,在这里补一行即可) */
 const TR={
@@ -365,7 +400,12 @@ function applyLang(){
   document.documentElement.lang=LANG;
   document.querySelectorAll("[data-i]").forEach(n=>n.textContent=T(n.dataset.i));
   document.querySelectorAll("[data-ph]").forEach(n=>n.placeholder=T(n.dataset.ph));
-  document.querySelectorAll(".lng").forEach(box=>{box.innerHTML="";LANGS.forEach(([k,t])=>{const b=document.createElement("button");b.type="button";b.textContent=t;b.className=k===LANG?"on":"";b.onclick=()=>setLang(k);box.appendChild(b)})});
+  document.querySelectorAll(".lng button").forEach(button=>{
+    const selected=button.dataset.lang===LANG;
+    button.classList.toggle("on",selected);
+    button.setAttribute("aria-pressed",String(selected));
+  });
+  paintRoleError();
   paintPreloadSwitch();
   if(!DATA)document.title=T("title");
 }
@@ -688,9 +728,7 @@ function applyManifest(manifest, cached) {
     next.forEach((entry, file) => preloadLessons.set(file, entry));
     SHA = shas;
     renderHome();
-    // Use the rendered order because grouping can move cards relative to lessons.json.
-    preloadOrder = [...new Set(Array.from($("home").querySelectorAll(".card:not(:disabled)"),
-      card => preloadLessons.get(card.dataset.file)).filter(Boolean))];
+    updatePreloadOrder();
     if (viewing) {
       const latest = preloadLessons.get(curLesson().file);
       $("pNewVersion").hidden = !latest || latest.key === viewing.key;
@@ -719,12 +757,24 @@ setInterval(() => {
   if (viewing && !document.hidden) refreshManifest();
 }, manifestInterval);
 
+function updatePreloadOrder(){
+  // Use the rendered order because grouping can move cards relative to lessons.json.
+  preloadOrder=[...new Set(Array.from($("home").querySelectorAll(".card:not(:disabled)"),
+    card=>preloadLessons.get(card.dataset.file)).filter(Boolean))];
+}
+
+function visibleLessons(){
+  if(AUTH_SITE&&reviewerRole===null)return [];
+  const subject=reviewerAdmin?null:({kk:"哈语",ru:"俄语"})[reviewerRole];
+  return subject?DATA.lessons.filter(l=>typeof l.subject==="string"&&l.subject.startsWith(subject)):DATA.lessons;
+}
+
 function renderHome(){
-  if(!FEISHU_NAME)$("whoBtn").textContent=st.name?("👤 "+st.name):T("who");
-  const groups=[];
-  DATA.lessons.forEach(l=>{let g=groups.find(x=>x.s===l.subject);if(!g)groups.push(g={s:l.subject,ls:[]});g.ls.push(l)});
+  if(!AUTH_SITE)$("whoBtn").textContent=st.name?("👤 "+st.name):T("who");
+  const groups=[], lessons=visibleLessons();
+  lessons.forEach(l=>{let g=groups.find(x=>x.s===l.subject);if(!g)groups.push(g={s:l.subject,ls:[]});g.ls.push(l)});
   const h=$("home");h.innerHTML="";
-  const ready=DATA.lessons.filter(made);
+  const ready=lessons.filter(made);
   let ng=0,nr=0;
   groups.forEach(g=>{
     const t=document.createElement("div");t.className="grp";t.textContent=tr(g.s);h.appendChild(t);
@@ -750,7 +800,7 @@ function renderHome(){
     });
     h.appendChild(c);
   });
-  document.title=T("docT")(ng,nr,ready.length);
+  document.title=AUTH_SITE&&reviewerRole===null?T("title"):T("docT")(ng,nr,ready.length);
 }
 
 let tick=null, pendingS=0, resumeAfter=false, afterName=null;
@@ -874,9 +924,9 @@ function submitLesson(){
     if(ok){toast(T("sent"));setTimeout(()=>{if(viewing===submittedView)closeLesson()},900)}
     else toast(T("offline"));});
 }
-const COLLECT="https://review.ooii.top/submit", QKEY="c51tl:queue";
-const COLLECT_BASE=COLLECT.replace(/\/submit$/, "");
-const HISTORY_STATES=["fixed","nochange","wip"];
+const COLLECT_BASE=AUTH_SITE?"":"https://review.ooii.top", QKEY="c51tl:queue";
+const COLLECT=COLLECT_BASE+"/submit";
+const HISTORY_STATES=["fixed","nochange","wip","merged","conflict"];
 let summary={}, summaryRequest=0, historyView=null;
 
 async function getReviewData(path){
@@ -932,7 +982,7 @@ function reviewDate(value){
     ?date.toLocaleDateString("sv-SE",{timeZone:"Asia/Shanghai"}):"";
 }
 
-function appendHistoryEntry(group,text,seconds,replies){
+function appendHistoryEntry(group,text,seconds,replies,effective,own){
   const reply=lastReply(replies);
   const status=HISTORY_STATES.includes(reply?.status)?reply.status:"unreplied";
   const entry=document.createElement("div");
@@ -951,7 +1001,13 @@ function appendHistoryEntry(group,text,seconds,replies){
   const badge=entry.querySelector(".history-badge");
   badge.classList.add(status);
   badge.textContent=T(status);
-  entry.querySelector(".history-answer").textContent=[reviewText(reply?.text),reviewText(reply?.version)].filter(Boolean).join(" · ");
+  const answer=entry.querySelector(".history-answer");
+  const details=current=>{
+    if(current?.status==="conflict")return [T("conflictWith")(reviewText(current.with)),reviewText(current.text)];
+    const version=reviewText(current?.version);
+    return [reviewText(current?.text),own&&current?.status==="fixed"&&version?T("fixedIn")(version):version];
+  };
+  answer.textContent=[...details(reply),...(effective?[T(effective.status),...details(effective)]:[])].filter(Boolean).join(" · ");
   group.appendChild(entry);
 }
 
@@ -982,8 +1038,8 @@ function renderHistory(l){
       meta.append(" · ",old);
     }
     group.appendChild(meta);
-    if(showNote)appendHistoryEntry(group,note===generated?note.split("\n")[0]:note,null,item.note_replies);
-    for(const comment of cs)appendHistoryEntry(group,comment.c,comment.s,comment.replies);
+    if(showNote)appendHistoryEntry(group,note===generated?note.split("\n")[0]:note,null,item.note_replies,item.note_effective_reply,item.own);
+    for(const comment of cs)appendHistoryEntry(group,comment.c,comment.s,comment.replies,comment.effective_reply,item.own);
     list.appendChild(group);
   }
   $("history").hidden=!list.childElementCount;
@@ -992,7 +1048,9 @@ function renderHistory(l){
 function queueGet(){try{return JSON.parse(localStorage.getItem(QKEY)||"[]")}catch(e){return[]}}
 function queueSet(q){try{localStorage.setItem(QKEY,JSON.stringify(q))}catch(e){}}
 function queuePush(r){const q=queueGet();q.push(r);queueSet(q)}
-async function flushQueue(){let q=queueGet();
+async function flushQueue(){
+  if(AUTH_SITE&&reviewerRole===null)return false;
+  let q=queueGet();
   while(q.length){try{const res=await fetch(COLLECT,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify(q[0])});
       const j=await res.json().catch(()=>({}));if(!res.ok||!j.ok)return false}catch(e){return false}
     q.shift();queueSet(q)}
@@ -1019,24 +1077,146 @@ $("bSend").onclick=submitLesson;
 $("bBack").onclick=closeLesson;
 $("bTop").onclick=closeLesson;
 /* J 261120 980.4:课里要有明显的回列表按钮;Esc 同效(评论框开着时 Esc 先关评论框) */
-document.addEventListener("keydown",e=>{if(e.key!=="Escape")return;if($("cmtOv").classList.contains("on")||$("nameOv").classList.contains("on"))return;if($("player").classList.contains("on"))closeLesson()});
+document.addEventListener("keydown",e=>{if(e.key!=="Escape"||$("roleDialog").open)return;if($("cmtOv").classList.contains("on")||$("nameOv").classList.contains("on"))return;if($("player").classList.contains("on"))closeLesson()});
 $("cCancel").onclick=closeComment;
 $("cSave").onclick=saveComment;
 $("txt").addEventListener("keydown",e=>{if(e.key==="Enter"&&(e.metaKey||e.ctrlKey))$("cSave").click()});
 
-$("whoBtn").onclick=()=>{if(!FEISHU_NAME)askName(null)};
-// 在 review.ooii.top(飞书登录版)上:右上角名字取飞书登录身份,不用手填;老 GitHub 页照旧手填
-if(location.host==="review.ooii.top")fetch("/auth/me",{credentials:"same-origin",cache:"no-store"})
-  .then(r=>r.ok?r.json():null).then(j=>{if(!j||!j.ok||!j.name)return;
-    FEISHU_NAME=j.name;st.name=j.name;save();const w=$("whoBtn");w.textContent="";w.style.cursor="default";w.title="已用飞书登录";
-    if(j.avatar){const im=document.createElement("img");im.src=j.avatar;im.alt="";im.referrerPolicy="no-referrer";
-      im.style.cssText="width:28px;height:28px;border-radius:50%;vertical-align:middle;margin-right:8px;object-fit:cover";
-      im.onerror=()=>im.remove();w.appendChild(im)}
-    w.appendChild(document.createTextNode(j.name));
-    if(DATA)renderHome();}).catch(()=>{});
+function setRoleMenu(open){
+  $("whoMenu").hidden=!open;
+  $("whoBtn").setAttribute("aria-expanded",String(open));
+  if(open)$("switchRole").focus();
+}
+
+function paintRoleError(){
+  $("roleError").textContent=roleError?T(roleError):"";
+}
+
+function openRoleDialog(){
+  roleError="";paintRoleError();
+  $("roleRetry").hidden=true;
+  for(const button of $("roleOptions").querySelectorAll("button")){
+    button.disabled=!FEISHU_NAME;
+    button.setAttribute("aria-pressed",String(button.dataset.role===reviewerRole));
+  }
+  if(!$("roleDialog").open)$("roleDialog").showModal();
+}
+
+function paintReviewer(){
+  const button=$("whoBtn");
+  button.textContent="";
+  if(FEISHU_NAME&&reviewerAvatar){
+    const img=document.createElement("img");
+    img.src=reviewerAvatar;img.alt="";img.referrerPolicy="no-referrer";
+    img.style.cssText="width:28px;height:28px;border-radius:50%;vertical-align:middle;margin-right:8px;object-fit:cover";
+    img.onerror=()=>img.remove();
+    button.appendChild(img);
+  }
+  button.append(document.createTextNode(FEISHU_NAME));
+}
+
+let reviewerAvatar="";
+async function loadReviewer(){
+  $("roleRetry").disabled=true;
+  try{
+    const response=await fetch("/auth/me",{cache:"no-store",signal:AbortSignal.timeout(8000)});
+    if(response.status===401){
+      location.replace("/auth/login?"+new URLSearchParams({next:location.pathname+location.search}));
+      return;
+    }
+    if(!response.ok)throw new Error("Could not load reviewer");
+    const profile=await response.json();
+    if(!profile.ok||!profile.name)throw new Error("Invalid reviewer profile");
+    FEISHU_NAME=profile.name;reviewerAvatar=profile.avatar;st.name=profile.name;save();
+    reviewerRole=["kk_ru","kk","ru","zh","none"].includes(profile.role)?profile.role:null;
+    reviewerAdmin=profile.is_admin===true;
+    paintReviewer();
+    if(reviewerRole===null)openRoleDialog();
+    else{
+      $("roleDialog").close();
+      updateRoleView();
+      flushQueue();
+    }
+  }catch{
+    openRoleDialog();
+    $("roleRetry").hidden=false;
+    roleError="roleLoadError";paintRoleError();
+    $("roleRetry").focus();
+  }finally{
+    $("roleRetry").disabled=false;
+  }
+}
+
+function updateRoleView(){
+  if(!DATA)return;
+  stopPreload();
+  renderHome();
+  updatePreloadOrder();
+  schedulePreload();
+}
+
+async function chooseRole(role){
+  if(roleSaving||!FEISHU_NAME)return;
+  roleSaving=true;
+  const buttons=[...$("roleOptions").querySelectorAll("button")];
+  buttons.forEach(button=>button.disabled=true);
+  roleError="";paintRoleError();
+  try{
+    const response=await fetch("/me/role",{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({role}),signal:AbortSignal.timeout(8000)});
+    if(response.status===401){await loadReviewer();return}
+    if(!response.ok||(await response.json()).role!==role)throw new Error("Could not save role");
+    reviewerRole=role;
+    $("roleDialog").close();
+    $("whoBtn").focus();
+    updateRoleView();
+    flushQueue();
+  }catch{
+    roleError="roleSaveError";paintRoleError();
+  }finally{
+    roleSaving=false;
+    buttons.forEach(button=>button.disabled=!FEISHU_NAME);
+    if($("roleDialog").open&&FEISHU_NAME)buttons.find(button=>button.dataset.role===role)?.focus();
+  }
+}
+
+$("whoBtn").onclick=()=>{
+  if(!AUTH_SITE)askName(null);
+  else if(FEISHU_NAME)setRoleMenu($("whoMenu").hidden);
+};
+if(AUTH_SITE){
+  $("whoBtn").textContent="";
+  $("whoBtn").setAttribute("aria-controls","whoMenu");
+  setRoleMenu(false);
+  $("switchRole").onclick=()=>{setRoleMenu(false);openRoleDialog()};
+  document.addEventListener("click",event=>{
+    if(!$("whoMenu").hidden&&!$("whoWrap").contains(event.target))setRoleMenu(false);
+  });
+  document.addEventListener("keydown",event=>{
+    if(event.key==="Escape"&&!$("whoMenu").hidden){setRoleMenu(false);$("whoBtn").focus()}
+  });
+  $("roleDialog").addEventListener("cancel",event=>{
+    if(reviewerRole===null||roleSaving)event.preventDefault();
+    else $("whoBtn").focus();
+  });
+  $("roleOptions").addEventListener("click",event=>{
+    const button=event.target.closest("button[data-role]");
+    if(button)chooseRole(button.dataset.role);
+  });
+  $("roleRetry").onclick=loadReviewer;
+}
 $("nameOk").onclick=confirmName;
 $("nameIn").addEventListener("keydown",e=>{if(e.key==="Enter")confirmName()});
+for(const box of document.querySelectorAll(".lng")){
+  for(const [lang,label] of LANGS){
+    const button=document.createElement("button");
+    button.type="button";button.textContent=label;button.dataset.lang=lang;
+    button.onclick=()=>setLang(lang);
+    box.appendChild(button);
+  }
+}
 applyLang();
+if(AUTH_SITE)loadReviewer();
 
 fetch("lessons.json").then(r=>r.json()).then(async d=>{
   DATA=d;
