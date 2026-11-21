@@ -12,6 +12,13 @@ button,input,textarea{font:inherit}
 button{border:0;border-radius:12px;cursor:pointer;background:#eef1f5;color:var(--ink)}
 .top{display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--panel);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
 .top b{font-size:18px}
+#preloadSetting{display:inline-flex;align-items:center;gap:4px;font-size:13px;color:var(--mute)}
+#preloadSetting[hidden]{display:none}
+#preloadToggle{accent-color:var(--acc)}
+.card{position:relative}
+.preload-badge{position:absolute;top:5px;right:5px;padding:2px 6px;border-radius:6px;background:var(--panel);color:var(--mute);font-size:11px;line-height:1.2;pointer-events:none}
+.card:not(:has(.th)):has(.preload-badge:not([hidden])){padding-top:24px}
+@media(max-width:560px){.top:has(#preloadSetting:not([hidden])){flex-wrap:wrap}}
 .top .sp{flex:1}
 .last{outline:3px solid #f5b301;outline-offset:2px}
 #whoBtn{min-height:44px;padding:6px 14px;font-weight:700}
@@ -98,7 +105,7 @@ button{border:0;border-radius:12px;cursor:pointer;background:#eef1f5;color:var(-
 </style>
 </head>
 <body>
-<div class="top"><b data-i="title">看课评审</b><span class="sp"></span><div class="lng"></div><button id="whoBtn" type="button">填名字</button></div>
+<div class="top"><b data-i="title">看课评审</b><span class="sp"></span><label id="preloadSetting" hidden><input id="preloadToggle" type="checkbox"><span data-i="preload"></span></label><div class="lng"></div><button id="whoBtn" type="button">填名字</button></div>
 <div id="home"></div>
 
 <div id="player">
@@ -153,10 +160,10 @@ const comments=l=>(st.c[lid(l)]||[]).filter(x=>x.sha&&x.sha===shaOf(l)).sort((a,
 /* J 261120 982:整页界面四语(中 / 英 / 俄 / 哈)切换;课件自己的语言按钮不归这里管 */
 const LANGS=[["zh","中"],["en","EN"],["ru","РУ"],["kk","ҚАЗ"]];
 const UI={
- zh:{history:"以往评论",fixed:"已改",nochange:"不改",wip:"处理中",unreplied:"未回复",oldVersion:"旧版",beijing:"北京时间",unrepliedCount:n=>n+" 条未回复评论",title:"看课评审",who:"填名字",top:"← 返回课程列表",making:"制作中",cmts:"本课评论",cmtsHint:"点时间跳到那一秒;✕ 删除",note:"评论",pass:"通过",fail:"不通过",send:"提交本课反馈",back:"← 返回列表",cmtSub:"课件已暂停。写一句就行,可以写多条。",cmtPh:"哪里不对?",cancel:"取消",save:"保存",nmTtl:"先填你的名字",nmSub:"只在第一次提交前问一次,存在这台设备上,之后不再问。",nmPh:"你的名字",ok:"确定",stG:"通过",stR:"不通过",stY:"没判",stM:"制作中",empty:"还没有评论",del:"删除",lesson:n=>"第 "+n+" 课",nc:n=>"意见 "+n+" 条",docT:(g,r,a)=>"看课评审 · 通过 "+g+" · 不通过 "+r+" / "+a,noSha:"这节课的校验还没载入,稍后再试",needV:"先点通过或不通过,或写一条评论",sending:"正在提交…",sent:"已提交,谢谢",offline:"网络不通,已存在本机,恢复后自动补交"},
- en:{history:"Previous comments",fixed:"Fixed",nochange:"No change",wip:"In progress",unreplied:"Awaiting reply",oldVersion:"Older version",beijing:"Beijing time",unrepliedCount:n=>"Comments awaiting reply: "+n,title:"Lesson review",who:"Enter name",top:"← Back to lesson list",making:"In production",cmts:"Comments on this lesson",cmtsHint:"Tap a time to jump there; ✕ deletes",note:"Comment",pass:"Pass",fail:"Fail",send:"Submit feedback",back:"← Back to list",cmtSub:"The lesson is paused. One sentence is enough; you can add several.",cmtPh:"What is wrong?",cancel:"Cancel",save:"Save",nmTtl:"Enter your name first",nmSub:"Asked only once before your first submission and saved on this device.",nmPh:"Your name",ok:"OK",stG:"Passed",stR:"Failed",stY:"Not rated",stM:"In production",empty:"No comments yet",del:"Delete",lesson:n=>"Lesson "+n,nc:n=>n+(n===1?" comment":" comments"),docT:(g,r,a)=>"Lesson review · passed "+g+" · failed "+r+" / "+a,noSha:"This lesson's checksum has not loaded yet. Try again shortly.",needV:"Tap Pass or Fail, or write a comment first",sending:"Submitting…",sent:"Submitted. Thank you!",offline:"Offline. Saved on this device and will be sent automatically."},
- ru:{history:"Предыдущие комментарии",fixed:"Исправлено",nochange:"Без изменений",wip:"В работе",unreplied:"Без ответа",oldVersion:"Старая версия",beijing:"Пекинское время",unrepliedCount:n=>"Комментариев без ответа: "+n,title:"Отзыв об уроках",who:"Введите имя",top:"← К списку уроков",making:"В работе",cmts:"Комментарии к уроку",cmtsHint:"Нажмите на время, чтобы перейти; ✕ удалить",note:"Комментарий",pass:"Принято",fail:"Не принято",send:"Отправить отзыв",back:"← К списку",cmtSub:"Урок на паузе. Достаточно одной фразы, можно написать несколько.",cmtPh:"Что не так?",cancel:"Отмена",save:"Сохранить",nmTtl:"Сначала введите своё имя",nmSub:"Спросим один раз перед первой отправкой, имя сохранится на этом устройстве.",nmPh:"Ваше имя",ok:"Готово",stG:"Принято",stR:"Не принято",stY:"Не оценено",stM:"В работе",empty:"Пока нет комментариев",del:"Удалить",lesson:n=>"Урок "+n,nc:n=>"замечаний: "+n,docT:(g,r,a)=>"Отзыв об уроках · принято "+g+" · не принято "+r+" / "+a,noSha:"Проверка урока ещё не загрузилась, попробуйте чуть позже",needV:"Сначала нажмите «Принято» или «Не принято» либо напишите комментарий",sending:"Отправляем…",sent:"Отправлено, спасибо!",offline:"Нет сети. Сохранено на устройстве, отправится автоматически."},
- kk:{history:"Бұрынғы пікірлер",fixed:"Түзетілді",nochange:"Өзгеріссіз",wip:"Орындалуда",unreplied:"Жауап жоқ",oldVersion:"Бұрынғы нұсқа",beijing:"Бейжің уақыты",unrepliedCount:n=>"Жауапсыз пікірлер: "+n,title:"Сабақтарды бағалау",who:"Атыңызды жазыңыз",top:"← Сабақтар тізіміне",making:"Дайындалуда",cmts:"Сабаққа пікірлер",cmtsHint:"Уақытты бассаңыз, сол секундқа өтеді; ✕ өшіру",note:"Пікір",pass:"Өтті",fail:"Өтпеді",send:"Пікірді жіберу",back:"← Тізімге",cmtSub:"Сабақ кідіртілді. Бір сөйлем жеткілікті, бірнешеуін жазуға болады.",cmtPh:"Не дұрыс емес?",cancel:"Болдырмау",save:"Сақтау",nmTtl:"Алдымен атыңызды жазыңыз",nmSub:"Алғашқы жіберу алдында бір рет қана сұралады, осы құрылғыда сақталады.",nmPh:"Атыңыз",ok:"Дайын",stG:"Өтті",stR:"Өтпеді",stY:"Бағаланбаған",stM:"Дайындалуда",empty:"Әзірге пікір жоқ",del:"Өшіру",lesson:n=>n+"-сабақ",nc:n=>"пікір: "+n,docT:(g,r,a)=>"Сабақтарды бағалау · өтті "+g+" · өтпеді "+r+" / "+a,noSha:"Сабақ тексерісі әлі жүктелмеді, сәлден кейін қайталаңыз",needV:"Алдымен «Өтті» не «Өтпеді» басыңыз немесе пікір жазыңыз",sending:"Жіберілуде…",sent:"Жіберілді, рахмет!",offline:"Желі жоқ. Құрылғыда сақталды, желі қосылғанда өзі жіберіледі."}
+ zh:{preload:"后台预加载",preloadCached:"已缓存 ✓",preloadDownloading:"正在下载…",preloadPercent:n=>"正在下载 "+n+"%",preloadQueued:"排队中",preloadFailed:"下载失败",preloadLow:"可用空间不足 2 GB，后台预加载已暂停",history:"以往评论",fixed:"已改",nochange:"不改",wip:"处理中",unreplied:"未回复",oldVersion:"旧版",beijing:"北京时间",unrepliedCount:n=>n+" 条未回复评论",title:"看课评审",who:"填名字",top:"← 返回课程列表",making:"制作中",cmts:"本课评论",cmtsHint:"点时间跳到那一秒;✕ 删除",note:"评论",pass:"通过",fail:"不通过",send:"提交本课反馈",back:"← 返回列表",cmtSub:"课件已暂停。写一句就行,可以写多条。",cmtPh:"哪里不对?",cancel:"取消",save:"保存",nmTtl:"先填你的名字",nmSub:"只在第一次提交前问一次,存在这台设备上,之后不再问。",nmPh:"你的名字",ok:"确定",stG:"通过",stR:"不通过",stY:"没判",stM:"制作中",empty:"还没有评论",del:"删除",lesson:n=>"第 "+n+" 课",nc:n=>"意见 "+n+" 条",docT:(g,r,a)=>"看课评审 · 通过 "+g+" · 不通过 "+r+" / "+a,noSha:"这节课的校验还没载入,稍后再试",needV:"先点通过或不通过,或写一条评论",sending:"正在提交…",sent:"已提交,谢谢",offline:"网络不通,已存在本机,恢复后自动补交"},
+ en:{preload:"Background preload",preloadCached:"Cached ✓",preloadDownloading:"Downloading…",preloadPercent:n=>"Downloading "+n+"%",preloadQueued:"Queued",preloadFailed:"Download failed",preloadLow:"Background preload paused because less than 2 GB is available",history:"Previous comments",fixed:"Fixed",nochange:"No change",wip:"In progress",unreplied:"Awaiting reply",oldVersion:"Older version",beijing:"Beijing time",unrepliedCount:n=>"Comments awaiting reply: "+n,title:"Lesson review",who:"Enter name",top:"← Back to lesson list",making:"In production",cmts:"Comments on this lesson",cmtsHint:"Tap a time to jump there; ✕ deletes",note:"Comment",pass:"Pass",fail:"Fail",send:"Submit feedback",back:"← Back to list",cmtSub:"The lesson is paused. One sentence is enough; you can add several.",cmtPh:"What is wrong?",cancel:"Cancel",save:"Save",nmTtl:"Enter your name first",nmSub:"Asked only once before your first submission and saved on this device.",nmPh:"Your name",ok:"OK",stG:"Passed",stR:"Failed",stY:"Not rated",stM:"In production",empty:"No comments yet",del:"Delete",lesson:n=>"Lesson "+n,nc:n=>n+(n===1?" comment":" comments"),docT:(g,r,a)=>"Lesson review · passed "+g+" · failed "+r+" / "+a,noSha:"This lesson's checksum has not loaded yet. Try again shortly.",needV:"Tap Pass or Fail, or write a comment first",sending:"Submitting…",sent:"Submitted. Thank you!",offline:"Offline. Saved on this device and will be sent automatically."},
+ ru:{preload:"Фоновая загрузка",preloadCached:"В кэше ✓",preloadDownloading:"Загрузка…",preloadPercent:n=>"Загрузка "+n+"%",preloadQueued:"В очереди",preloadFailed:"Ошибка загрузки",preloadLow:"Фоновая загрузка приостановлена, доступно менее 2 ГБ",history:"Предыдущие комментарии",fixed:"Исправлено",nochange:"Без изменений",wip:"В работе",unreplied:"Без ответа",oldVersion:"Старая версия",beijing:"Пекинское время",unrepliedCount:n=>"Комментариев без ответа: "+n,title:"Отзыв об уроках",who:"Введите имя",top:"← К списку уроков",making:"В работе",cmts:"Комментарии к уроку",cmtsHint:"Нажмите на время, чтобы перейти; ✕ удалить",note:"Комментарий",pass:"Принято",fail:"Не принято",send:"Отправить отзыв",back:"← К списку",cmtSub:"Урок на паузе. Достаточно одной фразы, можно написать несколько.",cmtPh:"Что не так?",cancel:"Отмена",save:"Сохранить",nmTtl:"Сначала введите своё имя",nmSub:"Спросим один раз перед первой отправкой, имя сохранится на этом устройстве.",nmPh:"Ваше имя",ok:"Готово",stG:"Принято",stR:"Не принято",stY:"Не оценено",stM:"В работе",empty:"Пока нет комментариев",del:"Удалить",lesson:n=>"Урок "+n,nc:n=>"замечаний: "+n,docT:(g,r,a)=>"Отзыв об уроках · принято "+g+" · не принято "+r+" / "+a,noSha:"Проверка урока ещё не загрузилась, попробуйте чуть позже",needV:"Сначала нажмите «Принято» или «Не принято» либо напишите комментарий",sending:"Отправляем…",sent:"Отправлено, спасибо!",offline:"Нет сети. Сохранено на устройстве, отправится автоматически."},
+ kk:{preload:"Фондық жүктеу",preloadCached:"Кэште ✓",preloadDownloading:"Жүктелуде…",preloadPercent:n=>"Жүктелуде "+n+"%",preloadQueued:"Кезекте",preloadFailed:"Жүктеу сәтсіз аяқталды",preloadLow:"Бос орын 2 ГБ-тан аз, фондық жүктеу тоқтатылды",history:"Бұрынғы пікірлер",fixed:"Түзетілді",nochange:"Өзгеріссіз",wip:"Орындалуда",unreplied:"Жауап жоқ",oldVersion:"Бұрынғы нұсқа",beijing:"Бейжің уақыты",unrepliedCount:n=>"Жауапсыз пікірлер: "+n,title:"Сабақтарды бағалау",who:"Атыңызды жазыңыз",top:"← Сабақтар тізіміне",making:"Дайындалуда",cmts:"Сабаққа пікірлер",cmtsHint:"Уақытты бассаңыз, сол секундқа өтеді; ✕ өшіру",note:"Пікір",pass:"Өтті",fail:"Өтпеді",send:"Пікірді жіберу",back:"← Тізімге",cmtSub:"Сабақ кідіртілді. Бір сөйлем жеткілікті, бірнешеуін жазуға болады.",cmtPh:"Не дұрыс емес?",cancel:"Болдырмау",save:"Сақтау",nmTtl:"Алдымен атыңызды жазыңыз",nmSub:"Алғашқы жіберу алдында бір рет қана сұралады, осы құрылғыда сақталады.",nmPh:"Атыңыз",ok:"Дайын",stG:"Өтті",stR:"Өтпеді",stY:"Бағаланбаған",stM:"Дайындалуда",empty:"Әзірге пікір жоқ",del:"Өшіру",lesson:n=>n+"-сабақ",nc:n=>"пікір: "+n,docT:(g,r,a)=>"Сабақтарды бағалау · өтті "+g+" · өтпеді "+r+" / "+a,noSha:"Сабақ тексерісі әлі жүктелмеді, сәлден кейін қайталаңыз",needV:"Алдымен «Өтті» не «Өтпеді» басыңыз немесе пікір жазыңыз",sending:"Жіберілуде…",sent:"Жіберілді, рахмет!",offline:"Желі жоқ. Құрылғыда сақталды, желі қосылғанда өзі жіберіледі."}
 };
 /* 分组名 / 风格 / 课名:按中文原值查表,查不到显示中文原值(新加的课先显示中文,在这里补一行即可) */
 const TR={
@@ -201,6 +208,7 @@ function applyLang(){
   document.querySelectorAll("[data-i]").forEach(n=>n.textContent=T(n.dataset.i));
   document.querySelectorAll("[data-ph]").forEach(n=>n.placeholder=T(n.dataset.ph));
   document.querySelectorAll(".lng").forEach(box=>{box.innerHTML="";LANGS.forEach(([k,t])=>{const b=document.createElement("button");b.type="button";b.textContent=t;b.className=k===LANG?"on":"";b.onclick=()=>setLang(k);box.appendChild(b)})});
+  paintPreloadSwitch();
   if(!DATA)document.title=T("title");
 }
 function setLang(k){if(!UI[k])return;LANG=k;try{localStorage.setItem("c51tl:lang",k)}catch(e){}applyLang();
@@ -208,6 +216,259 @@ function setLang(k){if(!UI[k])return;LANG=k;try{localStorage.setItem("c51tl:lang
 function setTtl(l){$("pTtl").textContent=tr(l.subject)+" · "+lbl(l)+" · "+tr(l.title)}
 
 function toast(t){const n=$("toast");n.textContent=t;n.classList.add("on");clearTimeout(toast._t);toast._t=setTimeout(()=>n.classList.remove("on"),2400)}
+const preloadPreference = KEY + ":preload";
+const preloadLessons = new Map();
+let preloadWorker, preloadTimer, preloadActive, preloadOpening;
+let preloadOrder = [], preloadStart = 0, preloadLow = false;
+const connection = navigator.connection;
+let preloadOn = !(connection?.saveData || /^(?:slow-)?[23]g$/.test(connection?.effectiveType));
+try {
+  const saved = localStorage.getItem(preloadPreference);
+  if (saved === "on" || saved === "off") preloadOn = saved === "on";
+} catch {}
+
+function preloadURL(file, sha) {
+  const url = new URL(file, new URL("./", location.href));
+  url.searchParams.set("c51-sha", sha);
+  return url.href;
+}
+
+function paintPreload(entry) {
+  if (!entry.badge) return;
+  let label = "";
+  if (entry.state === "cached") label = T("preloadCached");
+  else if (preloadOn && !preloadLow) {
+    if (entry.state === "downloading") {
+      label = entry.percent == null ? T("preloadDownloading") : T("preloadPercent")(entry.percent);
+    } else label = T(entry.state === "failed" ? "preloadFailed" : "preloadQueued");
+  }
+  entry.badge.textContent = label;
+  entry.badge.hidden = !label;
+}
+
+function renderPreloadBadge(card) {
+  const entry = preloadLessons.get(card.dataset.file);
+  if (!entry) return;
+  entry.badge = document.createElement("span");
+  entry.badge.className = "preload-badge";
+  card.appendChild(entry.badge);
+  paintPreload(entry);
+}
+
+function paintPreloadSwitch() {
+  const toggle = $("preloadToggle");
+  toggle.checked = preloadOn && !preloadLow;
+  toggle.disabled = preloadLow;
+  $("preloadSetting").title = preloadLow ? T("preloadLow") : "";
+  $("preloadSetting").hidden = !preloadWorker;
+  preloadLessons.forEach(paintPreload);
+}
+
+function stopPreload() {
+  clearTimeout(preloadTimer);
+  preloadTimer = null;
+  preloadActive?.aborter.abort();
+}
+
+function workerCall(type, entry, { signal, progress } = {}) {
+  return new Promise((resolve, reject) => {
+    const channel = new MessageChannel();
+    const cancel = () => channel.port1.postMessage("cancel");
+    function finish() {
+      clearTimeout(timeout);
+      signal?.removeEventListener("abort", cancel);
+      channel.port1.close();
+    }
+    const timeout = setTimeout(() => {
+      cancel();
+      finish();
+      reject(new Error("Preload worker timed out"));
+    }, type === "preload" ? 95000 : 10000);
+    channel.port1.onmessage = ({ data }) => {
+      if ("percent" in data) {
+        if (!signal?.aborted) progress?.(data.percent);
+        return;
+      }
+      finish();
+      if (data.error) reject(new Error("Preload worker unavailable"));
+      else resolve(data);
+    };
+    signal?.addEventListener("abort", cancel, { once: true });
+    try {
+      preloadWorker.postMessage({ type, file: entry?.file, sha: entry?.sha }, [channel.port2]);
+      if (signal?.aborted) cancel();
+    } catch (error) {
+      finish();
+      reject(error);
+    }
+  });
+}
+
+function schedulePreload() {
+  if (!preloadWorker || !preloadOn || preloadLow || preloadTimer || preloadActive || preloadOpening) return;
+  const entry = preloadOrder.find(item => item.state === "queued");
+  if (!entry) return;
+  preloadTimer = setTimeout(() => {
+    preloadTimer = null;
+    downloadLesson(entry);
+  }, Math.max(0, preloadStart - Date.now()));
+}
+
+async function downloadLesson(entry) {
+  const aborter = new AbortController();
+  preloadActive = { entry, aborter };
+  entry.state = "downloading";
+  entry.percent = 0;
+  paintPreload(entry);
+  try {
+    // One attempt and at most two retries. A cancellation does not spend a retry.
+    for (let attempt = 0; attempt < 3 && !aborter.signal.aborted; attempt++) {
+      entry.percent = 0;
+      paintPreload(entry);
+      const result = await workerCall("preload", entry, {
+        signal: aborter.signal,
+        progress: percent => {
+          entry.percent = percent;
+          paintPreload(entry);
+        }
+      }).catch(() => ({}));
+      if (result.cached) {
+        entry.state = "cached";
+        return;
+      }
+      if (result.lowStorage) {
+        preloadLow = true;
+        paintPreloadSwitch();
+        return;
+      }
+    }
+    if (!aborter.signal.aborted) entry.state = "failed";
+  } finally {
+    if (entry.state === "downloading") entry.state = "queued";
+    preloadActive = null;
+    paintPreload(entry);
+    schedulePreload();
+  }
+}
+
+function setLessonFrame(lesson) {
+  const frame = $("lesson");
+  const entry = preloadLessons.get(lesson.file);
+  if (!entry) {
+    frame.src = lesson.file;
+    return;
+  }
+  if (entry.state !== "cached") {
+    clearTimeout(preloadTimer);
+    preloadTimer = null;
+    preloadOpening = { entry };
+    if (preloadActive?.entry !== entry) preloadActive?.aborter.abort();
+  } else if (preloadLow) {
+    preloadOpening = { entry };
+  }
+  frame.src = entry.key;
+}
+
+function lessonFrameLoaded() {
+  const opening = preloadOpening;
+  const frame = $("lesson");
+  if (!opening || frame.src !== opening.entry.key) return;
+  try {
+    if (frame.contentWindow.location.href === "about:blank") return;
+  } catch {}
+  refreshOpenedLesson(opening);
+}
+
+async function refreshOpenedLesson(opening) {
+  if (opening.refreshing) return;
+  opening.refreshing = true;
+  const entry = opening.entry;
+  const result = await workerCall("status", entry).catch(() => ({}));
+  if (result.cached) {
+    entry.state = "cached";
+    paintPreload(entry);
+  }
+  if (result.lowStorage) {
+    preloadLow = true;
+    if (result.cached) {
+      for (const other of preloadOrder) {
+        if (other !== entry && other.state === "cached") other.state = "queued";
+      }
+    }
+    paintPreloadSwitch();
+  }
+  if (preloadOpening === opening) preloadOpening = null;
+  schedulePreload();
+}
+
+function waitForPreloadWorker(serviceWorker, script) {
+  return new Promise(resolve => {
+    const check = () => {
+      if (serviceWorker.controller?.scriptURL === script) finish(serviceWorker.controller);
+    };
+    const finish = worker => {
+      clearTimeout(timeout);
+      serviceWorker.removeEventListener("controllerchange", check);
+      resolve(worker);
+    };
+    const timeout = setTimeout(() => finish(null), 5000);
+    serviceWorker.addEventListener("controllerchange", check);
+    check();
+  });
+}
+
+async function initPreload(manifest) {
+  const serviceWorker = navigator.serviceWorker;
+  if (!serviceWorker || !Array.isArray(manifest.items)) return;
+  const script = new URL("sw.js", new URL("./", location.href)).href;
+  try {
+    await serviceWorker.register(script, { scope: "./" });
+    preloadWorker = await waitForPreloadWorker(serviceWorker, script);
+    if (!preloadWorker) return;
+    const { keys } = await workerCall("sync");
+    const cached = new Set(keys);
+
+    const base = new URL("./", location.href);
+    const root = new URL("lessons/", base).pathname;
+    for (const item of manifest.items) {
+      if (typeof item?.file !== "string" || !/^[a-f0-9]{64}$/.test(item.sha)) continue;
+      const key = preloadURL(item.file, item.sha);
+      const url = new URL(key);
+      if (url.origin !== base.origin || !url.pathname.startsWith(root) ||
+          !/^[^/]+\.html$/.test(url.pathname.slice(root.length))) continue;
+      preloadLessons.set(item.file, { file: item.file, sha: item.sha, key,
+        state: cached.has(key) ? "cached" : "queued" });
+    }
+
+    // Use the rendered order because grouping can move cards relative to lessons.json.
+    for (const card of $("home").querySelectorAll(".card:not(:disabled)")) {
+      const entry = preloadLessons.get(card.dataset.file);
+      if (entry && !preloadOrder.includes(entry)) preloadOrder.push(entry);
+      renderPreloadBadge(card);
+    }
+    try {
+      const { quota, usage } = await navigator.storage.estimate();
+      preloadLow = Number.isFinite(quota) && Number.isFinite(usage) && quota - usage < 2 * 1024 ** 3;
+    } catch {}
+    paintPreloadSwitch();
+    schedulePreload();
+  } catch {
+    preloadWorker = null;
+    preloadLessons.clear();
+  }
+}
+
+$("preloadToggle").onchange = event => {
+  preloadOn = event.target.checked;
+  try { localStorage.setItem(preloadPreference, preloadOn ? "on" : "off"); } catch {}
+  if (!preloadOn) stopPreload();
+  paintPreloadSwitch();
+  schedulePreload();
+};
+$("lesson").addEventListener("load", lessonFrameLoaded);
+window.addEventListener("pagehide", stopPreload);
+window.addEventListener("pageshow", schedulePreload);
+
 function renderHome(){
   if(!FEISHU_NAME)$("whoBtn").textContent=st.name?("👤 "+st.name):T("who");
   const groups=[];
@@ -231,6 +492,7 @@ function renderHome(){
       if(ok)renderUnreplied(b,lid(l));
       const ns=ok?comments(l).length:0;
       {const sg=trStyle(l.style).split(" · "),dc={ccc:"#f08a24",codex:"#3b82f6"}[l.by];b.querySelector(".meta").innerHTML=esc(sg[0])+(dc?'<i class="mk" style="background:'+dc+'"></i>':"")+esc((sg.length>1?" · "+sg.slice(1).join(" · "):"")+(ns?" · "+T("nc")(ns):""))}
+      if(ok)renderPreloadBadge(b);
       b.disabled=!ok;
       b.dataset.lid=lid(l);
       b.onclick=()=>openLesson(l);
@@ -263,7 +525,7 @@ function openLesson(l){
   $("home").style.display="none";
   document.querySelector(".top").style.display="none";
   setTtl(l);
-  $("lesson").src=l.file;
+  setLessonFrame(l);
   markVerdict();renderList();
   loadHistory(l);
   clearInterval(tick);tick=setInterval(()=>$("pSec").textContent=fmt(curT()),500);
@@ -272,7 +534,10 @@ function closeLesson(){
   historyView=null;
   clearInterval(tick);
   $("player").classList.remove("on");
+  if (preloadOpening) refreshOpenedLesson(preloadOpening);
+  preloadOpening = null;
   $("lesson").src="about:blank";
+  schedulePreload();
   document.querySelector(".top").style.display="";
   $("home").style.display="";
   renderHome();
@@ -506,12 +771,16 @@ applyLang();
 
 Promise.all([
   fetch("lessons.json").then(r=>r.json()),
-  fetch("manifest.json").then(r=>r.ok?r.json():{items:[]}).catch(()=>({items:[]}))
+  fetch("manifest.json",{cache:"no-store"}).then(r=>r.ok?r.json():{items:[]}).then(m=>{
+    preloadStart=Date.now()+2000;
+    return m;
+  }).catch(()=>({items:[]}))
 ]).then(([d,m])=>{
   DATA=d;
   (m.items||[]).forEach(it=>{if(it.id&&it.sha)SHA[it.id]=it.sha});
   renderHome();
   loadSummary();
+  initPreload(m);
 });
 </script>
 </body>
