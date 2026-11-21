@@ -117,6 +117,14 @@
    "sha": "7695dd19bb21b5a5821511ca0c91ef9e431ee196c4fb7544ffc635533ce7aa3e"
   },
   {
+   "id": "kk-math-81-wow",
+   "no": 81,
+   "subject": "哈语数学",
+   "title": "数量关系与圆形图(CCC wow 试点)",
+   "file": "lessons/kk-math-81-wow.html",
+   "sha": "733f16bf4e484e368e99df4793f3c115aa4d142923c85941d464e85dffed445d"
+  },
+  {
    "id": "kk-math-82",
    "no": 82,
    "subject": "哈语数学",
