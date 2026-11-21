@@ -69,7 +69,8 @@ button{border:0;border-radius:12px;cursor:pointer;background:#eef1f5;color:var(-
 #clist .x{background:transparent;color:#fff;min-width:36px;min-height:36px}
 #clist .empty{color:#9aa3ad;padding:6px 0}
 #history{flex:0 1 auto;max-height:65%;min-height:0;overflow-y:auto;border-bottom:1px solid #2a3240}
-#history+.sh{flex:0 0 auto}
+#draftComments:not([hidden]){display:flex;flex:1 1 auto;flex-direction:column;min-height:0}
+#history:has(+ #draftComments[hidden]){max-height:100%}
 #history .sh{position:sticky;top:0;background:#12171f}
 #historyList{padding:0 12px}
 .history-sub{padding:8px 0;border-bottom:1px solid #2a3240;overflow-wrap:anywhere}
@@ -90,9 +91,6 @@ button{border:0;border-radius:12px;cursor:pointer;background:#eef1f5;color:var(-
 #dock button{flex:1 1 90px;min-height:48px;font-weight:800;font-size:15px;color:#fff}
 #bNote{background:#d4a017;color:#1a1300}
 #bPass{background:var(--g)}
-#bFail{background:var(--r)}
-#bSend{background:var(--acc)}
-#bBack{background:#2a3240}
 #bTop{background:#ffd56a;color:#1a1300;font-weight:800;font-size:15px;min-height:36px;padding:4px 14px;border-radius:8px;margin-right:12px;flex:0 0 auto}
 #dock button.on{outline:3px solid #fff}
 .lng{display:flex;gap:4px;flex:0 0 auto}
@@ -111,6 +109,7 @@ button{border:0;border-radius:12px;cursor:pointer;background:#eef1f5;color:var(-
 #cSave,#nameOk{background:var(--acc);color:#fff}
 #toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#12351f;color:#fff;border-radius:12px;padding:12px 18px;font-weight:700;display:none;z-index:70;max-width:92vw}
 #toast.on{display:block}
+.lesson-state{background:#fff0bd;color:#664600;font-size:13px;padding:4px 8px}
 </style>
 <style id="kzTheme">
 /* ccc-005 (K 261121): warm Kazakh look + phone layout. This block only restyles the rules above; the page logic is unchanged.
@@ -202,9 +201,6 @@ button:focus-visible{outline:3px solid var(--gold2);outline-offset:2px}
 #dock button:disabled{opacity:.6;cursor:wait}
 #bNote{background:#e0a526;color:#2a1a00}
 #bPass{background:var(--g)}
-#bFail{background:var(--r)}
-#bSend{background:var(--acc)}
-#bBack{background:var(--dkl);color:var(--cream)}
 #dock button.on{outline:3px solid #fff7e0;outline-offset:2px}
 /* dialogs, toast */
 .ov{background:rgba(23,14,6,.72)}
@@ -284,6 +280,7 @@ button:focus-visible{outline:3px solid var(--gold2);outline-offset:2px}
 
 <div id="player">
   <div id="bar"><button id="bTop" type="button" data-i="top">← 返回课程列表</button><span class="ttl" id="pTtl"></span><span id="pNewVersion" data-i="newVersion" aria-live="polite" hidden></span><div class="lng"></div><span class="sec" id="pSec">00:00</span></div>
+  <div id="pFix" class="lesson-state" role="status" hidden></div>
   <div id="pbody">
     <div id="stage"><iframe id="lesson" title="lesson" allow="fullscreen" allowfullscreen></iframe><button id="lessonRetry" type="button" data-i="retryLesson" hidden></button><div id="ph" data-i="making">制作中</div></div>
     <div id="side">
@@ -291,14 +288,11 @@ button:focus-visible{outline:3px solid var(--gold2);outline-offset:2px}
         <div class="sh" id="historyTitle" data-i="history"></div>
         <div id="historyList"></div>
       </section>
-      <div class="sh"><span data-i="cmts">本课评论</span><small data-i="cmtsHint">点时间跳到那一秒;✕ 删除</small></div><div id="clist"></div></div>
+      <div id="draftComments" hidden><div class="sh"><span data-i="cmts">本课评论</span><small data-i="cmtsHint">点时间跳到那一秒</small></div><div id="clist"></div></div></div>
   </div>
   <div id="dock">
-    <button id="bNote" type="button" data-i="note">评论</button>
-    <button id="bPass" type="button" data-i="pass">通过</button>
-    <button id="bFail" type="button" data-i="fail">不通过</button>
-    <button id="bSend" type="button" data-i="send">提交本课反馈</button>
-    <button id="bBack" type="button" data-i="back">← 返回列表</button>
+    <button id="bNote" type="button" data-i="note">暂停并评论</button>
+    <button id="bPass" type="button" data-i="pass" hidden>通过</button>
   </div>
 </div>
 
@@ -330,16 +324,28 @@ button:focus-visible{outline:3px solid var(--gold2);outline-offset:2px}
   <button id="roleRetry" type="button" data-i="roleRetry" hidden></button>
 </dialog>
 
-<div id="toast"></div>
+<div id="toast" role="status"></div>
 <script>
 const PAGE_ID="c51-feedback-v3";
 const AUTH_SITE=location.hostname==="review.ooii.top" ||
   (["localhost","127.0.0.1","[::1]"].includes(location.hostname)&&location.pathname.startsWith("/v3/"));
 let reviewerRole=null, reviewerAdmin=false, roleSaving=false, roleError="";
 const KEY="c51tl:"+PAGE_ID;
-let FEISHU_NAME="", DATA=null, SHA={}, st={name:"",v:{},c:{},cur:null};
-try{const s=JSON.parse(localStorage.getItem(KEY)||"null");if(s&&s.v&&s.c)st=Object.assign(st,s)}catch(e){}
-const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}};
+let FEISHU_NAME="", DATA=null, SHA={}, accountKey="";
+const draftKey=()=>accountKey?KEY+":"+accountKey:KEY;
+function loadDraft(){
+  try{
+    const draft=JSON.parse(localStorage.getItem(draftKey())||"null");
+    if(draft?.c)return draft;
+  }catch{}
+  return {name:"",c:{},cur:null};
+}
+let st=AUTH_SITE?{name:"",c:{},cur:null}:loadDraft();
+const save=()=>{try{if(!AUTH_SITE||accountKey)localStorage.setItem(draftKey(),JSON.stringify(st))}catch{}};
+let lessonStatus={}, statusReady=false, statusRequest=0;
+const mine=l=>Object.hasOwn(lessonStatus,lid(l))?lessonStatus[lid(l)]?.mine:statusReady?"unreviewed":null;
+const fixing=l=>Object.hasOwn(lessonStatus,lid(l))?lessonStatus[lid(l)]?.fixing:null;
+const CARD_STATES={pass:["g","stG"],fail:["r","stR"],recheck:["make","recheck"],unreviewed:["y","stY"]};
 const $=id=>document.getElementById(id);
 const esc=s=>String(s).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
 const fmt=s=>{s=Math.max(0,Math.floor(+s||0));return String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0")};
@@ -348,15 +354,14 @@ const made=l=>l.status!=="制作中"&&!!l.file;
 const shaOf=l=>SHA[lid(l)]||"";
 let viewing, openingLesson = false;
 const viewedSha=l=>viewing?.id===lid(l)?viewing.sha:"";
-const color=(l,sha=shaOf(l))=>{const v=st.v[lid(l)];if(v&&sha&&v.sha===sha)return v.v;/* J 261120 980:只写评论不点按钮 = 不通过 */return sha&&(st.c[lid(l)]||[]).some(x=>x.sha===sha)?"r":"y"};
 const comments=(l,sha=shaOf(l))=>(st.c[lid(l)]||[]).filter(x=>x.sha&&x.sha===sha).sort((a,b)=>a.s-b.s);
 /* J 261120 982:整页界面四语(中 / 英 / 俄 / 哈)切换;课件自己的语言按钮不归这里管 */
 const LANGS=[["zh","中"],["en","EN"],["ru","Рус"],["kk","Қаз"]];
 const UI={
- zh:{roleTitle:"选择你的身份",switchRole:"切换身份",role_kk_ru:"我是俄语和哈语的教师或教研",role_kk:"我是哈语老师或教研",role_ru:"我是俄语老师或教研",role_zh:"我是中文教研",role_none:"我不是老师或教研",roleLoadError:"暂时无法读取登录身份，请重试。",roleSaveError:"暂时无法保存身份，请重试。",roleRetry:"重试",merged:"已合并",conflict:"反馈冲突",conflictWith:name=>"您的反馈和 "+name+" 的修改意见有冲突，请直接联系该用户",fixedIn:v=>"已在 "+v+" 修改",newVersion:"有新版",retryLesson:"下载失败，重试",preload:"后台预加载",preloadCached:"已缓存 ✓",preloadDownloading:"正在下载…",preloadPercent:n=>"正在下载 "+n+"%",preloadQueued:"排队中",preloadFailed:"下载失败",preloadLow:"可用空间不足 2 GB，后台预加载已暂停",history:"以往评论",fixed:"已改",nochange:"不改",wip:"处理中",unreplied:"未回复",oldVersion:"旧版",beijing:"北京时间",unrepliedCount:n=>n+" 条未回复评论",title:"看课评审",who:"填名字",top:"← 返回课程列表",making:"制作中",cmts:"本课评论",cmtsHint:"点时间跳到那一秒;✕ 删除",note:"评论",pass:"通过",fail:"不通过",send:"提交本课反馈",back:"← 返回列表",cmtSub:"课件已暂停。写一句就行,可以写多条。",cmtPh:"哪里不对?",cancel:"取消",save:"保存",nmTtl:"先填你的名字",nmSub:"只在第一次提交前问一次,存在这台设备上,之后不再问。",nmPh:"你的名字",ok:"确定",stG:"通过",stR:"不通过",stY:"没判",stM:"制作中",empty:"还没有评论",del:"删除",lesson:n=>"第 "+n+" 课",nc:n=>"意见 "+n+" 条",docT:(g,r,a)=>"看课评审 · 通过 "+g+" · 不通过 "+r+" / "+a,noSha:"这节课的校验还没载入,稍后再试",needV:"先点通过或不通过,或写一条评论",sending:"正在提交…",sent:"已提交,谢谢",offline:"网络不通,已存在本机,恢复后自动补交"},
- en:{roleTitle:"Choose your role",switchRole:"Switch role",role_kk_ru:"I teach or develop curricula for both Russian and Kazakh",role_kk:"I teach or develop curricula for Kazakh",role_ru:"I teach or develop curricula for Russian",role_zh:"I develop Chinese-language curricula",role_none:"I am neither a teacher nor a curriculum specialist",roleLoadError:"Could not load your account. Try again.",roleSaveError:"Could not save your role. Try again.",roleRetry:"Try again",merged:"Merged",conflict:"Conflicting feedback",conflictWith:name=>"Your feedback conflicts with "+name+"’s suggested changes. Please contact them directly.",fixedIn:v=>"Fixed in "+v,newVersion:"New version available",retryLesson:"Download failed. Retry",preload:"Background preload",preloadCached:"Cached ✓",preloadDownloading:"Downloading…",preloadPercent:n=>"Downloading "+n+"%",preloadQueued:"Queued",preloadFailed:"Download failed",preloadLow:"Background preload paused because less than 2 GB is available",history:"Previous comments",fixed:"Fixed",nochange:"No change",wip:"In progress",unreplied:"Awaiting reply",oldVersion:"Older version",beijing:"Beijing time",unrepliedCount:n=>"Comments awaiting reply: "+n,title:"Lesson review",who:"Enter name",top:"← Back to lesson list",making:"In production",cmts:"Comments on this lesson",cmtsHint:"Tap a time to jump there; ✕ deletes",note:"Comment",pass:"Pass",fail:"Fail",send:"Submit feedback",back:"← Back to list",cmtSub:"The lesson is paused. One sentence is enough; you can add several.",cmtPh:"What is wrong?",cancel:"Cancel",save:"Save",nmTtl:"Enter your name first",nmSub:"Asked only once before your first submission and saved on this device.",nmPh:"Your name",ok:"OK",stG:"Passed",stR:"Failed",stY:"Not rated",stM:"In production",empty:"No comments yet",del:"Delete",lesson:n=>"Lesson "+n,nc:n=>n+(n===1?" comment":" comments"),docT:(g,r,a)=>"Lesson review · passed "+g+" · failed "+r+" / "+a,noSha:"This lesson's checksum has not loaded yet. Try again shortly.",needV:"Tap Pass or Fail, or write a comment first",sending:"Submitting…",sent:"Submitted. Thank you!",offline:"Offline. Saved on this device and will be sent automatically."},
- ru:{roleTitle:"Выберите свою роль",switchRole:"Сменить роль",role_kk_ru:"Я учитель или методист по русскому и казахскому языкам",role_kk:"Я учитель или методист по казахскому языку",role_ru:"Я учитель или методист по русскому языку",role_zh:"Я методист по китайскому языку",role_none:"Я не учитель и не методист",roleLoadError:"Не удалось загрузить данные вашей учётной записи. Попробуйте ещё раз.",roleSaveError:"Не удалось сохранить роль. Попробуйте ещё раз.",roleRetry:"Повторить",merged:"Объединено",conflict:"Противоречивые замечания",conflictWith:name=>"Ваше замечание противоречит правкам, которые предложил пользователь "+name+". Пожалуйста, свяжитесь с этим пользователем напрямую.",fixedIn:v=>"Исправлено в версии "+v,newVersion:"Доступна новая версия",retryLesson:"Ошибка загрузки. Повторить",preload:"Фоновая загрузка",preloadCached:"В кэше ✓",preloadDownloading:"Загрузка…",preloadPercent:n=>"Загрузка "+n+"%",preloadQueued:"В очереди",preloadFailed:"Ошибка загрузки",preloadLow:"Фоновая загрузка приостановлена, доступно менее 2 ГБ",history:"Предыдущие комментарии",fixed:"Исправлено",nochange:"Без изменений",wip:"В работе",unreplied:"Без ответа",oldVersion:"Старая версия",beijing:"Пекинское время",unrepliedCount:n=>"Комментариев без ответа: "+n,title:"Отзыв об уроках",who:"Введите имя",top:"← К списку уроков",making:"В работе",cmts:"Комментарии к уроку",cmtsHint:"Нажмите на время, чтобы перейти; ✕ удалить",note:"Комментарий",pass:"Принято",fail:"Не принято",send:"Отправить отзыв",back:"← К списку",cmtSub:"Урок на паузе. Достаточно одной фразы, можно написать несколько.",cmtPh:"Что не так?",cancel:"Отмена",save:"Сохранить",nmTtl:"Сначала введите своё имя",nmSub:"Спросим один раз перед первой отправкой, имя сохранится на этом устройстве.",nmPh:"Ваше имя",ok:"Готово",stG:"Принято",stR:"Не принято",stY:"Не оценено",stM:"В работе",empty:"Пока нет комментариев",del:"Удалить",lesson:n=>"Урок "+n,nc:n=>"замечаний: "+n,docT:(g,r,a)=>"Отзыв об уроках · принято "+g+" · не принято "+r+" / "+a,noSha:"Проверка урока ещё не загрузилась, попробуйте чуть позже",needV:"Сначала нажмите «Принято» или «Не принято» либо напишите комментарий",sending:"Отправляем…",sent:"Отправлено, спасибо!",offline:"Нет сети. Сохранено на устройстве, отправится автоматически."},
- kk:{roleTitle:"Рөліңізді таңдаңыз",switchRole:"Рөлді ауыстыру",role_kk_ru:"Мен орыс және қазақ тілдерінің мұғалімімін немесе әдіскерімін",role_kk:"Мен қазақ тілінің мұғалімімін немесе әдіскерімін",role_ru:"Мен орыс тілінің мұғалімімін немесе әдіскерімін",role_zh:"Мен қытай тілінің әдіскерімін",role_none:"Мен мұғалім де, әдіскер де емеспін",roleLoadError:"Аккаунт деректері жүктелмеді. Қайталап көріңіз.",roleSaveError:"Рөліңіз сақталмады. Қайталап көріңіз.",roleRetry:"Қайталау",merged:"Біріктірілді",conflict:"Қайшы пікірлер",conflictWith:name=>"Сіздің пікіріңіз "+name+" ұсынған түзетулермен қайшы келеді. Сол пайдаланушымен тікелей байланысыңыз.",fixedIn:v=>v+" нұсқасында түзетілді",newVersion:"Жаңа нұсқа бар",retryLesson:"Жүктеу сәтсіз. Қайталау",preload:"Фондық жүктеу",preloadCached:"Кэште ✓",preloadDownloading:"Жүктелуде…",preloadPercent:n=>"Жүктелуде "+n+"%",preloadQueued:"Кезекте",preloadFailed:"Жүктеу сәтсіз аяқталды",preloadLow:"Бос орын 2 ГБ-тан аз, фондық жүктеу тоқтатылды",history:"Бұрынғы пікірлер",fixed:"Түзетілді",nochange:"Өзгеріссіз",wip:"Орындалуда",unreplied:"Жауап жоқ",oldVersion:"Бұрынғы нұсқа",beijing:"Бейжің уақыты",unrepliedCount:n=>"Жауапсыз пікірлер: "+n,title:"Сабақтарды бағалау",who:"Атыңызды жазыңыз",top:"← Сабақтар тізіміне",making:"Дайындалуда",cmts:"Сабаққа пікірлер",cmtsHint:"Уақытты бассаңыз, сол секундқа өтеді; ✕ өшіру",note:"Пікір",pass:"Өтті",fail:"Өтпеді",send:"Пікірді жіберу",back:"← Тізімге",cmtSub:"Сабақ кідіртілді. Бір сөйлем жеткілікті, бірнешеуін жазуға болады.",cmtPh:"Не дұрыс емес?",cancel:"Болдырмау",save:"Сақтау",nmTtl:"Алдымен атыңызды жазыңыз",nmSub:"Алғашқы жіберу алдында бір рет қана сұралады, осы құрылғыда сақталады.",nmPh:"Атыңыз",ok:"Дайын",stG:"Өтті",stR:"Өтпеді",stY:"Бағаланбаған",stM:"Дайындалуда",empty:"Әзірге пікір жоқ",del:"Өшіру",lesson:n=>n+"-сабақ",nc:n=>"пікір: "+n,docT:(g,r,a)=>"Сабақтарды бағалау · өтті "+g+" · өтпеді "+r+" / "+a,noSha:"Сабақ тексерісі әлі жүктелмеді, сәлден кейін қайталаңыз",needV:"Алдымен «Өтті» не «Өтпеді» басыңыз немесе пікір жазыңыз",sending:"Жіберілуде…",sent:"Жіберілді, рахмет!",offline:"Желі жоқ. Құрылғыда сақталды, желі қосылғанда өзі жіберіледі."}
+ zh:{roleTitle:"选择你的身份",switchRole:"切换身份",role_kk_ru:"我是俄语和哈语的教师或教研",role_kk:"我是哈语老师或教研",role_ru:"我是俄语老师或教研",role_zh:"我是中文教研",role_none:"我不是老师或教研",roleLoadError:"暂时无法读取登录身份，请重试。",roleSaveError:"暂时无法保存身份，请重试。",roleRetry:"重试",merged:"已合并",conflict:"反馈冲突",conflictWith:name=>"您的反馈和 "+name+" 的修改意见有冲突，请直接联系该用户",fixedIn:v=>"已在 "+v+" 修改",newVersion:"有新版",retryLesson:"下载失败，重试",preload:"后台预加载",preloadCached:"已缓存 ✓",preloadDownloading:"正在下载…",preloadPercent:n=>"正在下载 "+n+"%",preloadQueued:"排队中",preloadFailed:"下载失败",preloadLow:"可用空间不足 2 GB，后台预加载已暂停",history:"以往评论",fixed:"已改",nochange:"不改",wip:"处理中",unreplied:"未回复",oldVersion:"旧版",beijing:"北京时间",unrepliedCount:n=>n+" 条未回复评论",title:"看课评审",who:"填名字",top:"← 返回课程列表",making:"制作中",cmts:"本课评论",cmtsHint:"点时间跳到那一秒",note:"暂停并评论",pass:"通过",cmtSub:"课件已暂停。写一句就行,可以写多条。",cmtPh:"哪里不对?",cancel:"取消",save:"保存",nmTtl:"先填你的名字",nmSub:"只在第一次提交前问一次,存在这台设备上,之后不再问。",nmPh:"你的名字",ok:"确定",stG:"通过",stR:"不通过",stY:"没判",stM:"制作中",empty:"还没有评论",del:"删除",lesson:n=>"第 "+n+" 课",nc:n=>"意见 "+n+" 条",docT:(g,r,a)=>"看课评审 · 通过 "+g+" · 不通过 "+r+" / "+a,noSha:"这节课的校验还没载入,稍后再试",sent:"已保存",offline:"待重发",edit:"编辑",passBlocked:"还有待处理的评论"},
+ en:{roleTitle:"Choose your role",switchRole:"Switch role",role_kk_ru:"I teach or develop curricula for both Russian and Kazakh",role_kk:"I teach or develop curricula for Kazakh",role_ru:"I teach or develop curricula for Russian",role_zh:"I develop Chinese-language curricula",role_none:"I am neither a teacher nor a curriculum specialist",roleLoadError:"Could not load your account. Try again.",roleSaveError:"Could not save your role. Try again.",roleRetry:"Try again",merged:"Merged",conflict:"Conflicting feedback",conflictWith:name=>"Your feedback conflicts with "+name+"’s suggested changes. Please contact them directly.",fixedIn:v=>"Fixed in "+v,newVersion:"New version available",retryLesson:"Download failed. Retry",preload:"Background preload",preloadCached:"Cached ✓",preloadDownloading:"Downloading…",preloadPercent:n=>"Downloading "+n+"%",preloadQueued:"Queued",preloadFailed:"Download failed",preloadLow:"Background preload paused because less than 2 GB is available",history:"Previous comments",fixed:"Fixed",nochange:"No change",wip:"In progress",unreplied:"Awaiting reply",oldVersion:"Older version",beijing:"Beijing time",unrepliedCount:n=>"Comments awaiting reply: "+n,title:"Lesson review",who:"Enter name",top:"← Back to lesson list",making:"In production",cmts:"Comments on this lesson",cmtsHint:"Tap a time to jump there",note:"Pause and comment",pass:"Pass",cmtSub:"The lesson is paused. One sentence is enough; you can add several.",cmtPh:"What is wrong?",cancel:"Cancel",save:"Save",nmTtl:"Enter your name first",nmSub:"Asked only once before your first submission and saved on this device.",nmPh:"Your name",ok:"OK",stG:"Passed",stR:"Failed",stY:"Not rated",stM:"In production",empty:"No comments yet",del:"Delete",lesson:n=>"Lesson "+n,nc:n=>n+(n===1?" comment":" comments"),docT:(g,r,a)=>"Lesson review · passed "+g+" · failed "+r+" / "+a,noSha:"This lesson's checksum has not loaded yet. Try again shortly.",sent:"Saved",offline:"Waiting to retry",edit:"Edit",passBlocked:"There are unresolved comments"},
+ ru:{roleTitle:"Выберите свою роль",switchRole:"Сменить роль",role_kk_ru:"Я учитель или методист по русскому и казахскому языкам",role_kk:"Я учитель или методист по казахскому языку",role_ru:"Я учитель или методист по русскому языку",role_zh:"Я методист по китайскому языку",role_none:"Я не учитель и не методист",roleLoadError:"Не удалось загрузить данные вашей учётной записи. Попробуйте ещё раз.",roleSaveError:"Не удалось сохранить роль. Попробуйте ещё раз.",roleRetry:"Повторить",merged:"Объединено",conflict:"Противоречивые замечания",conflictWith:name=>"Ваше замечание противоречит правкам, которые предложил пользователь "+name+". Пожалуйста, свяжитесь с этим пользователем напрямую.",fixedIn:v=>"Исправлено в версии "+v,newVersion:"Доступна новая версия",retryLesson:"Ошибка загрузки. Повторить",preload:"Фоновая загрузка",preloadCached:"В кэше ✓",preloadDownloading:"Загрузка…",preloadPercent:n=>"Загрузка "+n+"%",preloadQueued:"В очереди",preloadFailed:"Ошибка загрузки",preloadLow:"Фоновая загрузка приостановлена, доступно менее 2 ГБ",history:"Предыдущие комментарии",fixed:"Исправлено",nochange:"Без изменений",wip:"В работе",unreplied:"Без ответа",oldVersion:"Старая версия",beijing:"Пекинское время",unrepliedCount:n=>"Комментариев без ответа: "+n,title:"Отзыв об уроках",who:"Введите имя",top:"← К списку уроков",making:"В работе",cmts:"Комментарии к уроку",cmtsHint:"Нажмите на время, чтобы перейти",note:"Приостановить и прокомментировать",pass:"Принято",cmtSub:"Урок на паузе. Достаточно одной фразы, можно написать несколько.",cmtPh:"Что не так?",cancel:"Отмена",save:"Сохранить",nmTtl:"Сначала введите своё имя",nmSub:"Спросим один раз перед первой отправкой, имя сохранится на этом устройстве.",nmPh:"Ваше имя",ok:"Готово",stG:"Принято",stR:"Не принято",stY:"Не оценено",stM:"В работе",empty:"Пока нет комментариев",del:"Удалить",lesson:n=>"Урок "+n,nc:n=>"замечаний: "+n,docT:(g,r,a)=>"Отзыв об уроках · принято "+g+" · не принято "+r+" / "+a,noSha:"Проверка урока ещё не загрузилась, попробуйте чуть позже",sent:"Сохранено",offline:"Ожидает повторной отправки",edit:"Изменить",passBlocked:"Есть незакрытые замечания"},
+ kk:{roleTitle:"Рөліңізді таңдаңыз",switchRole:"Рөлді ауыстыру",role_kk_ru:"Мен орыс және қазақ тілдерінің мұғалімімін немесе әдіскерімін",role_kk:"Мен қазақ тілінің мұғалімімін немесе әдіскерімін",role_ru:"Мен орыс тілінің мұғалімімін немесе әдіскерімін",role_zh:"Мен қытай тілінің әдіскерімін",role_none:"Мен мұғалім де, әдіскер де емеспін",roleLoadError:"Аккаунт деректері жүктелмеді. Қайталап көріңіз.",roleSaveError:"Рөліңіз сақталмады. Қайталап көріңіз.",roleRetry:"Қайталау",merged:"Біріктірілді",conflict:"Қайшы пікірлер",conflictWith:name=>"Сіздің пікіріңіз "+name+" ұсынған түзетулермен қайшы келеді. Сол пайдаланушымен тікелей байланысыңыз.",fixedIn:v=>v+" нұсқасында түзетілді",newVersion:"Жаңа нұсқа бар",retryLesson:"Жүктеу сәтсіз. Қайталау",preload:"Фондық жүктеу",preloadCached:"Кэште ✓",preloadDownloading:"Жүктелуде…",preloadPercent:n=>"Жүктелуде "+n+"%",preloadQueued:"Кезекте",preloadFailed:"Жүктеу сәтсіз аяқталды",preloadLow:"Бос орын 2 ГБ-тан аз, фондық жүктеу тоқтатылды",history:"Бұрынғы пікірлер",fixed:"Түзетілді",nochange:"Өзгеріссіз",wip:"Орындалуда",unreplied:"Жауап жоқ",oldVersion:"Бұрынғы нұсқа",beijing:"Бейжің уақыты",unrepliedCount:n=>"Жауапсыз пікірлер: "+n,title:"Сабақтарды бағалау",who:"Атыңызды жазыңыз",top:"← Сабақтар тізіміне",making:"Дайындалуда",cmts:"Сабаққа пікірлер",cmtsHint:"Уақытты бассаңыз, сол секундқа өтеді",note:"Кідіртіп, пікір жазу",pass:"Өтті",cmtSub:"Сабақ кідіртілді. Бір сөйлем жеткілікті, бірнешеуін жазуға болады.",cmtPh:"Не дұрыс емес?",cancel:"Болдырмау",save:"Сақтау",nmTtl:"Алдымен атыңызды жазыңыз",nmSub:"Алғашқы жіберу алдында бір рет қана сұралады, осы құрылғыда сақталады.",nmPh:"Атыңыз",ok:"Дайын",stG:"Өтті",stR:"Өтпеді",stY:"Бағаланбаған",stM:"Дайындалуда",empty:"Әзірге пікір жоқ",del:"Өшіру",lesson:n=>n+"-сабақ",nc:n=>"пікір: "+n,docT:(g,r,a)=>"Сабақтарды бағалау · өтті "+g+" · өтпеді "+r+" / "+a,noSha:"Сабақ тексерісі әлі жүктелмеді, сәлден кейін қайталаңыз",sent:"Сақталды",offline:"Қайта жіберуді күтуде",edit:"Өңдеу",passBlocked:"Жабылмаған пікірлер бар"}
 };
 /* 分组名 / 风格 / 课名:按中文原值查表,查不到显示中文原值(新加的课先显示中文,在这里补一行即可) */
 const TR={
@@ -392,7 +397,29 @@ const pickLang=()=>{try{const q=new URLSearchParams(location.search).get("lang")
   try{const s=localStorage.getItem("c51tl:lang");if(s&&UI[s])return s}catch(e){}
   const n=(navigator.language||"").toLowerCase().slice(0,2);return UI[n]?n:"zh"};
 let LANG=pickLang();
-const T=k=>UI[LANG][k]!==undefined?UI[LANG][k]:UI.zh[k];
+const REVIEW_UI={
+  zh:{recheck:"待复查",stY:"没判",fixing:"修复中 · 意见将排入下一批",pending:"待处理",
+    queued:"排队下一批",queuedBy:b=>"批次 "+b+" 结束后转待处理",wip:"本批修复中",
+    batchLabel:b=>"批次 "+b,mergedInto:(sub,idx)=>"合并至 #"+sub+":"+idx,
+    tooLarge:"评论太长，请缩短后再提交",
+    docT:(g,r,c,a)=>"看课评审 · 通过 "+g+" · 不通过 "+r+" · 待复查 "+c+" / "+a},
+  en:{recheck:"Ready for recheck",stY:"Not reviewed",fixing:"Fixes in progress · New feedback goes to the next batch",
+    pending:"Pending",queued:"Queued for the next batch",queuedBy:b=>"Pending once batch "+b+" closes",
+    wip:"Being fixed in this batch",batchLabel:b=>"Batch "+b,mergedInto:(sub,idx)=>"Merged into #"+sub+":"+idx,
+    tooLarge:"Shorten your comments and try again",
+    docT:(g,r,c,a)=>"Lesson review · Passed "+g+" · Failed "+r+" · Ready for recheck "+c+" / "+a},
+  ru:{recheck:"На повторной проверке",stY:"Не оценено",fixing:"Идёт исправление · Новые замечания войдут в следующий пакет",
+    pending:"Ожидает обработки",queued:"В очереди на следующий пакет",queuedBy:b=>"Ожидает завершения пакета "+b,
+    wip:"Исправляется в текущем пакете",batchLabel:b=>"Пакет "+b,mergedInto:(sub,idx)=>"Объединено с #"+sub+":"+idx,
+    tooLarge:"Сократите комментарии и попробуйте снова",
+    docT:(g,r,c,a)=>"Оценка уроков · Принято "+g+" · Не принято "+r+" · На повторной проверке "+c+" / "+a},
+  kk:{recheck:"Қайта тексеруге дайын",stY:"Бағаланбаған",fixing:"Түзетіліп жатыр · Жаңа пікірлер келесі топтамаға қосылады",
+    pending:"Өңдеуді күтуде",queued:"Келесі топтама кезегінде",queuedBy:b=>b+" топтамасы аяқталғанын күтуде",
+    wip:"Осы топтамада түзетіліп жатыр",batchLabel:b=>"Топтама "+b,mergedInto:(sub,idx)=>"#"+sub+":"+idx+" пікірімен біріктірілді",
+    tooLarge:"Пікірлерді қысқартып, қайта жіберіңіз",
+    docT:(g,r,c,a)=>"Сабақтарды бағалау · Өтті "+g+" · Өтпеді "+r+" · Қайта тексеруге дайын "+c+" / "+a}
+};
+const T=k=>REVIEW_UI[LANG][k]??UI[LANG][k]??UI.zh[k];
 const tr=z=>{if(!z||LANG==="zh")return z||"";const m=TR[z];return m&&m[LANG]?m[LANG]:z};
 const trStyle=z=>String(z||"").split(" · ").map(tr).join(" · ");
 const lbl=l=>l.label||T("lesson")(l.no);
@@ -411,7 +438,12 @@ function applyLang(){
 }
 function setLang(k){if(!UI[k])return;LANG=k;try{localStorage.setItem("c51tl:lang",k)}catch(e){}applyLang();
   if(DATA){renderHome();const l=curLesson();if($("player").classList.contains("on")&&l){setTtl(l);renderList();renderHistory(l)}}}
-function setTtl(l){$("pTtl").textContent=tr(l.subject)+" · "+lbl(l)+" · "+tr(l.title)}
+function setTtl(l){$("pTtl").textContent=tr(l.subject)+" · "+lbl(l)+" · "+tr(l.title);paintFixBanner($("pFix"),l)}
+function paintFixBanner(node,l){
+  const active=fixing(l);
+  node.hidden=!active;
+  node.textContent=active?T("fixing"):"";
+}
 
 function toast(t){const n=$("toast");n.textContent=t;n.classList.add("on");clearTimeout(toast._t);toast._t=setTimeout(()=>n.classList.remove("on"),2400)}
 const preloadPreference = KEY + ":preload";
@@ -599,6 +631,7 @@ function lessonFrameLoaded() {
     $("lessonRetry").hidden = false;
   }
   if (preloadOpening) refreshOpenedLesson(preloadOpening);
+  paintReviewActions();
 }
 
 async function refreshOpenedLesson(opening) {
@@ -727,6 +760,7 @@ function applyManifest(manifest, cached) {
     preloadLessons.clear();
     next.forEach((entry, file) => preloadLessons.set(file, entry));
     SHA = shas;
+    loadReviewStatus();
     renderHome();
     updatePreloadOrder();
     if (viewing) {
@@ -750,12 +784,15 @@ window.addEventListener("pageshow", event => {
   if (event.persisted && DATA) refreshManifest();
   schedulePreload();
 });
-document.addEventListener("visibilitychange", () => {
-  if (!document.hidden && DATA) refreshManifest();
-});
-setInterval(() => {
-  if (viewing && !document.hidden) refreshManifest();
-}, manifestInterval);
+async function refreshReview(){
+  if(document.hidden||!DATA)return;
+  await refreshManifest();
+  loadReviewStatus();
+  loadSummary();
+  if(viewing)loadHistory(curLesson());
+}
+document.addEventListener("visibilitychange",refreshReview);
+setInterval(refreshReview,manifestInterval);
 
 function updatePreloadOrder(){
   // Use the rendered order because grouping can move cards relative to lessons.json.
@@ -775,23 +812,32 @@ function renderHome(){
   lessons.forEach(l=>{let g=groups.find(x=>x.s===l.subject);if(!g)groups.push(g={s:l.subject,ls:[]});g.ls.push(l)});
   const h=$("home");h.innerHTML="";
   const ready=lessons.filter(made);
-  let ng=0,nr=0;
+  let ng=0,nr=0,nc=0;
   groups.forEach(g=>{
     const t=document.createElement("div");t.className="grp";t.textContent=tr(g.s);h.appendChild(t);
     const c=document.createElement("div");c.className="cards";
     g.ls.forEach(l=>{
-      const ok=made(l), col=ok?color(l):"";
-      if(col==="g")ng++; else if(col==="r")nr++;
+      const ok=made(l), state=ok?mine(l):null;
+      const [col,label]=CARD_STATES[state]??["",""];
+      if(state==="pass")ng++; else if(state==="fail")nr++; else if(state==="recheck")nc++;
       const b=document.createElement("button");
       b.type="button";
-      b.className="card"+(ok?" "+col:" off");
+      b.className="card"+(ok?(col?" "+col:""):" off");
       b.dataset.file=l.file||"";
-      const badge=ok?(col==="g"?'<span class="st g">'+esc(T("stG"))+'</span>':col==="r"?'<span class="st r">'+esc(T("stR"))+'</span>':'<span class="st y">'+esc(T("stY"))+'</span>'):'<span class="st make">'+esc(T("stM"))+'</span>';
+      if(state)b.dataset.reviewState=state;
+      const badge=ok?(label?'<span class="st '+col+'">'+esc(T(label))+'</span>':""):'<span class="st make">'+esc(T("stM"))+'</span>';
       b.innerHTML=(ok&&l.thumb?'<img class="th" alt="" src="'+l.thumb+'">':'')+'<div class="hd"><span class="no">'+esc(lbl(l))+'</span>'+badge+'</div><div class="tt"></div><div class="meta"></div>';
       b.querySelector(".tt").textContent=tr(l.title);
-      if(ok)renderUnreplied(b,lid(l));
-      const ns=ok?comments(l).length:0;
-      {const sg=trStyle(l.style).split(" · "),dc={ccc:"#f08a24",codex:"#3b82f6"}[l.by];b.querySelector(".meta").innerHTML=esc(sg[0])+(dc?'<i class="mk" style="background:'+dc+'"></i>':"")+esc((sg.length>1?" · "+sg.slice(1).join(" · "):"")+(ns?" · "+T("nc")(ns):""))}
+      if(ok){
+        renderUnreplied(b,lid(l));
+        if(fixing(l)){
+          const banner=document.createElement("div");
+          banner.className="lesson-state";
+          paintFixBanner(banner,l);
+          b.appendChild(banner);
+        }
+      }
+      {const sg=trStyle(l.style).split(" · "),dc={ccc:"#f08a24",codex:"#3b82f6"}[l.by];b.querySelector(".meta").innerHTML=esc(sg[0])+(dc?'<i class="mk" style="background:'+dc+'"></i>':"")+esc(sg.length>1?" · "+sg.slice(1).join(" · "):"")}
       if(ok)renderPreloadBadge(b);
       b.disabled=!ok;
       b.dataset.lid=lid(l);
@@ -800,10 +846,10 @@ function renderHome(){
     });
     h.appendChild(c);
   });
-  document.title=AUTH_SITE&&reviewerRole===null?T("title"):T("docT")(ng,nr,ready.length);
+  document.title=AUTH_SITE&&reviewerRole===null?T("title"):T("docT")(ng,nr,nc,ready.length);
 }
 
-let tick=null, pendingS=0, resumeAfter=false, afterName=null;
+let tick=null, pendingS=0, resumeAfter=false, editingComment=null;
 function curT(){try{const w=$("lesson").contentWindow,s=w.__state&&w.__state();if(s&&isFinite(s.t))return s.t;
   const a=w.document.querySelector("audio,video");if(a&&isFinite(a.currentTime))return a.currentTime}catch(e){}return 0}
 function playing(){try{const w=$("lesson").contentWindow,s=w.__state&&w.__state();
@@ -821,17 +867,18 @@ let homeY=0;
 async function openLesson(l){
   if(openingLesson||viewing)return;
   openingLesson=true;
+  homeY=window.scrollY||document.documentElement.scrollTop||0;
   await preloadInit;
   await refreshManifest();
   openingLesson=false;
-  homeY=window.scrollY||document.documentElement.scrollTop||0;
   st.cur=lid(l);save();
   $("player").classList.add("on");
   $("home").style.display="none";
   document.querySelector(".top").style.display="none";
   setTtl(l);
+  loadReviewStatus();
   setLessonFrame(l);
-  markVerdict();renderList();
+  paintReviewActions();renderList();
   loadHistory(l);
   clearInterval(tick);tick=setInterval(()=>$("pSec").textContent=fmt(curT()),500);
 }
@@ -848,34 +895,73 @@ async function closeLesson(){
   renderHome();
   loadSummary();
   await refreshManifest();
+  loadReviewStatus();
   // 回到目录时停在刚才进去的位置,并让刚看的那张课卡在视野里(K 261121)
   requestAnimationFrame(()=>{window.scrollTo(0,homeY);
     const card=st.cur&&document.querySelector('[data-lid="'+CSS.escape(st.cur)+'"]');
     if(card){const r=card.getBoundingClientRect();if(r.top<0||r.bottom>innerHeight)card.scrollIntoView({block:"center"});
       card.classList.add("last");setTimeout(()=>card.classList.remove("last"),1600)}});
 }
-function markVerdict(){const l=curLesson();const v=l&&st.v[lid(l)];const on=v&&v.sha===viewedSha(l)?v.v:"";
-  $("bPass").classList.toggle("on",on==="g");$("bFail").classList.toggle("on",on==="r")}
+function paintReviewActions(){
+  const l=curLesson();
+  if(!l||!viewing)return;
+  const queued=queueGet().filter(record=>record.lesson===lid(l));
+  const pass=$("bPass");
+  const status=lessonStatus[lid(l)];
+  pass.hidden=!statusReady||status?.has_open_comments!==false||
+    queued.some(record=>record.comment_action==="create"||record.comment_action==="edit"||record.comments?.length);
+  pass.disabled=!viewing.ready||queued.some(record=>record.verdict==="g");
+  pass.classList.toggle("on",status?.mine==="pass"&&viewedSha(l)===shaOf(l));
+  $("bNote").disabled=!viewing.ready;
+}
+function addCommentActions(box,it,remove){
+  const edit=document.createElement("button");
+  edit.type="button";edit.className="comment-edit";edit.textContent=T("edit");
+  edit.onclick=()=>openComment(it);
+  const del=document.createElement("button");
+  del.type="button";del.className="x";del.textContent="✕";
+  del.setAttribute("aria-label",T("del"));
+  del.onclick=remove;
+  box.append(edit,del);
+}
 function renderList(){
   const l=curLesson();const box=$("clist");if(!l){box.innerHTML="";return}
-  const cs=comments(l,viewedSha(l));
-  box.innerHTML=cs.length?"":'<div class="empty">'+esc(T("empty"))+'</div>';
-  cs.forEach(it=>{
+  const sha=viewedSha(l);
+  const pending=new Map();
+  for(const record of queueGet()){
+    if(record.lesson!==lid(l)||record.sha!==sha||!record.comment_id)continue;
+    if(record.comment_action==="delete")pending.delete(record.comment_id);
+    else pending.set(record.comment_id,{...record.comments[0],id:record.comment_id,sha});
+  }
+  const drafts=comments(l,sha);
+  const cs=[...drafts,...pending.values()].sort((a,b)=>a.s-b.s);
+  box.replaceChildren();
+  $("draftComments").hidden=!cs.length;
+  for(const it of cs){
     const d=document.createElement("div");d.className="it";
-    d.innerHTML='<button class="tm" type="button"></button><span class="tx"></span><button class="x" type="button">✕</button>';
+    d.innerHTML='<button class="tm" type="button"></button><span class="tx"></span>';
     d.querySelector(".tm").textContent=fmt(it.s);
     d.querySelector(".tx").textContent=it.c;
-    d.querySelector(".x").setAttribute("aria-label",T("del"));
     d.querySelector(".tm").onclick=()=>{seek(it.s);pause()};
-    d.querySelector(".x").onclick=()=>{st.c[lid(l)]=(st.c[lid(l)]||[]).filter(x=>x!==it);save();renderList();renderHome()};
+    addCommentActions(d,it,()=>{
+      if(it.id)removeComment(it);
+      else discardDraft(l,it);
+    });
     box.appendChild(d);
-  });
+  }
 }
-function openComment(){
-  const l=curLesson();if(!l||!viewing?.ready)return;
-  resumeAfter=pause();pendingS=curT();
+function discardDraft(l,it){
+  st.c[lid(l)]=(st.c[lid(l)]||[]).filter(comment=>comment!==it);
+  save();renderList();
+}
+function openComment(it=null){
+  const l=curLesson();if(!l||(!it&&!viewing?.ready))return;
+  if(!AUTH_SITE){location.assign("https://review.ooii.top/auth/login");return}
+  if(!accountKey)return;
+  editingComment=it;
+  resumeAfter=pause();pendingS=it?.s??curT();
   $("cmtAt").textContent="⏸ "+fmt(pendingS)+" · "+lbl(l);
-  $("txt").value="";
+  $("txt").value=it?.c??"";
   $("cmtOv").classList.add("on");
   setTimeout(()=>$("txt").focus(),50);
 }
@@ -883,58 +969,74 @@ function closeComment(){$("cmtOv").classList.remove("on");if(resumeAfter)resume(
 function saveComment(){
   const text=$("txt").value.trim();if(!text){$("txt").focus();return}
   const l=curLesson();if(!l)return;
-  const id=lid(l), sha=viewedSha(l);
-  if(!sha||!viewing?.ready){toast(T("noSha"));return}
-  (st.c[id]=st.c[id]||[]).push({s:Math.round(pendingS*10)/10,c:text,sha,lang:LANG});
-  save();renderList();renderHome();
+  const it=editingComment;
+  const cid=it?.id??crypto.randomUUID();
+  const payload=[{s:it?.s??Math.round(pendingS*10)/10,c:text,lang:it?.lang||LANG}];
+  if(!submitChange(l,it?.sha??viewedSha(l),"y",payload,it?.id?"edit":"create",cid))return;
+  if(it&&!it.id)discardDraft(l,it);
   $("cmtOv").classList.remove("on");resumeAfter=false;
 }
-function setVerdict(kind){
-  const l=curLesson();if(!l)return;
-  const id=lid(l), sha=viewedSha(l);
-  if(!sha||!viewing?.ready){toast(T("noSha"));return}
-  if(kind==="r"){st.v[id]={v:"r",sha};save();markVerdict();renderHome();openComment();return}
-  const v=st.v[id];
-  if(v&&v.sha===sha&&v.v==="g")delete st.v[id];else st.v[id]={v:"g",sha};
-  save();markVerdict();renderHome();
+function removeComment(it){
+  const l=curLesson();
+  if(l)submitChange(l,it.sha,"y",[],"delete",it.id);
 }
-function askName(next){afterName=next||null;$("nameIn").value=st.name||"";$("nameOv").classList.add("on");setTimeout(()=>$("nameIn").focus(),50)}
+function askName(){$("nameIn").value=st.name||"";$("nameOv").classList.add("on");setTimeout(()=>$("nameIn").focus(),50)}
 function confirmName(){
   const n=$("nameIn").value.trim();if(!n){$("nameIn").focus();return}
   st.name=n;save();$("nameOv").classList.remove("on");renderHome();
-  const fn=afterName;afterName=null;if(fn)fn();
 }
-function submitLesson(){
-  const l=curLesson();if(!l)return;
-  const id=lid(l), sha=viewedSha(l);
-  if(!sha||!viewing?.ready){toast(T("noSha"));return}
-  if(!st.name){askName(submitLesson);return}
-  const col=color(l,sha), cs=comments(l,sha);
-  if(col==="y"&&!cs.length){toast(T("needV"));return}
-  const txt=cs.map(x=>"["+fmt(x.s)+"] "+x.c).join("\n");
-  const r={},c={};
-  if(col!=="y")r[id]=[col,sha.slice(0,8),txt];
-  if(cs.length)c[id]=cs.map(x=>({s:x.s,c:x.c,lang:x.lang||"zh"}));
-  const mark={g:"🟩",r:"🟥",y:"🟨"}[col];
-  const rec={v:1,page:PAGE_ID,reviewer:st.name,lesson:id,sha:sha.slice(0,8),verdict:col,comments:cs.map(x=>({s:x.s,c:x.c,lang:x.lang||"zh"})),note:id+" "+mark+(txt?"\n"+txt:""),ts:new Date().toISOString(),ua:navigator.userAgent.slice(0,120)};
-  const submittedView=viewing;
-  queuePush(rec);
-  $("bSend").disabled=true;toast(T("sending"));
-  flushQueue().then(ok=>{$("bSend").disabled=false;
-    if(ok){toast(T("sent"));setTimeout(()=>{if(viewing===submittedView)closeLesson()},900)}
-    else toast(T("offline"));});
+function submitChange(l,sha,verdict,payload,action,id){
+  if(!accountKey)return false;
+  if(!sha){toast(T("noSha"));return false}
+  if(JSON.stringify(payload).length>20000){toast(T("tooLarge"));return false}
+  const rec={v:1,page:PAGE_ID,lesson:lid(l),sha,verdict,comments:payload,
+    ts:new Date().toISOString(),ua:navigator.userAgent.slice(0,120),
+    request_id:crypto.randomUUID(),account_key:accountKey};
+  if(action)Object.assign(rec,{comment_action:action,comment_id:id});
+  try{queueSet([...queueGet(),rec])}catch{toast(T("roleSaveError"));return false}
+  paintReviewActions();renderList();renderHistory(l);
+  flushQueue().then(ok=>{if(!ok)toast(T("offline"))});
+  return true;
 }
-const COLLECT_BASE=AUTH_SITE?"":"https://review.ooii.top", QKEY="c51tl:queue";
-const COLLECT=COLLECT_BASE+"/submit";
-const HISTORY_STATES=["fixed","nochange","wip","merged","conflict"];
+const HISTORY_STATES=["pending","queued","fixed","nochange","wip","merged","conflict"];
 let summary={}, summaryRequest=0, historyView=null;
 
+async function loadReviewStatus(){
+  if(!accountKey||!DATA)return;
+  const request=++statusRequest;
+  const entries=Object.entries(SHA).filter(([id])=>id&&id.length<=64);
+  const chunks=[];
+  for(let i=0;i<entries.length;i+=50)chunks.push(entries.slice(i,i+50));
+  if(!chunks.length)chunks.push([]);
+  const parts=await Promise.all(chunks.map(async (chunk,index)=>{
+    const params=new URLSearchParams({shas:JSON.stringify(Object.fromEntries(chunk))});
+    const data=await getReviewData("/status?"+params);
+    if(!data?.lessons)return null;
+    if(index===0)return data.lessons;
+    return Object.fromEntries(chunk.map(([id])=>[id,data.lessons[id]]));
+  }));
+  if(request!==statusRequest||parts.some(part=>!part))return;
+  const next=Object.assign(Object.create(null),...parts);
+  if(statusReady&&JSON.stringify(next)===JSON.stringify(lessonStatus)){
+    if(viewing)paintReviewActions();
+    return;
+  }
+  statusReady=true;
+  lessonStatus=next;
+  const focused=document.activeElement?.dataset.lid;
+  renderHome();
+  if(focused)document.querySelector('[data-lid="'+CSS.escape(focused)+'"]')?.focus({preventScroll:true});
+  if(viewing){paintFixBanner($("pFix"),curLesson());paintReviewActions()}
+}
+
 async function getReviewData(path){
+  if(!accountKey)return null;
   try{
     const controller=new AbortController();
     const timeout=setTimeout(()=>controller.abort(),5000);
     try{
-      const response=await fetch(COLLECT_BASE+path,{signal:controller.signal,cache:"no-store"});
+      const response=await fetch(path,{signal:controller.signal,cache:"no-store",
+        headers:{"X-C51-Account":accountKey}});
       if(!response.ok)return null;
       const data=await response.json();
       return data?.ok===true?data:null;
@@ -958,20 +1060,24 @@ async function loadSummary(){
   const request=++summaryRequest;
   const data=await getReviewData("/summary");
   if(request!==summaryRequest)return;
-  summary=data?.lessons&&typeof data.lessons==="object"?data.lessons:{};
+  if(!data?.lessons)return;
+  summary=data.lessons;
   $("home").querySelectorAll(".card:not(:disabled)").forEach(card=>{
     renderUnreplied(card,lid({file:card.dataset.file}));
   });
 }
 
 async function loadHistory(l){
-  const view={items:[]};
+  const id=lid(l);
+  const previous=historyView?.id===id?historyView:null;
+  const view={id,items:previous?.items??[]};
   historyView=view;
-  renderHistory(l);
-  const data=await getReviewData("/thread?lesson="+encodeURIComponent(lid(l)));
-  if(historyView!==view||!Array.isArray(data?.items))return;
+  if(!previous)renderHistory(l);
+  const data=await getReviewData("/thread?lesson="+encodeURIComponent(id));
+  if(historyView!==view||!Array.isArray(data?.items)||
+      JSON.stringify(data.items)===JSON.stringify(view.items))return;
   view.items=data.items;
-  renderHistory(l);
+  renderList();renderHistory(l);
 }
 
 const reviewText=value=>typeof value==="string"?value:"";
@@ -982,13 +1088,13 @@ function reviewDate(value){
     ?date.toLocaleDateString("sv-SE",{timeZone:"Asia/Shanghai"}):"";
 }
 
-function appendHistoryEntry(group,text,seconds,replies,effective,own){
+function appendHistoryEntry(group,text,seconds,replies,effective){
   const reply=lastReply(replies);
-  const status=HISTORY_STATES.includes(reply?.status)?reply.status:"unreplied";
+  const status=HISTORY_STATES.includes(reply?.status)?reply.status:"pending";
   const entry=document.createElement("div");
   const timed=Number.isFinite(seconds)&&seconds>=0;
   entry.className="history-entry"+(timed?"":" general");
-  entry.innerHTML='<div class="history-line"><span class="history-text"></span></div><div class="history-reply"><span class="history-badge"></span> <span class="history-answer"></span></div>';
+  entry.innerHTML='<div class="history-line"><span class="history-text"></span></div><div class="history-reply"><span class="history-badge cmt-state"></span> <span class="history-answer"></span></div>';
   if(timed){
     const time=document.createElement("button");
     time.type="button";
@@ -1004,17 +1110,23 @@ function appendHistoryEntry(group,text,seconds,replies,effective,own){
   const answer=entry.querySelector(".history-answer");
   const details=current=>{
     if(current?.status==="conflict")return [T("conflictWith")(reviewText(current.with)),reviewText(current.text)];
-    const version=reviewText(current?.version);
-    return [reviewText(current?.text),own&&current?.status==="fixed"&&version?T("fixedIn")(version):version];
+    const batch=reviewText(current?.batch), version=reviewText(current?.version);
+    if(current?.status==="queued")return [batch?T("queuedBy")(batch):T("fixing")];
+    if(current?.status==="wip")return [batch?T("batchLabel")(batch):version,reviewText(current.text)];
+    if(current?.status==="merged")return [
+      current.target_sub_id!=null?T("mergedInto")(current.target_sub_id,current.target_idx):"",reviewText(current.text)];
+    return [reviewText(current?.text),current?.status==="fixed"&&version?T("fixedIn")(version):version];
   };
   answer.textContent=[...details(reply),...(effective?[T(effective.status),...details(effective)]:[])].filter(Boolean).join(" · ");
   group.appendChild(entry);
+  return entry;
 }
 
 function renderHistory(l){
   const list=$("historyList");
   list.replaceChildren();
   const id=lid(l), currentSha=viewedSha(l);
+  const pending=new Set(queueGet().filter(record=>record.lesson===id).map(record=>record.comment_id));
   for(const item of historyView?.items||[]){
     if(!item||typeof item!=="object")continue;
     const cs=Array.isArray(item.comments)?item.comments.filter(c=>reviewText(c?.c).trim()):[];
@@ -1023,7 +1135,8 @@ function renderHistory(l){
     const mark={g:"🟩",r:"🟥",y:"🟨"}[reviewText(item.verdict)];
     const generated=[id+" "+mark,...cs.map(c=>"["+fmt(Number.isFinite(c.s)?c.s:0)+"] "+c.c)].join("\n");
     const showNote=lastReply(item.note_replies)||(note&&note!==generated);
-    if(!cs.length&&!showNote)continue;
+    const visible=cs.filter(comment=>!pending.has(comment.id));
+    if(!visible.length&&!showNote)continue;
     const group=document.createElement("div");
     group.className="history-sub";
     const meta=document.createElement("div");
@@ -1038,26 +1151,64 @@ function renderHistory(l){
       meta.append(" · ",old);
     }
     group.appendChild(meta);
-    if(showNote)appendHistoryEntry(group,note===generated?note.split("\n")[0]:note,null,item.note_replies,item.note_effective_reply,item.own);
-    for(const comment of cs)appendHistoryEntry(group,comment.c,comment.s,comment.replies,comment.effective_reply,item.own);
+    if(showNote)appendHistoryEntry(group,note===generated?note.split("\n")[0]:note,null,item.note_replies,item.note_effective_reply);
+    for(const comment of visible){
+      const entry=appendHistoryEntry(group,comment.c,comment.s,comment.replies,comment.effective_reply);
+      if(item.own&&comment.id&&/^(?:[a-f0-9]{8}|[a-f0-9]{64})$/.test(itemSha)){
+        const it={...comment,sha:itemSha};
+        addCommentActions(entry.querySelector(".history-line"),it,()=>removeComment(it));
+      }
+    }
     list.appendChild(group);
   }
   $("history").hidden=!list.childElementCount;
 }
 
-function queueGet(){try{return JSON.parse(localStorage.getItem(QKEY)||"[]")}catch(e){return[]}}
-function queueSet(q){try{localStorage.setItem(QKEY,JSON.stringify(q))}catch(e){}}
-function queuePush(r){const q=queueGet();q.push(r);queueSet(q)}
-async function flushQueue(){
-  if(AUTH_SITE&&reviewerRole===null)return false;
-  let q=queueGet();
-  while(q.length){try{const res=await fetch(COLLECT,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify(q[0])});
-      const j=await res.json().catch(()=>({}));if(!res.ok||!j.ok)return false}catch(e){return false}
-    q.shift();queueSet(q)}
-  return true}
+const queueKey=()=>KEY+":queue:"+accountKey;
+function queueGet(){
+  try{return accountKey?JSON.parse(localStorage.getItem(queueKey())||"[]"):[]}catch{return []}
+}
+function queueSet(q){localStorage.setItem(queueKey(),JSON.stringify(q))}
+let queueFlush;
+function flushQueue(){
+  if(!accountKey||reviewerRole===null)return Promise.resolve(false);
+  if(queueFlush)return queueFlush;
+  const account=accountKey;
+  queueFlush=(async ()=>{
+    let sent=false, blocked=false;
+    try{
+      while(accountKey===account){
+        const [record]=queueGet();
+        if(!record)break;
+        const res=await fetch("/submit",{method:"POST",headers:{"Content-Type":"application/json"},
+          body:JSON.stringify(record),signal:AbortSignal.timeout(8000)});
+        if(!res.ok)return false;
+        const result=await res.json();
+        if(!result.ok||accountKey!==account)return false;
+        blocked ||= result.blocked===true;
+        queueSet(queueGet().filter(item=>item.request_id!==record.request_id));
+        sent=true;
+      }
+      return accountKey===account;
+    }catch{return false}
+    finally{
+      if(sent&&accountKey===account){
+        await Promise.all([loadReviewStatus(),loadSummary(),viewing&&loadHistory(curLesson())]);
+        if(viewing){renderList();renderHistory(curLesson())}
+        if(!queueGet().length)toast(T(blocked?"passBlocked":"sent"));
+      }
+    }
+  })().then(ok=>{
+    queueFlush=null;
+    return ok&&accountKey&&queueGet().length?flushQueue():ok;
+  },()=>{
+    queueFlush=null;
+    return false;
+  });
+  return queueFlush;
+}
 setInterval(()=>{if(queueGet().length)flushQueue()},30000);
-window.addEventListener("online",()=>flushQueue());
-flushQueue();
+window.addEventListener("online",()=>{flushQueue();refreshReview()});
 
 $("lessonRetry").onclick=async ()=>{
   const failed = viewing;
@@ -1065,16 +1216,16 @@ $("lessonRetry").onclick=async ()=>{
   if (viewing === failed) {
     const lesson = curLesson();
     setLessonFrame(lesson);
-    markVerdict();
+    paintReviewActions();
     renderList();
     renderHistory(lesson);
   }
 };
-$("bNote").onclick=openComment;
-$("bPass").onclick=()=>setVerdict("g");
-$("bFail").onclick=()=>setVerdict("r");
-$("bSend").onclick=submitLesson;
-$("bBack").onclick=closeLesson;
+$("bNote").onclick=()=>openComment();
+$("bPass").onclick=()=>{
+  const l=curLesson();
+  if(l&&!$("bPass").hidden&&!$("bPass").disabled)submitChange(l,viewedSha(l),"g",[]);
+};
 $("bTop").onclick=closeLesson;
 /* J 261120 980.4:课里要有明显的回列表按钮;Esc 同效(评论框开着时 Esc 先关评论框) */
 document.addEventListener("keydown",e=>{if(e.key!=="Escape"||$("roleDialog").open)return;if($("cmtOv").classList.contains("on")||$("nameOv").classList.contains("on"))return;if($("player").classList.contains("on"))closeLesson()});
@@ -1126,7 +1277,13 @@ async function loadReviewer(){
     }
     if(!response.ok)throw new Error("Could not load reviewer");
     const profile=await response.json();
-    if(!profile.ok||!profile.name)throw new Error("Invalid reviewer profile");
+    if(!profile.ok||!profile.name||!profile.account_key)throw new Error("Invalid reviewer profile");
+    if(accountKey!==profile.account_key){
+      accountKey=profile.account_key;
+      lessonStatus={};statusReady=false;summary={};historyView=null;
+      ++statusRequest;++summaryRequest;
+      st=loadDraft();
+    }
     FEISHU_NAME=profile.name;reviewerAvatar=profile.avatar;st.name=profile.name;save();
     reviewerRole=["kk_ru","kk","ru","zh","none"].includes(profile.role)?profile.role:null;
     reviewerAdmin=profile.is_admin===true;
@@ -1135,6 +1292,8 @@ async function loadReviewer(){
     else{
       $("roleDialog").close();
       updateRoleView();
+      loadReviewStatus();
+      loadSummary();
       flushQueue();
     }
   }catch{
@@ -1222,6 +1381,7 @@ fetch("lessons.json").then(r=>r.json()).then(async d=>{
   DATA=d;
   renderHome();
   loadSummary();
+  loadReviewStatus();
   preloadStart=Date.now()+2000;
   preloadInit=initPreload();
   await preloadInit;
