@@ -480,7 +480,13 @@ document.addEventListener("keydown",e=>{if(e.key!=="Escape")return;if($("cmtOv")
 $("cCancel").onclick=closeComment;
 $("cSave").onclick=saveComment;
 $("txt").addEventListener("keydown",e=>{if(e.key==="Enter"&&(e.metaKey||e.ctrlKey))$("cSave").click()});
-$("whoBtn").onclick=()=>askName(null);
+let FEISHU_NAME="";
+$("whoBtn").onclick=()=>{if(!FEISHU_NAME)askName(null)};
+// 在 review.ooii.top(飞书登录版)上:右上角名字取飞书登录身份,不用手填;老 GitHub 页照旧手填
+if(location.host==="review.ooii.top")fetch("/auth/me",{credentials:"same-origin",cache:"no-store"})
+  .then(r=>r.ok?r.json():null).then(j=>{if(!j||!j.ok||!j.name)return;
+    FEISHU_NAME=j.name;st.name=j.name;save();$("whoBtn").textContent="👤 "+j.name;$("whoBtn").style.cursor="default";
+    if(DATA)renderHome();}).catch(()=>{});
 $("nameOk").onclick=confirmName;
 $("nameIn").addEventListener("keydown",e=>{if(e.key==="Enter")confirmName()});
 applyLang();
