@@ -45,7 +45,7 @@ button{border:0;border-radius:12px;cursor:pointer;background:#eef1f5;color:var(-
 .st.r{background:#fde8e6;color:var(--r)}
 .st.y{background:#fff6db;color:var(--y)}
 .st.make{background:#eef1f5;color:var(--mute)}
-.card .unreplied{min-width:20px;border-radius:999px;background:#b92c27;color:#fff;padding:1px 6px;text-align:center;font-size:12px;font-weight:800}
+.card .unreplied,.card .fixed-count{min-width:20px;border-radius:999px;background:#b92c27;color:#fff;padding:1px 6px;text-align:center;font-size:12px;font-weight:800}
 .card .tt{font-size:15px}
 .card .meta{font-size:12px;color:var(--mute)}
 .mk{display:inline-block;width:6px;height:6px;border-radius:50%;margin-left:3px;vertical-align:middle}
@@ -156,6 +156,7 @@ button:focus-visible{outline:3px solid var(--gold2);outline-offset:2px}
 .st.y{background:#fbefcf;color:#8a5e00}
 .st.make{background:#efe6d7;color:var(--mute)}
 .card .unreplied{background:#b3261e;box-shadow:0 0 0 2px var(--panel)}
+.card .fixed-count{background:#1d6b43;box-shadow:0 0 0 2px var(--panel)}
 .card .tt{font-size:15px;line-height:1.35;font-weight:600;overflow-wrap:anywhere}
 .card .meta{font-size:12.5px;overflow-wrap:anywhere}
 @media (hover:hover){
@@ -358,10 +359,10 @@ const comments=(l,sha=shaOf(l))=>(st.c[lid(l)]||[]).filter(x=>x.sha&&x.sha===sha
 /* J 261120 982:整页界面四语(中 / 英 / 俄 / 哈)切换;课件自己的语言按钮不归这里管 */
 const LANGS=[["zh","中"],["en","EN"],["ru","Рус"],["kk","Қаз"]];
 const UI={
- zh:{roleTitle:"选择你的身份",switchRole:"切换身份",role_kk_ru:"我是俄语和哈语的教师或教研",role_kk:"我是哈语老师或教研",role_ru:"我是俄语老师或教研",role_zh:"我是中文教研",role_none:"我不是老师或教研",roleLoadError:"暂时无法读取登录身份，请重试。",roleSaveError:"暂时无法保存身份，请重试。",roleRetry:"重试",merged:"已合并",conflict:"反馈冲突",conflictWith:name=>"您的反馈和 "+name+" 的修改意见有冲突，请直接联系该用户",fixedIn:v=>"已在 "+v+" 修改",newVersion:"有新版",retryLesson:"下载失败，重试",preload:"后台预加载",preloadCached:"已缓存 ✓",preloadDownloading:"正在下载…",preloadPercent:n=>"正在下载 "+n+"%",preloadQueued:"排队中",preloadFailed:"下载失败",preloadLow:"可用空间不足 2 GB，后台预加载已暂停",history:"以往评论",fixed:"已改",nochange:"不改",wip:"处理中",unreplied:"未回复",oldVersion:"旧版",beijing:"北京时间",unrepliedCount:n=>n+" 条未回复评论",title:"看课评审",who:"填名字",top:"← 返回课程列表",making:"制作中",cmts:"本课评论",cmtsHint:"点时间跳到那一秒",note:"暂停并评论",pass:"通过",cmtSub:"课件已暂停。写一句就行,可以写多条。",cmtPh:"哪里不对?",cancel:"取消",save:"保存",nmTtl:"先填你的名字",nmSub:"只在第一次提交前问一次,存在这台设备上,之后不再问。",nmPh:"你的名字",ok:"确定",stG:"通过",stR:"不通过",stY:"没判",stM:"制作中",empty:"还没有评论",del:"删除",lesson:n=>"第 "+n+" 课",nc:n=>"意见 "+n+" 条",docT:(g,r,a)=>"看课评审 · 通过 "+g+" · 不通过 "+r+" / "+a,noSha:"这节课的校验还没载入,稍后再试",sent:"已保存",offline:"待重发",edit:"编辑",passBlocked:"还有待处理的评论"},
- en:{roleTitle:"Choose your role",switchRole:"Switch role",role_kk_ru:"I teach or develop curricula for both Russian and Kazakh",role_kk:"I teach or develop curricula for Kazakh",role_ru:"I teach or develop curricula for Russian",role_zh:"I develop Chinese-language curricula",role_none:"I am neither a teacher nor a curriculum specialist",roleLoadError:"Could not load your account. Try again.",roleSaveError:"Could not save your role. Try again.",roleRetry:"Try again",merged:"Merged",conflict:"Conflicting feedback",conflictWith:name=>"Your feedback conflicts with "+name+"’s suggested changes. Please contact them directly.",fixedIn:v=>"Fixed in "+v,newVersion:"New version available",retryLesson:"Download failed. Retry",preload:"Background preload",preloadCached:"Cached ✓",preloadDownloading:"Downloading…",preloadPercent:n=>"Downloading "+n+"%",preloadQueued:"Queued",preloadFailed:"Download failed",preloadLow:"Background preload paused because less than 2 GB is available",history:"Previous comments",fixed:"Fixed",nochange:"No change",wip:"In progress",unreplied:"Awaiting reply",oldVersion:"Older version",beijing:"Beijing time",unrepliedCount:n=>"Comments awaiting reply: "+n,title:"Lesson review",who:"Enter name",top:"← Back to lesson list",making:"In production",cmts:"Comments on this lesson",cmtsHint:"Tap a time to jump there",note:"Pause and comment",pass:"Pass",cmtSub:"The lesson is paused. One sentence is enough; you can add several.",cmtPh:"What is wrong?",cancel:"Cancel",save:"Save",nmTtl:"Enter your name first",nmSub:"Asked only once before your first submission and saved on this device.",nmPh:"Your name",ok:"OK",stG:"Passed",stR:"Failed",stY:"Not rated",stM:"In production",empty:"No comments yet",del:"Delete",lesson:n=>"Lesson "+n,nc:n=>n+(n===1?" comment":" comments"),docT:(g,r,a)=>"Lesson review · passed "+g+" · failed "+r+" / "+a,noSha:"This lesson's checksum has not loaded yet. Try again shortly.",sent:"Saved",offline:"Waiting to retry",edit:"Edit",passBlocked:"There are unresolved comments"},
- ru:{roleTitle:"Выберите свою роль",switchRole:"Сменить роль",role_kk_ru:"Я учитель или методист по русскому и казахскому языкам",role_kk:"Я учитель или методист по казахскому языку",role_ru:"Я учитель или методист по русскому языку",role_zh:"Я методист по китайскому языку",role_none:"Я не учитель и не методист",roleLoadError:"Не удалось загрузить данные вашей учётной записи. Попробуйте ещё раз.",roleSaveError:"Не удалось сохранить роль. Попробуйте ещё раз.",roleRetry:"Повторить",merged:"Объединено",conflict:"Противоречивые замечания",conflictWith:name=>"Ваше замечание противоречит правкам, которые предложил пользователь "+name+". Пожалуйста, свяжитесь с этим пользователем напрямую.",fixedIn:v=>"Исправлено в версии "+v,newVersion:"Доступна новая версия",retryLesson:"Ошибка загрузки. Повторить",preload:"Фоновая загрузка",preloadCached:"В кэше ✓",preloadDownloading:"Загрузка…",preloadPercent:n=>"Загрузка "+n+"%",preloadQueued:"В очереди",preloadFailed:"Ошибка загрузки",preloadLow:"Фоновая загрузка приостановлена, доступно менее 2 ГБ",history:"Предыдущие комментарии",fixed:"Исправлено",nochange:"Без изменений",wip:"В работе",unreplied:"Без ответа",oldVersion:"Старая версия",beijing:"Пекинское время",unrepliedCount:n=>"Комментариев без ответа: "+n,title:"Отзыв об уроках",who:"Введите имя",top:"← К списку уроков",making:"В работе",cmts:"Комментарии к уроку",cmtsHint:"Нажмите на время, чтобы перейти",note:"Приостановить и прокомментировать",pass:"Принято",cmtSub:"Урок на паузе. Достаточно одной фразы, можно написать несколько.",cmtPh:"Что не так?",cancel:"Отмена",save:"Сохранить",nmTtl:"Сначала введите своё имя",nmSub:"Спросим один раз перед первой отправкой, имя сохранится на этом устройстве.",nmPh:"Ваше имя",ok:"Готово",stG:"Принято",stR:"Не принято",stY:"Не оценено",stM:"В работе",empty:"Пока нет комментариев",del:"Удалить",lesson:n=>"Урок "+n,nc:n=>"замечаний: "+n,docT:(g,r,a)=>"Отзыв об уроках · принято "+g+" · не принято "+r+" / "+a,noSha:"Проверка урока ещё не загрузилась, попробуйте чуть позже",sent:"Сохранено",offline:"Ожидает повторной отправки",edit:"Изменить",passBlocked:"Есть незакрытые замечания"},
- kk:{roleTitle:"Рөліңізді таңдаңыз",switchRole:"Рөлді ауыстыру",role_kk_ru:"Мен орыс және қазақ тілдерінің мұғалімімін немесе әдіскерімін",role_kk:"Мен қазақ тілінің мұғалімімін немесе әдіскерімін",role_ru:"Мен орыс тілінің мұғалімімін немесе әдіскерімін",role_zh:"Мен қытай тілінің әдіскерімін",role_none:"Мен мұғалім де, әдіскер де емеспін",roleLoadError:"Аккаунт деректері жүктелмеді. Қайталап көріңіз.",roleSaveError:"Рөліңіз сақталмады. Қайталап көріңіз.",roleRetry:"Қайталау",merged:"Біріктірілді",conflict:"Қайшы пікірлер",conflictWith:name=>"Сіздің пікіріңіз "+name+" ұсынған түзетулермен қайшы келеді. Сол пайдаланушымен тікелей байланысыңыз.",fixedIn:v=>v+" нұсқасында түзетілді",newVersion:"Жаңа нұсқа бар",retryLesson:"Жүктеу сәтсіз. Қайталау",preload:"Фондық жүктеу",preloadCached:"Кэште ✓",preloadDownloading:"Жүктелуде…",preloadPercent:n=>"Жүктелуде "+n+"%",preloadQueued:"Кезекте",preloadFailed:"Жүктеу сәтсіз аяқталды",preloadLow:"Бос орын 2 ГБ-тан аз, фондық жүктеу тоқтатылды",history:"Бұрынғы пікірлер",fixed:"Түзетілді",nochange:"Өзгеріссіз",wip:"Орындалуда",unreplied:"Жауап жоқ",oldVersion:"Бұрынғы нұсқа",beijing:"Бейжің уақыты",unrepliedCount:n=>"Жауапсыз пікірлер: "+n,title:"Сабақтарды бағалау",who:"Атыңызды жазыңыз",top:"← Сабақтар тізіміне",making:"Дайындалуда",cmts:"Сабаққа пікірлер",cmtsHint:"Уақытты бассаңыз, сол секундқа өтеді",note:"Кідіртіп, пікір жазу",pass:"Өтті",cmtSub:"Сабақ кідіртілді. Бір сөйлем жеткілікті, бірнешеуін жазуға болады.",cmtPh:"Не дұрыс емес?",cancel:"Болдырмау",save:"Сақтау",nmTtl:"Алдымен атыңызды жазыңыз",nmSub:"Алғашқы жіберу алдында бір рет қана сұралады, осы құрылғыда сақталады.",nmPh:"Атыңыз",ok:"Дайын",stG:"Өтті",stR:"Өтпеді",stY:"Бағаланбаған",stM:"Дайындалуда",empty:"Әзірге пікір жоқ",del:"Өшіру",lesson:n=>n+"-сабақ",nc:n=>"пікір: "+n,docT:(g,r,a)=>"Сабақтарды бағалау · өтті "+g+" · өтпеді "+r+" / "+a,noSha:"Сабақ тексерісі әлі жүктелмеді, сәлден кейін қайталаңыз",sent:"Сақталды",offline:"Қайта жіберуді күтуде",edit:"Өңдеу",passBlocked:"Жабылмаған пікірлер бар"}
+ zh:{roleTitle:"选择你的身份",switchRole:"切换身份",role_kk_ru:"我是俄语和哈语的教师或教研",role_kk:"我是哈语老师或教研",role_ru:"我是俄语老师或教研",role_zh:"我是中文教研",role_none:"我不是老师或教研",roleLoadError:"暂时无法读取登录身份，请重试。",roleSaveError:"暂时无法保存身份，请重试。",roleRetry:"重试",merged:"已合并",conflict:"反馈冲突",conflictWith:name=>"您的反馈和 "+name+" 的修改意见有冲突，请直接联系该用户",fixedIn:v=>"已在 "+v+" 修改",newVersion:"有新版",retryLesson:"下载失败，重试",preload:"后台预加载",preloadCached:"已缓存 ✓",preloadDownloading:"正在下载…",preloadPercent:n=>"正在下载 "+n+"%",preloadQueued:"排队中",preloadFailed:"下载失败",preloadLow:"可用空间不足 2 GB，后台预加载已暂停",history:"以往评论",fixed:"已改",nochange:"不改",wip:"处理中",unreplied:"未回复",oldVersion:"旧版",beijing:"北京时间",title:"看课评审",who:"填名字",top:"← 返回课程列表",making:"制作中",cmts:"本课评论",cmtsHint:"点时间跳到那一秒",note:"暂停并评论",pass:"通过",cmtSub:"课件已暂停。写一句就行,可以写多条。",cmtPh:"哪里不对?",cancel:"取消",save:"保存",nmTtl:"先填你的名字",nmSub:"只在第一次提交前问一次,存在这台设备上,之后不再问。",nmPh:"你的名字",ok:"确定",stG:"通过",stR:"不通过",stY:"没判",stM:"制作中",empty:"还没有评论",del:"删除",lesson:n=>"第 "+n+" 课",nc:n=>"意见 "+n+" 条",docT:(g,r,a)=>"看课评审 · 通过 "+g+" · 不通过 "+r+" / "+a,noSha:"这节课的校验还没载入,稍后再试",sent:"已保存",offline:"待重发",edit:"编辑",passBlocked:"还有待处理的评论"},
+ en:{roleTitle:"Choose your role",switchRole:"Switch role",role_kk_ru:"I teach or develop curricula for both Russian and Kazakh",role_kk:"I teach or develop curricula for Kazakh",role_ru:"I teach or develop curricula for Russian",role_zh:"I develop Chinese-language curricula",role_none:"I am neither a teacher nor a curriculum specialist",roleLoadError:"Could not load your account. Try again.",roleSaveError:"Could not save your role. Try again.",roleRetry:"Try again",merged:"Merged",conflict:"Conflicting feedback",conflictWith:name=>"Your feedback conflicts with "+name+"’s suggested changes. Please contact them directly.",fixedIn:v=>"Fixed in "+v,newVersion:"New version available",retryLesson:"Download failed. Retry",preload:"Background preload",preloadCached:"Cached ✓",preloadDownloading:"Downloading…",preloadPercent:n=>"Downloading "+n+"%",preloadQueued:"Queued",preloadFailed:"Download failed",preloadLow:"Background preload paused because less than 2 GB is available",history:"Previous comments",fixed:"Fixed",nochange:"No change",wip:"In progress",unreplied:"Awaiting reply",oldVersion:"Older version",beijing:"Beijing time",title:"Lesson review",who:"Enter name",top:"← Back to lesson list",making:"In production",cmts:"Comments on this lesson",cmtsHint:"Tap a time to jump there",note:"Pause and comment",pass:"Pass",cmtSub:"The lesson is paused. One sentence is enough; you can add several.",cmtPh:"What is wrong?",cancel:"Cancel",save:"Save",nmTtl:"Enter your name first",nmSub:"Asked only once before your first submission and saved on this device.",nmPh:"Your name",ok:"OK",stG:"Passed",stR:"Failed",stY:"Not rated",stM:"In production",empty:"No comments yet",del:"Delete",lesson:n=>"Lesson "+n,nc:n=>n+(n===1?" comment":" comments"),docT:(g,r,a)=>"Lesson review · passed "+g+" · failed "+r+" / "+a,noSha:"This lesson's checksum has not loaded yet. Try again shortly.",sent:"Saved",offline:"Waiting to retry",edit:"Edit",passBlocked:"There are unresolved comments"},
+ ru:{roleTitle:"Выберите свою роль",switchRole:"Сменить роль",role_kk_ru:"Я учитель или методист по русскому и казахскому языкам",role_kk:"Я учитель или методист по казахскому языку",role_ru:"Я учитель или методист по русскому языку",role_zh:"Я методист по китайскому языку",role_none:"Я не учитель и не методист",roleLoadError:"Не удалось загрузить данные вашей учётной записи. Попробуйте ещё раз.",roleSaveError:"Не удалось сохранить роль. Попробуйте ещё раз.",roleRetry:"Повторить",merged:"Объединено",conflict:"Противоречивые замечания",conflictWith:name=>"Ваше замечание противоречит правкам, которые предложил пользователь "+name+". Пожалуйста, свяжитесь с этим пользователем напрямую.",fixedIn:v=>"Исправлено в версии "+v,newVersion:"Доступна новая версия",retryLesson:"Ошибка загрузки. Повторить",preload:"Фоновая загрузка",preloadCached:"В кэше ✓",preloadDownloading:"Загрузка…",preloadPercent:n=>"Загрузка "+n+"%",preloadQueued:"В очереди",preloadFailed:"Ошибка загрузки",preloadLow:"Фоновая загрузка приостановлена, доступно менее 2 ГБ",history:"Предыдущие комментарии",fixed:"Исправлено",nochange:"Без изменений",wip:"В работе",unreplied:"Без ответа",oldVersion:"Старая версия",beijing:"Пекинское время",title:"Отзыв об уроках",who:"Введите имя",top:"← К списку уроков",making:"В работе",cmts:"Комментарии к уроку",cmtsHint:"Нажмите на время, чтобы перейти",note:"Приостановить и прокомментировать",pass:"Принято",cmtSub:"Урок на паузе. Достаточно одной фразы, можно написать несколько.",cmtPh:"Что не так?",cancel:"Отмена",save:"Сохранить",nmTtl:"Сначала введите своё имя",nmSub:"Спросим один раз перед первой отправкой, имя сохранится на этом устройстве.",nmPh:"Ваше имя",ok:"Готово",stG:"Принято",stR:"Не принято",stY:"Не оценено",stM:"В работе",empty:"Пока нет комментариев",del:"Удалить",lesson:n=>"Урок "+n,nc:n=>"замечаний: "+n,docT:(g,r,a)=>"Отзыв об уроках · принято "+g+" · не принято "+r+" / "+a,noSha:"Проверка урока ещё не загрузилась, попробуйте чуть позже",sent:"Сохранено",offline:"Ожидает повторной отправки",edit:"Изменить",passBlocked:"Есть незакрытые замечания"},
+ kk:{roleTitle:"Рөліңізді таңдаңыз",switchRole:"Рөлді ауыстыру",role_kk_ru:"Мен орыс және қазақ тілдерінің мұғалімімін немесе әдіскерімін",role_kk:"Мен қазақ тілінің мұғалімімін немесе әдіскерімін",role_ru:"Мен орыс тілінің мұғалімімін немесе әдіскерімін",role_zh:"Мен қытай тілінің әдіскерімін",role_none:"Мен мұғалім де, әдіскер де емеспін",roleLoadError:"Аккаунт деректері жүктелмеді. Қайталап көріңіз.",roleSaveError:"Рөліңіз сақталмады. Қайталап көріңіз.",roleRetry:"Қайталау",merged:"Біріктірілді",conflict:"Қайшы пікірлер",conflictWith:name=>"Сіздің пікіріңіз "+name+" ұсынған түзетулермен қайшы келеді. Сол пайдаланушымен тікелей байланысыңыз.",fixedIn:v=>v+" нұсқасында түзетілді",newVersion:"Жаңа нұсқа бар",retryLesson:"Жүктеу сәтсіз. Қайталау",preload:"Фондық жүктеу",preloadCached:"Кэште ✓",preloadDownloading:"Жүктелуде…",preloadPercent:n=>"Жүктелуде "+n+"%",preloadQueued:"Кезекте",preloadFailed:"Жүктеу сәтсіз аяқталды",preloadLow:"Бос орын 2 ГБ-тан аз, фондық жүктеу тоқтатылды",history:"Бұрынғы пікірлер",fixed:"Түзетілді",nochange:"Өзгеріссіз",wip:"Орындалуда",unreplied:"Жауап жоқ",oldVersion:"Бұрынғы нұсқа",beijing:"Бейжің уақыты",title:"Сабақтарды бағалау",who:"Атыңызды жазыңыз",top:"← Сабақтар тізіміне",making:"Дайындалуда",cmts:"Сабаққа пікірлер",cmtsHint:"Уақытты бассаңыз, сол секундқа өтеді",note:"Кідіртіп, пікір жазу",pass:"Өтті",cmtSub:"Сабақ кідіртілді. Бір сөйлем жеткілікті, бірнешеуін жазуға болады.",cmtPh:"Не дұрыс емес?",cancel:"Болдырмау",save:"Сақтау",nmTtl:"Алдымен атыңызды жазыңыз",nmSub:"Алғашқы жіберу алдында бір рет қана сұралады, осы құрылғыда сақталады.",nmPh:"Атыңыз",ok:"Дайын",stG:"Өтті",stR:"Өтпеді",stY:"Бағаланбаған",stM:"Дайындалуда",empty:"Әзірге пікір жоқ",del:"Өшіру",lesson:n=>n+"-сабақ",nc:n=>"пікір: "+n,docT:(g,r,a)=>"Сабақтарды бағалау · өтті "+g+" · өтпеді "+r+" / "+a,noSha:"Сабақ тексерісі әлі жүктелмеді, сәлден кейін қайталаңыз",sent:"Сақталды",offline:"Қайта жіберуді күтуде",edit:"Өңдеу",passBlocked:"Жабылмаған пікірлер бар"}
 };
 /* 分组名 / 风格 / 课名:按中文原值查表,查不到显示中文原值(新加的课先显示中文,在这里补一行即可) */
 const TR={
@@ -401,21 +402,25 @@ const REVIEW_UI={
   zh:{recheck:"待复查",stY:"没判",fixing:"修复中 · 意见将排入下一批",pending:"待处理",
     queued:"排队下一批",queuedBy:b=>"批次 "+b+" 结束后转待处理",wip:"本批修复中",
     batchLabel:b=>"批次 "+b,mergedInto:(sub,idx)=>"合并至 #"+sub+":"+idx,
+    openCount:n=>n+" 条意见还没修",fixedCount:n=>n+" 条已修，等你复查",
     tooLarge:"评论太长，请缩短后再提交",
     docT:(g,r,c,a)=>"看课评审 · 通过 "+g+" · 不通过 "+r+" · 待复查 "+c+" / "+a},
   en:{recheck:"Ready for recheck",stY:"Not reviewed",fixing:"Fixes in progress · New feedback goes to the next batch",
     pending:"Pending",queued:"Queued for the next batch",queuedBy:b=>"Pending once batch "+b+" closes",
     wip:"Being fixed in this batch",batchLabel:b=>"Batch "+b,mergedInto:(sub,idx)=>"Merged into #"+sub+":"+idx,
+    openCount:n=>n+(n===1?" comment still needs a fix":" comments still need fixes"),fixedCount:n=>n+(n===1?" fixed comment awaits your recheck":" fixed comments await your recheck"),
     tooLarge:"Shorten your comments and try again",
     docT:(g,r,c,a)=>"Lesson review · Passed "+g+" · Failed "+r+" · Ready for recheck "+c+" / "+a},
   ru:{recheck:"На повторной проверке",stY:"Не оценено",fixing:"Идёт исправление · Новые замечания войдут в следующий пакет",
     pending:"Ожидает обработки",queued:"В очереди на следующий пакет",queuedBy:b=>"Ожидает завершения пакета "+b,
     wip:"Исправляется в текущем пакете",batchLabel:b=>"Пакет "+b,mergedInto:(sub,idx)=>"Объединено с #"+sub+":"+idx,
+    openCount:n=>"Ещё не исправлено замечаний: "+n,fixedCount:n=>"Исправлено замечаний для вашей повторной проверки: "+n,
     tooLarge:"Сократите комментарии и попробуйте снова",
     docT:(g,r,c,a)=>"Оценка уроков · Принято "+g+" · Не принято "+r+" · На повторной проверке "+c+" / "+a},
   kk:{recheck:"Қайта тексеруге дайын",stY:"Бағаланбаған",fixing:"Түзетіліп жатыр · Жаңа пікірлер келесі топтамаға қосылады",
     pending:"Өңдеуді күтуде",queued:"Келесі топтама кезегінде",queuedBy:b=>b+" топтамасы аяқталғанын күтуде",
     wip:"Осы топтамада түзетіліп жатыр",batchLabel:b=>"Топтама "+b,mergedInto:(sub,idx)=>"#"+sub+":"+idx+" пікірімен біріктірілді",
+    openCount:n=>n+" пікір әлі түзетілмеді",fixedCount:n=>n+" пікір түзетілді, қайта тексеруіңізді күтіп тұр",
     tooLarge:"Пікірлерді қысқартып, қайта жіберіңіз",
     docT:(g,r,c,a)=>"Сабақтарды бағалау · Өтті "+g+" · Өтпеді "+r+" · Қайта тексеруге дайын "+c+" / "+a}
 };
@@ -829,7 +834,7 @@ function renderHome(){
       b.innerHTML=(ok&&l.thumb?'<img class="th" alt="" src="'+l.thumb+'">':'')+'<div class="hd"><span class="no">'+esc(lbl(l))+'</span>'+badge+'</div><div class="tt"></div><div class="meta"></div>';
       b.querySelector(".tt").textContent=tr(l.title);
       if(ok){
-        renderUnreplied(b,lid(l));
+        renderCommentCounts(b,lid(l));
         if(fixing(l)){
           const banner=document.createElement("div");
           banner.className="lesson-state";
@@ -1044,16 +1049,22 @@ async function getReviewData(path){
   }catch(e){return null}
 }
 
-function renderUnreplied(card,id){
-  card.querySelector(".unreplied")?.remove();
-  const count=summary[id]?.unreplied;
-  if(!Number.isSafeInteger(count)||count<=0)return;
-  const badge=document.createElement("span");
-  badge.className="unreplied";
-  badge.textContent=count;
-  badge.title=T("unrepliedCount")(count);
-  badge.setAttribute("aria-label",badge.title);
-  card.querySelector(".hd").appendChild(badge);
+function renderCommentCounts(card,id){
+  const header=card.querySelector(".hd");
+  header.querySelectorAll(".unreplied, .fixed-count").forEach(badge=>badge.remove());
+  const {open, fixed}=summary[id]??{};
+  const counts=[["unreplied","openCount",open]];
+  if(card.dataset.reviewState==="recheck")counts.push(["fixed-count","fixedCount",fixed]);
+  for(const [className,label,count] of counts){
+    if(!Number.isSafeInteger(count)||count<=0)continue;
+    const badge=document.createElement("span");
+    badge.className=className;
+    badge.textContent=count;
+    badge.title=T(label)(count);
+    badge.setAttribute("role","img");
+    badge.setAttribute("aria-label",badge.title);
+    header.appendChild(badge);
+  }
 }
 
 async function loadSummary(){
@@ -1063,7 +1074,7 @@ async function loadSummary(){
   if(!data?.lessons)return;
   summary=data.lessons;
   $("home").querySelectorAll(".card:not(:disabled)").forEach(card=>{
-    renderUnreplied(card,lid({file:card.dataset.file}));
+    renderCommentCounts(card,card.dataset.lid);
   });
 }
 
