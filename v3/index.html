@@ -13,6 +13,7 @@ button{border:0;border-radius:12px;cursor:pointer;background:#eef1f5;color:var(-
 .top{display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--panel);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
 .top b{font-size:18px}
 .top .sp{flex:1}
+.last{outline:3px solid #f5b301;outline-offset:2px}
 #whoBtn{min-height:44px;padding:6px 14px;font-weight:700}
 .grp{padding:6px 16px 2px;font-size:13px;color:var(--mute);font-weight:700;letter-spacing:.04em}
 .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px;padding:8px 16px 24px}
@@ -231,6 +232,7 @@ function renderHome(){
       const ns=ok?comments(l).length:0;
       {const sg=trStyle(l.style).split(" · "),dc={ccc:"#f08a24",codex:"#3b82f6"}[l.by];b.querySelector(".meta").innerHTML=esc(sg[0])+(dc?'<i class="mk" style="background:'+dc+'"></i>':"")+esc((sg.length>1?" · "+sg.slice(1).join(" · "):"")+(ns?" · "+T("nc")(ns):""))}
       b.disabled=!ok;
+      b.dataset.lid=lid(l);
       b.onclick=()=>openLesson(l);
       c.appendChild(b);
     });
@@ -253,7 +255,9 @@ function resume(){try{const d=$("lesson").contentDocument,b=d.querySelector('[da
 function seek(s){try{const w=$("lesson").contentWindow;if(w.__setTime)w.__setTime(s)}catch(e){}}
 
 function curLesson(){return DATA.lessons.find(l=>lid(l)===st.cur)}
+let homeY=0;
 function openLesson(l){
+  homeY=window.scrollY||document.documentElement.scrollTop||0;
   st.cur=lid(l);save();
   $("player").classList.add("on");
   $("home").style.display="none";
@@ -273,6 +277,11 @@ function closeLesson(){
   $("home").style.display="";
   renderHome();
   loadSummary();
+  // 回到目录时停在刚才进去的位置,并让刚看的那张课卡在视野里(K 261121)
+  requestAnimationFrame(()=>{window.scrollTo(0,homeY);
+    const card=st.cur&&document.querySelector('[data-lid="'+CSS.escape(st.cur)+'"]');
+    if(card){const r=card.getBoundingClientRect();if(r.top<0||r.bottom>innerHeight)card.scrollIntoView({block:"center"});
+      card.classList.add("last");setTimeout(()=>card.classList.remove("last"),1600)}});
 }
 function markVerdict(){const l=curLesson();const v=l&&st.v[lid(l)];const on=v&&v.sha===shaOf(l)?v.v:"";
   $("bPass").classList.toggle("on",on==="g");$("bFail").classList.toggle("on",on==="r")}
