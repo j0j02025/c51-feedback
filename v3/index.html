@@ -221,11 +221,8 @@ const preloadLessons = new Map();
 let preloadWorker, preloadTimer, preloadActive, preloadOpening;
 let preloadOrder = [], preloadStart = 0, preloadLow = false;
 const connection = navigator.connection;
-let preloadOn = !(connection?.saveData || /^(?:slow-)?[23]g$/.test(connection?.effectiveType));
-try {
-  const saved = localStorage.getItem(preloadPreference);
-  if (saved === "on" || saved === "off") preloadOn = saved === "on";
-} catch {}
+// K 261121:「预加载开关不需要，就必须预加载」⇒ 一律开,不看网速档(桌面 Chrome 常把宽带报成 3g)、不给开关;只在本机剩余空间 < 2 GB 时暂停
+let preloadOn = true;
 
 function preloadURL(file, sha) {
   const url = new URL(file, new URL("./", location.href));
@@ -260,7 +257,7 @@ function paintPreloadSwitch() {
   toggle.checked = preloadOn && !preloadLow;
   toggle.disabled = preloadLow;
   $("preloadSetting").title = preloadLow ? T("preloadLow") : "";
-  $("preloadSetting").hidden = !preloadWorker;
+  $("preloadSetting").hidden = true;
   preloadLessons.forEach(paintPreload);
 }
 
