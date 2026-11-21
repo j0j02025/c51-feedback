@@ -416,7 +416,7 @@ function halfStep(kind,from,to,y,p,flip){
   return actor(kind+'-走',lerp(from,to,n/2),y,0,{flip,frameIndex:n===0?0:3-n});
 }
 
-function birdFlight(p,{from,to,via=0,carry=null,short=false,airOnly=false,flip=from[0]>to[0],landingFlip=flip,arriveEarly=false}){
+function birdFlight(p,{from,to,via=0,carry=null,short=false,airOnly=false,flip=from[0]>to[0],arriveEarly=false,holdPose=false,holdLanding=false}){
   let bird;
   const land=short?.64:.71;
   if(p<land||airOnly){
@@ -424,11 +424,12 @@ function birdFlight(p,{from,to,via=0,carry=null,short=false,airOnly=false,flip=f
     const count=short?6:stage.sprites['G-飞'].length;
     const flyX=arriveEarly?ease(u,0,.71):u;
     const descend=arriveEarly?ease(u,.25,1):u;
-    bird=actor('G-飞',lerp(from[0],to[0],flyX),lerp(from[1],to[1]-45,descend)-hop,0,
+    const x=lerp(from[0],to[0],flyX), y=lerp(from[1],to[1]-45,descend)-hop;
+    bird=holdPose?actor('G-落',x,y,1,{flip}):actor('G-飞',x,y,0,
       {flip,frameIndex:Math.min(count-1,Math.floor(u*count))});
   }else{
     const u=phase(p,land,1);
-    bird=actor('G-落',to[0],lerp(to[1]-45,to[1],u),u,{flip:landingFlip});
+    bird=actor('G-落',to[0],lerp(to[1]-45,to[1],u),holdPose||holdLanding?1:u,{flip});
   }
   return {bird,paint(){
     if(carry){
@@ -499,12 +500,15 @@ function foreground(){
   for(const [slot,x,y,w] of props[currentShot])imageAt(slot,x,y,w);
 }
 
-function ring(x,y,p){
+function ring(x,y,p,digit){
   circle(x,y,40,'#d7c09c',5);circle(x,y,40,color.purple,6,1-p);
-  label(String(Math.max(1,Math.ceil((1-p)*3))),x,y+2,46);
+  label(String(digit),x,y+2,46);
 }
 
 // One row per utterance in klp-kk-lang-68-v3 §2.1.
+const quizRow=12;
+const countdownTicks=[0,1,2].map(i=>lerp(end(quizRow),start(quizRow+1),i/3));
+const countdownNumber=t=>t>=countdownTicks[2]?1:t>=countdownTicks[1]?2:3;
 const shots=[1,2,2,3,3,2,3,3,3,4,4,4,4,4,2,1,5,5,3,3,2,2,1];
 const dockPan=1900, boatPan=3840;
 const quizX=[464,960,1442], quizY=532;
@@ -575,7 +579,7 @@ function dock(s,p,t){
       turtle=drag('T',dx+1480,y,phase(p,mark.take,mark.take+.22),true);
     }
     gull=birdFlight(phase(p,0,.38),{
-      from:[dx+1580,382],to:[dx+postX-36,postY-13],via:205,flip:true,landingFlip:false,arriveEarly:true,
+      from:[dx+1580,382],to:[dx+postX-36,postY-13],via:205,flip:true,arriveEarly:true,holdLanding:true,
       carry:p<.38?m=>imageAt('tag',m.x-38,m.y+22,105):null,
     });
   }else if(s===1){
@@ -607,7 +611,7 @@ function dock(s,p,t){
     turtle=p<mark.read22?(p<mark.tail22?at('T',dx+1590,y,true):point('T',dx+1590,y,phase(p,mark.tail22,mark.gap22),true)):
       actor('T-高兴',dx+1590,y,phase(p,mark.read22,1),{flip:true});
     const u=phase(p,mark.gap22-.08,mark.read22);
-    gull=p<mark.gap22-.08?perched(dx+1180,547,true):u<1?birdFlight(u,{from:[dx+1180,518],to:[dx+postX-36,postY-13],via:150,flip:true,landingFlip:false,arriveEarly:true}):perched(dx+postX-36,postY-13);
+    gull=p<mark.gap22-.08?perched(dx+1180,547,true):u<1?birdFlight(u,{from:[dx+1180,518],to:[dx+postX-36,postY-13],via:150,flip:true,arriveEarly:true,holdLanding:true}):actor('G-落',dx+postX-36,postY-13,1,{flip:true});
   }
 
   const basketBright=last&&p>mark.read22+.10;
@@ -740,7 +744,7 @@ function closeNet(s,p,t){
   if(s===7){
     const gx=a.centers[3], route=p<.36?
       birdFlight(phase(p,.03,.36),{from:[1207,332],to:[gx,upper-41],via:38,airOnly:true,flip:true}):
-      birdFlight(phase(p,.36,.92),{from:[gx,upper-27],to:[1619,613],via:54});
+      birdFlight(phase(p,.36,.92),{from:[gx,upper-27],to:[1619,613],via:54,flip:true,holdPose:true});
     route.paint();
     if(fall)morphLetter(gx,a.y-54,phase(p,.37,.78),b.gap,b.y+1,left+5*step+59);
   }
@@ -868,7 +872,7 @@ function bridge(s,p,t,gap){
   }else if(s===13&&p>.78){
     gull=birdFlight(phase(p,.78,1),{from:[quizX[1],611],to:[1720,456],via:25,airOnly:true,
       carry:m=>imageAt('mini-net-4-red',m.x+37,m.y+40,132)});
-  }else gull=perched(quizX[2],433,true);
+  }else gull=actor('G-落',quizX[2],433,1);
   fox.paint();turtle.paint();gull.paint();
 }
 
@@ -945,7 +949,7 @@ function plaqueText(s,p,t,gap){
       ctx.strokeStyle=color.purple;ctx.lineWidth=4;ctx.stroke();
     }
     if(s===5&&p>.89)checkmark(x+w-41,y+h-31);
-    if(gap)ring(x+w-62,y+54,phase(t,end(12),start(13)));
+    if(gap)ring(x+w-62,y+54,phase(t,end(12),start(13)),countdownNumber(t));
   });
 }
 
@@ -985,7 +989,7 @@ function renderScene(t){
   shown=[];
   timer.textContent='';
   const s=sentence(t), p=phase(t,start(s),end(s));
-  const gap=s===12&&t>=end(12);
+  const gap=s===quizRow&&t>=countdownTicks[0];
   const fade=s>0&&shots[s]!==shots[s-1]?phase(t,cues[s],cues[s]+.4):1;
   if(fade<1)paintWorld(s-1,1,cues[s],false);
   alpha(fade,()=>paintWorld(s,p,t,fade>.5,gap));
@@ -1001,7 +1005,7 @@ function auditFrame(frame){
 }
 function sceneState(t){
   const s=sentence(t);
-  return {sentence:s,shot:shots[s],countdown:s===12&&t>=end(12),words:shown.slice()};
+  return {sentence:s,shot:shots[s],countdown:s===quizRow&&t>=countdownTicks[0],words:shown.slice()};
 }
 
 const SCENE_EVENTS=[];
@@ -1019,6 +1023,7 @@ for(const [s,from,to,steps] of [[9,.05,.78,8],[22,mark.our22,mark.tail22,4]]){
   for(let i=0;i<steps;i++)event(s,lerp(from,to,i/steps),i%2?'padHeavy':'hoofLight',i%4);
 }
 for(const s of [0,2,5,9,14,15,20,22])event(s,.08,'wavelet');
+for(const t of countdownTicks)SCENE_EVENTS.push({t,id:'wood',v:0});
 SCENE_EVENTS.sort((a,b)=>a.t-b.t);
 
 // 声效层(本片版):由 v0.6.2 小山谷村 sfx-valley.js 拷来,配方与环境声不变,只换事件表:事件由场景文件的 SCENE_EVENTS 给(和画面同一批时刻常量)。

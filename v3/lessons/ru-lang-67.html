@@ -659,7 +659,7 @@ function foreground(mode){
   }
 }
 
-function countdown(x,y,p){
+function countdown(x,y,p,digit){
   const r=44;
   ctx.save();
   ctx.strokeStyle='rgba(99,65,42,.38)';ctx.lineWidth=6;
@@ -667,10 +667,13 @@ function countdown(x,y,p){
   ctx.strokeStyle='#754b32';ctx.lineCap='round';
   ctx.beginPath();ctx.arc(x,y,r,-Math.PI/2,-Math.PI/2+Math.PI*2*(1-p));ctx.stroke();
   ctx.restore();
-  textAt(Math.max(1,Math.ceil((1-p)*3)),x,y+1,44,color.ink,64);
+  textAt(digit,x,y+1,44,color.ink,64);
 }
 
 // Timeline corresponds to the 31 numbered rows of the v3 storyboard.
+const quizRow=26;
+const countdownTicks=[0,1,2].map(i=>lerp(end(quizRow),start(quizRow+1),i/3));
+const countdownNumber=t=>t>=countdownTicks[2]?1:t>=countdownTicks[1]?2:3;
 const closeShots=new Set([4,7,8,10,11,12,15,16,18,19,20,27,28]);
 const middleShots=new Set([3,5,6,24,25,26]);
 const widePan={0:410,1:275,2:280,9:705,13:705,14:1430,17:1430,21:1480,22:700,23:970,29:970,30:970};
@@ -784,7 +787,7 @@ function recapProof(unlocked){
 function renderScene(t){
   sceneSecond=t;
   const s=sentence(t);
-  const gap=s===26&&t>=end(26);
+  const gap=s===quizRow&&t>=countdownTicks[0];
   const p=phase(t,start(s),end(s));
   framing=closeShots.has(s)?'close':middleShots.has(s)?'mid':'wide';
   let pan=widePan[s]??0;
@@ -1083,7 +1086,7 @@ function renderScene(t){
     case 19: {
       const q=ease(p,.02,.67), i=Math.min(4,Math.floor(q*5));
       if(p<.72)pointAt(960+(q*4-2)*shellStep,665,p);
-      else actor('F-摇头',1335,775,phase(p,.72,1),{flip:true});
+      else actor('F-摇头',1335,775,phase(p,.72,1));
       teaching=()=>{
         wordPlaque(spell.hundredth,960,389);
         atWord('hundredth',{glow:p<.69?i:null});
@@ -1143,7 +1146,7 @@ function renderScene(t){
     case 22: {
       const q=ease(p,.13,.64);
       const f=actor(p<.72?'F-串':'F-收',lerp(795,1150,q),810,
-        p<.72?t*2.8:phase(p,.72,.99),{loop:p<.72,flip:p>.72});
+        p<.72?t*2.8:phase(p,.72,.99),{loop:p<.72});
       const a=actor('T-举',365,805,phase(p,.36,.68),{reverse:true});
       if(p<.65)attached.push(()=>{
         const z=a('lift_anchor');plaque('сто',Math.min(z.x+17,540),511,{w:137,h:59,size:41});
@@ -1187,7 +1190,7 @@ function renderScene(t){
         });
       }else if(s===25){
         if(p<.22)actor('G-落',960,lerp(445,385,p/.22),phase(p,0,.22),{reverse:true,flip:true});
-        else actor('G-飞',lerp(575,1180,ease(p,.22,1)),645,t*2.8,{loop:true});
+        else actor('G-站',lerp(575,1180,ease(p,.22,1)),645,0,{flip:true});
         standby('T',1595,735,true);
       }else if(gap&&t-end(26)<.68){
         actor('G-落',960,lerp(404,445,ease(t-end(26),0,.68)),phase(t-end(26),0,.68),{flip:true});
@@ -1201,7 +1204,7 @@ function renderScene(t){
         groundWords(s,p);
         if(s!==24||p>=.34)question(s===24?p:1,s!==24||p>=.54,s!==24||p>=.73,s===26);
         if(s===25)shelf(s,stepShelf,p>.34&&p<.59?[1]:p>.6&&p<.88?[2]:[]);
-        if(gap)countdown(960,627,phase(t,end(26),start(27)));
+        if(gap)countdown(960,627,phase(t,end(26),start(27)),countdownNumber(t));
       };
       break;
     }
@@ -1293,6 +1296,7 @@ for(const [i,f,id] of [
 for(const [s,counts,from,until] of [[4,10,.10,.70],[10,14,.08,.62],[22,9,.17,.62]]){
   for(let i=0;i<counts;i++)event(s,lerp(from,until,i/counts),'shellDrop',i%4);
 }
+for(const t of countdownTicks)SCENE_EVENTS.push({t,id:'wood',v:0});
 SCENE_EVENTS.sort((a,b)=>a.t-b.t);
 
 // 声效层(本片版):由 v0.6.2 小山谷村 sfx-valley.js 拷来,配方与环境声不变,只换事件表:事件由场景文件的 SCENE_EVENTS 给(和画面同一批时刻常量)。

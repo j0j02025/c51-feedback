@@ -387,6 +387,7 @@ const SCENE_EVENTS = [
   [25,.31,'cloth'],[25,.57,'cloth'],[25,.78,'cloth'],[27,.22,'cloth'],[27,.39,'cloth'],
   [28,.24,'cloth'],[28,.45,'cloth'],[29,.24,'cloth'],[30,.68,'cloth']
 ].map(([i,p,id])=>({t:seconds(i,p),id}));
+for(const offset of [0,1,2])SCENE_EVENTS.push({t:quizPause+offset,id:'block'});
 
 function artwork(id,x,y,w,h) {
   const source=SLOTS[id];
@@ -622,7 +623,7 @@ function drawTeaching(i,p,tt) {
         const left=Math.max(0,cues[13]-tt);
         oval(959,305,54,54,'rgba(255,247,220,.94)');
         outline(959,305,51,'#ab7641',7,left/3);
-        txt(String(Math.max(1,Math.ceil(left))),959,307,52,'center','#432c21');
+        txt(String(Math.max(1,3-Math.floor(tt-quizPause+1e-7))),959,307,52,'center','#432c21');
       }
       break;
     }

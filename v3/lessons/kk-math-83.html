@@ -239,6 +239,8 @@ const ease = x => (x=clamp(x), x*x*(3-2*x));
 const play = (p,a=0,b=1) => ease((p-a)/(b-a));
 const start = s => beats[s][0][0];
 const end = s => beats[s].at(-1)[1];
+const countdownStart = end(5), countdownEnd = cues[6];
+const countdownStep = (countdownEnd-countdownStart)/3;
 const fraction = (t,s) => clamp((t-start(s))/(end(s)-start(s)));
 const word = i => scene.words[i];
 const weight = n => n+' '+word(11);
@@ -329,50 +331,23 @@ const frameID=(role,action,frame)=>role.id+'-'+action+'-'+String(frame+1).padSta
 const cargoDimensions={record:[105,34],'sack-tied':[74,87],plank:[200,24]};
 const groupFade=.15;
 const standingFrame=[7,8];
-const gaitPhase={
-  walk:[[0,2,'hind'],[3,5,'front'],[6,8,'front'],[9,11,'hind']],
-  trot:[[0,4,'front'],[6,10,'hind']]
-};
-const anchorsFor=(role,action,k)=>scene.anchors[frameID(role,action,k)];
-function hoofShift(role,action,k,travel,scale) {
-  if(travel==null)return 0;
-  const phase=gaitPhase[action].find(([first,last])=>k>=first&&k<=last);
-  if(!phase)return 0;
-  const [first,last,foot]=phase, mid=Math.round((first+last)/2);
-  const x=anchorsFor(role,action,k).hoof_centers[foot]?.[0];
-  const ref=anchorsFor(role,action,mid).hoof_centers[foot]?.[0];
-  return x==null||ref==null?0:(mid-k)*travel/scale+ref-x;
-}
-function actor(index, choreo, shot, t) {
-  const {x,y,h,action,frame,face,carry,blend,step}=choreo;
+function actor(index, choreo, shot) {
+  const {x,y,h,action,frame,face,carry,blend}=choreo;
   const role=squad[index], id=frameID(role,action,frame), a=scene.anchors[id];
-  const size=key=>h/(scene.anchors[key].hoof_centers?(index===0?292:304):(index===0?306:318));
+  const scale=h/(index===0?292:304);
 
-  function sprite(key,opacity,direction,shift,breathe) {
+  function sprite(key,opacity,direction) {
     const anchor=scene.anchors[key], [fx,fy]=anchor.foot_bottom_midpoint;
-    const [l,u,r,b]=anchor.bounds, scale=size(key), sy=scale*breathe;
-    const footBand=fy-82;
+    const [l,u,r,b]=anchor.bounds;
     if(slotReady(key)&&opacity>0){
-      const im=SLOTS[key], projection=ctx.getTransform();
-      const px=scale*shot.zoom, py=sy*shot.zoom;
-      // Shot magnification is fixed geometry. Draw the image at its
-      // projected size in pixels; the pose itself can only mirror or breathe.
+      const im=SLOTS[key], projection=ctx.getTransform(), pixels=scale*shot.zoom;
+      // Draw the complete gait frame at the same scale as the rest pose.
       ctx.save();ctx.globalAlpha*=opacity;
       ctx.setTransform(direction,0,0,1,projection.a*x+projection.e,projection.d*y+projection.f);
-      const top=shift?footBand:b;
-      ctx.drawImage(im,l,u,r-l,top-u,(l-fx)*px,(u-fy)*py,(r-l)*px,(top-u)*py);
-      if(shift){
-        // Move thin strips of the lower leg, keeping the saddle and torso
-        // rigid. The offset grows from zero at the knee to the sole lock.
-        for(let row=footBand;row<b;row+=6){
-          const height=Math.min(6,b-row);
-          const dx=shift*(row+height*.5-footBand)/(fy-footBand);
-          ctx.drawImage(im,l,row,r-l,height,(l-fx+dx)*px,(row-fy)*py,(r-l)*px,height*py);
-        }
-      }
+      ctx.drawImage(im,l,u,r-l,b-u,(l-fx)*pixels,(u-fy)*pixels,(r-l)*pixels,(b-u)*pixels);
       ctx.restore();
     }
-    const map=([px,py])=>[x+direction*(px-fx)*scale,y+(py-fy)*sy];
+    const map=([px,py])=>[x+direction*(px-fx)*scale,y+(py-fy)*scale];
     return {
       back:map(anchor.saddle_cargo_point||anchor.back_cargo_point||
         [mix(l,r,.43),mix(u,b,.41)]),
@@ -380,16 +355,12 @@ function actor(index, choreo, shot, t) {
       hoof:index===1&&action==='point'?map([mix(l,r,frame>=4?.95:.82),mix(u,b,frame>=4?.57:.76)]):null
     };
   }
-  const [l,u,r,b]=a.bounds, [fx,fy]=a.foot_bottom_midpoint, scale=size(id);
-  const breathe=step==null&&action==='walk'?1+.013*Math.sin(t*4+index*1.7):1;
-  const shift=hoofShift(role,action,frame,step,scale);
+  const [l,u,r,b]=a.bounds, [fx,fy]=a.foot_bottom_midpoint;
   shadow(x,y+5/shot.zoom,(r-l)*scale*.36,10/shot.zoom,.19);
-  const old=blend?sprite(blend.id,1-blend.alpha,blend.face??face,blend.shift||0,1):null;
-  const result=sprite(id,blend?blend.alpha:1,face,shift,breathe);
-  const edgeShift=shift*scale;
+  const old=blend?sprite(blend.id,1-blend.alpha,blend.face??face):null;
+  const result=sprite(id,blend?blend.alpha:1,face);
   const drawX=face===1?x+(l-fx)*scale:x-(r-fx)*scale;
-  reg('char',role.id,drawX+Math.min(0,face*edgeShift),y+(u-fy)*scale*breathe,
-      (r-l)*scale+Math.abs(edgeShift),(b-u)*scale*breathe);
+  reg('char',role.id,drawX,y+(u-fy)*scale,(r-l)*scale,(b-u)*scale);
   if(old){
     result.back=result.back.map((n,i)=>mix(old.back[i],n,blend.alpha));
     if(result.hitch&&old.hitch)result.hitch=result.hitch.map((n,i)=>mix(old.hitch[i],n,blend.alpha));
@@ -413,26 +384,31 @@ function stageActors(s,t,p,shot) {
   function move(i,action,from,to,a,b,options={}) {
     const {carry='',release=b,finish='walk',face=to<from?-1:1}=options;
     const duration=span*(b-a), age=elapsed-span*a;
-    const count=squad[i].frames[action], frames=Math.max(1,Math.ceil(duration*gaitFPS));
+    const count=squad[i].frames[action];
+    const cycles=Math.max(1,Math.round(duration*gaitFPS/count));
+    const frames=cycles*count+1;
+    // Start and finish the stride on the same planted frame. Each frame is
+    // translated as a whole, with the shot's fixed projection.
+    const phase=i===0?0:action==='trot'?2:3;
     const movingFace=to<from?-1:1;
-    // One fixed translation per displayed frame; twelve advances form one
-    // gait cycle. The hold and the frame index come from the same clock.
-    const travel=age<=0?0:age>=duration?frames:Math.floor(age*gaitFPS);
-    const distance=Math.abs(xWorld(to)-xWorld(from))/frames;
+    const travel=Math.min(frames,Math.floor(clamp(age/duration)*frames));
     const walking=age>=0&&age<duration, after=age-duration;
-    const k=finish==='point'?play(after,0,Math.max(.28,(1-b)*span)):
+    const settling=finish==='point'&&i===0&&after>=Math.max(0,(1-b)*span-.15);
+    const k=finish==='point'?play(after,0,Math.max(.28,(1-b)*span-.15)):
       finish==='happy'?play(after,0,Math.max(.36,(1-b)*span)):0;
-    const d=pose(i,walking?action:age<0?'walk':finish,to,k,walking?movingFace:face);
+    const d=pose(i,walking?action:age<0||settling?'walk':finish,to,k,walking?movingFace:face);
+    if(settling) d.blend={
+      id:frameID(squad[i],finish,squad[i].frames[finish]-1),
+      alpha:clamp((after-(1-b)*span+.15)/.15),face
+    };
     d.x=mix(xWorld(from),xWorld(to),travel/frames);
     d.carry=p<release?carry:'';
     if(walking){
-      d.frame=travel%count;
-      d.step=distance;
+      d.frame=(travel+phase)%count;
       if(age<groupFade)d.blend={id:frameID(squad[i],'walk',standingFrame[i]),alpha:clamp(age/groupFade),face};
     }else if(after>=0&&after<groupFade){
-      const last=(frames-1)%count, id=frameID(squad[i],action,last);
-      const scale=h/(i===0?292:304);
-      d.blend={id,alpha:clamp(after/groupFade),face:movingFace,shift:hoofShift(squad[i],action,last,distance,scale)};
+      const last=(frames-1+phase)%count, id=frameID(squad[i],action,last);
+      d.blend={id,alpha:clamp(after/groupFade),face:movingFace};
     }
     return d;
   }
@@ -445,7 +421,7 @@ function stageActors(s,t,p,shot) {
       roles=[move(0,'walk',260,568,.05,.52,{carry:'sack-tied'}),
         move(1,'trot',1510,1266,.06,.57,{carry:'sack-tied'})];break;
     case 2:
-      roles=[pose(0,'point',228,play(p,.12,.39)),pose(1,'point',1683,play(p,.47,.81),-1)];break;
+      roles=[pose(0,'point',228,play(p,.12,.39)*(1-play(p,.83,.99))),pose(1,'point',1683,play(p,.47,.81),-1)];break;
     case 3:
       roles=[pose(0,'walk',1550,0,-1),move(1,'walk',1245,360,.06,.55,{finish:'think',face:-1})];break;
     case 4:case 5:
@@ -469,11 +445,9 @@ function stageActors(s,t,p,shot) {
     case 10:
       roles=[move(0,'walk',451,858,.04,.86),move(1,'walk',169,357,.11,.94)];break;
     case 11:
-      roles=[pose(0,'point',858,play(p,.04,.90),p<.64?-1:1),pose(1,'walk',357)];
+      roles=[pose(0,'point',858,play(p,.04,.80)*(1-play(p,.83,.99))),pose(1,'walk',357)];
       if(elapsed<groupFade)roles[0].blend={
-        id:frameID(squad[0],'walk',standingFrame[0]),alpha:elapsed/groupFade,face:1
-      };else if(p>=.64&&(p-.64)*span<groupFade)roles[0].blend={
-        id:frameID(squad[0],'point',roles[0].frame),alpha:(p-.64)*span/groupFade,face:-1
+        id:frameID(squad[0],'walk',standingFrame[0]),alpha:elapsed/groupFade
       };break;
     case 12:
       roles=[pose(0,'walk',414),move(1,'trot',1213,968,.02,.36,{finish:'point',face:-1})];
@@ -502,13 +476,13 @@ function stageActors(s,t,p,shot) {
       roles=[pose(0,'point',947,tap),pose(1,'think',345)];break;
     }
     case 22:
-      roles=[pose(0,'point',113,play(p,.26,.74)),pose(1,'walk',1765,0,-1)];
+      roles=[pose(0,'point',113,play(p,.26,.74)*(1-play(p,.83,.99))),pose(1,'walk',1765,0,-1)];
       roles[0].y=670;roles[0].h=184;roles[1].y-=16;break;
     case 23:
       roles=[move(0,'walk',456,891,.04,.76,{carry:'sack-tied',release:1.01,finish:'happy'}),
         move(1,'trot',1647,1184,.04,.76,{carry:'sack-tied',release:1.01,finish:'happy'})];break;
   }
-  return roles.map((role,i)=>actor(i,role,shot,t));
+  return roles.map((role,i)=>actor(i,role,shot));
 }
 function point(q,x,y){
   return [mix(mix(q[0][0],q[1][0],x),mix(q[3][0],q[2][0],x),y),
@@ -802,16 +776,16 @@ function card(s,t,p,isStation) {
   }
   const [formula,color]=equation(s,p);
   if(s===4||s===5) {
-    const wait=Math.max(0,t-end(5)), running=s===5&&wait>0;
+    const running=s===5&&t>=countdownStart&&t<countdownEnd;
     const tx=x+(running?219:266), width=running?378:480;
     txt(word(5),tx,y+244,fitSize(word(5),width,37),'center',C.ink);
     if(s===5)txt(word(6),tx,y+286,35,'center',C.ink);
     if(running){
-      const left=Math.max(0,3-wait), px=x+459,py=y+265,r=39;
+      const left=(countdownEnd-t)/countdownStep, px=x+459,py=y+265,r=39;
       ctx.beginPath();ctx.strokeStyle='#dec393';ctx.lineWidth=7;ctx.arc(px,py,r,0,Math.PI*2);ctx.stroke();
       ctx.beginPath();ctx.strokeStyle=C.gold;ctx.lineWidth=7;
       ctx.arc(px,py,r,-Math.PI/2,-Math.PI/2+Math.PI*2*left/3);ctx.stroke();
-      txt(String(Math.max(1,Math.ceil(left))),px,py,45,'center',C.gold);
+      txt(String(t>=countdownStart+2*countdownStep?1:t>=countdownStart+countdownStep?2:3),px,py,45,'center',C.gold);
     }
   } else if(s===21||s===22||s===23){
     const i=s===21?7:s===22&&p<.48?10:s===22?8:9;
@@ -1076,7 +1050,9 @@ function sceneState(t) {
   return {sentence:s, fieldColumns:hectares, fieldRows:depth, sackCount:[20,20]};
 }
 
-const SCENE_EVENTS = [];
+const SCENE_EVENTS = Array.from({length:3}, (_,i)=>({
+  t:countdownStart+i*countdownStep, id:'block'
+}));
 function sound(s,f,id,v=0) {
   SCENE_EVENTS.push({t:mix(start(s),end(s),f),id,v});
 }

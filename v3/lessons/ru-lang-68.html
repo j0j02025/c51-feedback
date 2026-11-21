@@ -285,6 +285,7 @@ const sailForms = [
 ];
 const firstAt = s => beats[s][0][0];
 const lastAt = s => beats[s].at(-1)[1];
+const quizPause = cues[27]-3;
 const clamp = x => Math.max(0,Math.min(1,x));
 const lerp = (from,to,p) => from+(to-from)*p;
 const smooth = p => (p=clamp(p),p*p*(3-2*p));
@@ -578,10 +579,11 @@ function rope(points,width=7,active=false) {
   stroke(points,active?'#bd7e22':'#53391f',width+3);
   stroke(points,active?'#ffde8a':'#cf9d5a',width);
 }
-function timeRing(x,y,remaining) {
+function timeRing(x,y,t) {
+  const remaining=cues[27]-t;
   ctx.save();ctx.lineWidth=6;ctx.strokeStyle='#745025';
   ctx.beginPath();ctx.arc(x,y,27,-Math.PI/2,-Math.PI/2+2*Math.PI*remaining/3);ctx.stroke();
-  label(String(Math.ceil(remaining)),x,y+1,33,colors.ink,'center');ctx.restore();
+  label(String(Math.max(1,3-Math.floor(t-quizPause+1e-7))),x,y+1,33,colors.ink,'center');ctx.restore();
 }
 function analysisRows(s,p) {
   const rows = [
@@ -697,13 +699,13 @@ function ledger(s,p,t,map,cam,box,counts) {
             tx+16+left,ty+95,tw-55,35);
       words([[answerTwo?'творительный':'____',colors.orange],[' падеж',colors.ink]],
             tx+16+left,ty+147,tw-55,35);
-      const resting=s===26&&t>=lastAt(26)&&t<cues[27];
+      const resting=s===26&&t>=quizPause&&t<cues[27];
       if(resting){
         if(Math.floor(t*3)%2===0){
           stroke([[tx+344,ty+83],[tx+344,ty+101]],colors.blue,3);
           stroke([[tx+36,ty+134],[tx+36,ty+152]],colors.orange,3);
         }
-        timeRing(x+w-61,ty+122,cues[27]-t);
+        timeRing(x+w-61,ty+122,t);
       }
       if(s>29||s===29&&p>=wordAt(29,'количественное')){
         label('количественное, простое',tx,ty+190,32,colors.ink,'left',tw);
@@ -974,7 +976,7 @@ function auditFrame(state) {
   return [];
 }
 
-const SCENE_EVENTS=[];
+const SCENE_EVENTS=[0,1,2].map(offset=>({t:quizPause+offset,id:'block'}));
 function sound(s,p,id,v=0) {
   SCENE_EVENTS.push({t:lerp(firstAt(s),lastAt(s),p),id,v});
 }
