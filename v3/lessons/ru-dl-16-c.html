@@ -905,7 +905,7 @@ function buildEvents(){return (typeof SCENE_EVENTS!=='undefined'?SCENE_EVENTS:[]
 // ccc-011 (K 261121: effects at 90 % of the voice): each effect buffer is soft-saturated after its trim
 // (tanh, ceiling -1 dBFS) because short clicks cannot reach voice loudness by gain alone; bus gain per language.
 const SFX_DRIVE=20.0,SFX_CEIL=Math.pow(10,-1/20),SFX_SAT=x=>SFX_CEIL*Math.tanh(SFX_DRIVE*x/SFX_CEIL);
-const SFX_LANG={"ru": 0.953, "en": 0.942, "zh": 1.0};
+const SFX_LANG={"ru": 0.795, "en": 0.786, "zh": 0.834};
 const SFXG=()=>SFX_LANG[(window.__lang&&window.__lang.cur)||LG]??(MIXG.sfx==null?.35:MIXG.sfx),AMBG=()=>MIXG.ambience==null?.05:MIXG.ambience;
 let SBUF=null,EVENTS=[];
 const audioReady=(async()=>{if(!window.OfflineAudioContext)return false;try{EVENTS=buildEvents();const out={sfx:{},amb:SFXCFG.ambience?await renderAmbience(SFXCFG.ambience):null};for(const id of new Set(EVENTS.map(e=>e.id)))out.sfx[id]=await Promise.all((VARIANTS.has(id)?[0,1,2,3]:[0]).map(v=>renderSfx(id,v)));SBUF=out;return true}catch(e){console.log('AUDIO-SYNTH-FAIL',e&&e.message);return false}})();
