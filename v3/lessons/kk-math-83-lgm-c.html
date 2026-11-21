@@ -447,15 +447,15 @@ function burst(o,dest,{at=0,dur=.05,gain=.5,type='bandpass',f=1500,f1,q=1,a=.001
 const RECIPES={
  pop(o,d){burst(o,d,{dur:.09,gain:.5,type:'lowpass',f:900,f1:300,q:.8,a:.003,seed:11});tone(o,d,{f0:320,f1:190,dur:.12,gain:.55,a:.003})},
  query(o,d){tone(o,d,{type:'triangle',f0:523,dur:.14,gain:.55});tone(o,d,{type:'triangle',f0:784,at:.13,dur:.24,gain:.6})},
- tick(o,d,v){const f=[1250,1180,1320,1210][v%4];tone(o,d,{f0:f,f1:f*.7,dur:.07,gain:.5,a:.001});burst(o,d,{dur:.03,gain:.18,type:'bandpass',f:2400,q:3,seed:21+v})},
+ tick(o,d,v){const f=[1250,1180,1320,1210][v%4],s=o.createOscillator(),g=o.createGain();s.frequency.setValueAtTime(f,0);s.frequency.exponentialRampToValueAtTime(f*.7,.07);g.gain.setValueAtTime(0,0);g.gain.linearRampToValueAtTime(.5,.001);g.gain.setValueAtTime(.5,.06);g.gain.exponentialRampToValueAtTime(.0001,.16);s.connect(g);g.connect(d);s.start(0);s.stop(.18);burst(o,d,{dur:.03,gain:.18,type:'bandpass',f:2400,q:3,seed:21+v})},
  ding(o,d){for(const[f,at,g]of[[784,0,.42],[988,.09,.38],[1319,.18,.36]]){tone(o,d,{f0:f,at,dur:.45,gain:g,a:.002});tone(o,d,{f0:f*4,at,dur:.08,gain:g*.15,a:.001})}},
  boing(o,d){const s=o.createOscillator(),g=o.createGain(),l=o.createOscillator(),lg=o.createGain();s.type='sine';s.frequency.setValueAtTime(180,0);s.frequency.exponentialRampToValueAtTime(520,.12);s.frequency.exponentialRampToValueAtTime(300,.38);
   l.frequency.value=28;lg.gain.value=26;l.connect(lg);lg.connect(s.frequency);g.gain.setValueAtTime(0,0);g.gain.linearRampToValueAtTime(.45,.01);g.gain.exponentialRampToValueAtTime(.0001,.42);s.connect(g);g.connect(d);s.start(0);l.start(0);s.stop(.45);l.stop(.45)},
  chime(o,d){for(const[f,at,g]of[[659,0,.32],[880,.08,.26],[1319,.16,.18]])tone(o,d,{f0:f,at,dur:.6,gain:g,a:.004})},
  swish(o,d,v){burst(o,d,{dur:.3,gain:.3,type:'bandpass',f:1400,f1:500,q:.8,a:.06,seed:101+v})},
 };
-const LEN={pop:.14,query:.4,tick:.09,ding:.66,boing:.46,chime:.8,swish:.34};
-const SFX_TRIM={pop:.6,query:.45,tick:.45,ding:.4,boing:.42,chime:.5,swish:.45};
+const LEN={pop:.14,query:.4,tick:.18,ding:.66,boing:.46,chime:.8,swish:.34};
+const SFX_TRIM={pop:.6,query:.45,tick:.47,ding:.4,boing:.42,chime:.5,swish:.45};
 const VARIANTS=new Set(['tick','swish']);
 async function renderSfx(id,v=0){const o=new OfflineAudioContext(2,Math.ceil(LEN[id]*ASR),ASR);RECIPES[id](o,o.destination,v);const r=await o.startRendering();for(let c=0;c<2;c++){const d=r.getChannelData(c);for(let i=0;i<d.length;i++)d[i]*=SFX_TRIM[id]}return r}
 // 环境底音:20 秒循环噪声,首尾交叉淡化。room = 低通的室内空气声
@@ -481,7 +481,7 @@ function audioTick(tt){
  const off=c.currentTime-narration.currentTime;
  if(live.offset===null||Math.abs(off-live.offset)>.25){live.offset=off;live.next=EVENTS.findIndex(e=>e.t>=tt);if(live.next<0)live.next=EVENTS.length}else live.offset=live.offset*.92+off*.08;
  const now=c.currentTime-live.offset;
- while(live.next<EVENTS.length&&EVENTS[live.next].t<now+.16){const e=EVENTS[live.next++];if(e.t<now-.03)continue;const s=c.createBufferSource();s.buffer=sbuf(e);s.connect(live.sfx);s.start(Math.max(c.currentTime,e.t+live.offset))}
+ while(live.next<EVENTS.length&&TMAP.s2a(EVENTS[live.next].t)<now+.16){const e=EVENTS[live.next++],ea=TMAP.s2a(e.t);if(ea<now-.03)continue;const s=c.createBufferSource();s.buffer=sbuf(e);s.connect(live.sfx);s.start(Math.max(c.currentTime,ea+live.offset))}
 }
 // 离线渲染:templates/mix_calibrate.py 用,和实时走同一批缓冲区、同一个事件表
 window.__renderStems=async(unity=true)=>{
