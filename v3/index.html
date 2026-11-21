@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>看课评审</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='4 2 40 30'><path d='M5 14V10Q5 5 10 5H38Q43 5 43 10V14Z' fill='%23b8502e'/><rect x='4' y='14' width='40' height='15' rx='2.5' fill='%238c2f1c'/><path d='M4 14H44' stroke='%23f2c14e' stroke-width='2'/><rect x='21' y='11' width='6' height='6' rx='1' fill='%23f2c14e'/></svg>">
 <style>
 :root{--bg:#f4f6f8;--panel:#fff;--ink:#1c2330;--mute:#6b7480;--line:#e3e7ec;--acc:#2563eb;--g:#16803c;--r:#d23b32;--y:#b8860b}
 *{box-sizing:border-box}
@@ -103,15 +104,162 @@ button{border:0;border-radius:12px;cursor:pointer;background:#eef1f5;color:var(-
 #toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#12351f;color:#fff;border-radius:12px;padding:12px 18px;font-weight:700;display:none;z-index:70;max-width:92vw}
 #toast.on{display:block}
 </style>
+<style id="kzTheme">
+/* ccc-005 (K 261121): warm Kazakh look + phone layout. This block only restyles the rules above; the page logic is unchanged.
+   Ornaments = koshkar-muiz (ram's horn) curls, inline SVG, no external files. Chest (sandyq) motif: the thumbnail tilts open like a lid on hover. */
+:root{--bg:#f7f0e4;--panel:#fffaf1;--ink:#2a2016;--mute:#76654f;--line:#e7d9c2;--acc:#11708a;--g:#2f7d3a;--r:#c2412d;--y:#a8740a;
+  --gold:#c8962a;--gold2:#f2c14e;--felt:#8c2f1c;--dk:#17120e;--dk2:#211913;--dk3:#2e241a;--dkl:#3b2e21;--cream:#f6e7c8;
+  --band:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 16'%3E%3Cg fill='none' stroke='%23c8962a' stroke-width='1.6' stroke-linecap='round'%3E%3Cpath d='M24 15V9M24 9C24 4 31 2 34 5C36.5 7.5 35 11 32 10.5C30 10 30 7.5 32 7.5M24 9C24 4 17 2 14 5C11.5 7.5 13 11 16 10.5C18 10 18 7.5 16 7.5'/%3E%3C/g%3E%3Cpath d='M2 9L4 7L6 9L4 11ZM42 9L44 7L46 9L44 11Z' fill='%23c8962a'/%3E%3C/svg%3E");
+  --corner:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 28'%3E%3Cg fill='none' stroke='%23c8962a' stroke-width='2.2' stroke-linecap='round'%3E%3Cpath d='M3 24V3H24'/%3E%3Cpath d='M3 3C10 3 14 7 11.5 11C9.8 13.6 6 12.6 6.6 9.8C7 8.2 9 8.2 9.4 9.4'/%3E%3C/g%3E%3C/svg%3E")}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%}
+html,body{background:var(--bg)}
+body{background:linear-gradient(180deg,#f1e2c8 0,var(--bg) 260px) no-repeat,var(--bg)}
+button:focus-visible{outline:3px solid var(--gold2);outline-offset:2px}
+/* top bar */
+.top{flex-wrap:wrap;gap:8px 12px;padding:10px max(16px,env(safe-area-inset-right)) 12px max(16px,env(safe-area-inset-left));background:linear-gradient(180deg,#fffaf1,#fbf0dc);border-bottom:0;box-shadow:0 3px 12px -6px rgba(90,55,20,.35)}
+.top::after{content:"";position:absolute;left:0;right:0;bottom:-6px;height:9px;background:var(--band) repeat-x center/27px 9px;opacity:.6;pointer-events:none}
+.top .logo{width:34px;height:24px;flex:0 0 auto}
+.top b{font-size:20px;color:var(--felt);letter-spacing:.01em;min-width:0}
+.top .lng{flex-wrap:wrap}
+.lng button{min-height:44px;background:#f1e5d0;color:var(--ink)}
+.lng button.on{background:var(--acc);color:#fff}
+#whoBtn{background:#fff;color:var(--ink);border:1px solid var(--line);border-radius:999px;padding:6px 16px;max-width:min(62vw,280px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;box-shadow:0 1px 3px rgba(90,55,20,.12)}
+#whoBtn img{border:2px solid var(--gold2);box-shadow:0 0 0 1px var(--gold)}
+/* directory */
+#home{max-width:1680px;margin:0 auto;padding-bottom:40px}
+.grp{display:flex;align-items:center;gap:10px;padding:24px 16px 4px;font-size:17px;color:var(--felt);font-weight:800;letter-spacing:.02em}
+.grp::before{content:"";flex:0 0 auto;width:30px;height:12px;background:var(--band) no-repeat center/30px 10px}
+.grp::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--gold),transparent 85%)}
+.cards{grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px;padding:10px 16px 8px}
+.card,.card.g,.card.r,.card.y{position:relative;background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:16px;padding:10px 10px 12px;gap:6px;
+  box-shadow:inset 5px 0 var(--sc,transparent),0 1px 2px rgba(70,45,20,.06),0 6px 16px -10px rgba(70,45,20,.35);transition:transform .22s ease,box-shadow .22s ease,border-color .22s ease}
+.card.g{--sc:var(--g)}
+.card.r{--sc:var(--r)}
+.card.y{--sc:var(--y)}
+.card::before,.card::after{content:"";position:absolute;top:5px;width:22px;height:22px;background:var(--corner) no-repeat center/contain;opacity:.8;pointer-events:none;z-index:1;transition:transform .28s ease,opacity .28s ease}
+.card::before{left:5px}
+.card::after{right:5px;transform:scaleX(-1)}
+.card .th{border-radius:11px;border:1px solid rgba(120,80,30,.18);background:#efe3cf;margin-bottom:2px;transform-origin:50% 100%;transition:transform .3s cubic-bezier(.2,.7,.3,1.25),box-shadow .3s ease}
+.card .hd{flex-wrap:wrap;row-gap:4px}
+.card .no{color:var(--felt)}
+.card .st{padding:3px 9px}
+.st.g{background:#e3f1e1;color:#24672f}
+.st.r{background:#fbe4dd;color:#a8361f}
+.st.y{background:#fbefcf;color:#8a5e00}
+.st.make{background:#efe6d7;color:var(--mute)}
+.card .unreplied{background:#b3261e;box-shadow:0 0 0 2px var(--panel)}
+.card .tt{font-size:15px;line-height:1.35;font-weight:600;overflow-wrap:anywhere}
+.card .meta{font-size:12.5px;overflow-wrap:anywhere}
+@media (hover:hover){
+  .card:not(:disabled):hover{transform:translateY(-3px);border-color:#e2c48a;box-shadow:inset 5px 0 var(--sc,transparent),0 0 0 1px rgba(200,150,42,.35),0 16px 28px -14px rgba(120,70,10,.55)}
+  .card:not(:disabled):hover .th{transform:perspective(700px) rotateX(8deg) translateY(-2px);box-shadow:0 12px 18px -10px rgba(242,193,78,.95)}
+  .card:not(:disabled):hover::before{transform:translate(-2px,-2px);opacity:1}
+  .card:not(:disabled):hover::after{transform:scaleX(-1) translate(-2px,-2px);opacity:1}
+}
+.card:not(:disabled):focus-visible .th{box-shadow:0 12px 18px -10px rgba(242,193,78,.95)}
+.card:not(:disabled):active{transform:translateY(-1px) scale(.985)}
+/* 98457cf5: the card you just came back from */
+.card.last{outline:3px solid var(--gold2);outline-offset:3px;animation:lastGlow 1.6s ease-out}
+@keyframes lastGlow{0%{box-shadow:inset 5px 0 var(--sc,transparent),0 0 0 8px rgba(242,193,78,.55)}100%{box-shadow:inset 5px 0 var(--sc,transparent),0 0 0 0 rgba(242,193,78,0)}}
+/* lesson page */
+#player{background:var(--dk)}
+#player.on{animation:chestOpen .26s ease-out}
+@keyframes chestOpen{from{opacity:0;transform:scale(.985) translateY(8px)}to{opacity:1;transform:none}}
+#bar{gap:8px;padding:6px max(10px,env(safe-area-inset-right)) 6px max(10px,env(safe-area-inset-left));background:linear-gradient(180deg,var(--dk3),var(--dk2));border-bottom:1px solid var(--dkl);color:var(--cream)}
+#bar .sec{color:var(--gold2)}
+#bTop{min-height:44px;border-radius:10px;background:var(--gold2);color:#2a1a00}
+#bar .lng button{background:var(--dkl);color:var(--cream)}
+#bar .lng button.on{background:var(--acc);color:#fff}
+#stage{display:flex;align-items:center;justify-content:center;background:#000}
+@supports (width:1cqw){
+  #stage{container-type:size}
+  #stage iframe{position:relative;inset:auto;flex:0 0 auto;width:min(100cqw,177.778cqh);height:min(56.25cqw,100cqh)}
+}
+#side{background:#1d1712;color:var(--cream);border-left:1px solid var(--dkl)}
+#side .sh{border-bottom:1px solid var(--dkl);color:var(--cream)}
+#side .sh small{color:#b9a98f}
+#history .sh{background:#1d1712}
+#history{border-bottom:1px solid var(--dkl)}
+#clist .it,.history-sub{border-bottom-color:#33281d}
+#clist .tm,.history-line .tm{color:var(--gold2);min-height:44px;white-space:nowrap}
+#clist .x{color:#d9c9ad;min-width:44px;min-height:44px;border-radius:10px}
+#clist .x:hover{background:var(--dkl)}
+#clist .tx{padding-top:11px}
+.history-line{align-items:center}
+.history-meta{color:#c4b498}
+.history-reply{color:#e0d3bb}
+#dock{gap:8px;padding:8px max(8px,env(safe-area-inset-right)) max(8px,env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-left));background:var(--dk2);border-top:1px solid var(--dkl)}
+#dock button{border-radius:12px;box-shadow:inset 0 -3px rgba(0,0,0,.2)}
+#dock button:disabled{opacity:.6;cursor:wait}
+#bNote{background:#e0a526;color:#2a1a00}
+#bPass{background:var(--g)}
+#bFail{background:var(--r)}
+#bSend{background:var(--acc)}
+#bBack{background:var(--dkl);color:var(--cream)}
+#dock button.on{outline:3px solid #fff7e0;outline-offset:2px}
+/* dialogs, toast */
+.ov{background:rgba(23,14,6,.72)}
+.box{position:relative;background:var(--panel);border-radius:18px;padding:22px 16px 16px;box-shadow:0 20px 50px -20px rgba(0,0,0,.6)}
+.box::before{content:"";position:absolute;left:0;right:0;top:6px;height:9px;background:var(--band) repeat-x center/27px 9px;opacity:.55}
+.box textarea,#nameIn{border-color:#dccbb0;background:#fff}
+#cCancel{background:#efe4d2;color:var(--ink)}
+#cSave,#nameOk{background:var(--acc);color:#fff}
+#toast{background:#2b2016;color:#fff7e6;border:1px solid var(--gold)}
+/* phones, portrait (and narrow windows): 2 cards per row; player on top, comments below */
+@media (max-width:540px){
+  .top{gap:6px 8px;padding-top:8px;padding-bottom:10px}
+  .top b{font-size:17px;flex:1 1 auto;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .top .sp{display:none}
+  .top .lng{order:3;flex:1 1 100%;justify-content:flex-end}
+  .top .logo{width:30px;height:21px}
+  .grp{padding:18px 12px 2px;font-size:16px}
+  .cards{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding:8px 12px}
+  .card,.card.g,.card.r,.card.y{padding:7px 7px 9px;border-radius:13px;gap:4px}
+  .card::before,.card::after{top:3px;width:17px;height:17px}
+  .card::before{left:3px}
+  .card::after{right:3px}
+  .card .th{border-radius:8px}
+  .card .hd{gap:4px 6px}
+  .card .no{font-size:14px}
+  .card .st{font-size:11px;padding:2px 7px}
+  .card .tt{font-size:13.5px}
+  .card .meta{font-size:11.5px}
+}
+@media (max-width:600px),(orientation:portrait) and (max-width:900px){
+  #pbody{flex-direction:column}
+  #stage{flex:0 0 auto;width:100%;height:min(56.25vw,46vh)}
+  #side{flex:1 1 auto;max-width:none;min-width:0;border-left:0;border-top:1px solid var(--dkl)}
+  #history{max-height:50%}
+  #bar{flex-wrap:wrap;row-gap:6px}
+  #bTop{order:1;flex:1 1 auto;min-width:0;margin-right:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  #bar .sec{order:2}
+  #bar .lng{order:3}
+  #bar .ttl{order:4;flex:1 1 140px;min-width:0}
+  #dock button{flex:1 1 30%;min-height:46px;font-size:14px;padding:0 6px}
+}
+/* short landscape screens (phone on its side): no sticky header, slimmer bars */
+@media (max-height:500px){
+  .top{position:relative}
+  #bar{padding-top:3px;padding-bottom:3px}
+  #dock{padding-top:4px;padding-bottom:max(4px,env(safe-area-inset-bottom))}
+  #dock button{min-height:44px;font-size:14px}
+  #side .sh{padding:6px 10px}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+  .card:not(:disabled):hover,.card:not(:disabled):active,.card:not(:disabled):hover .th{transform:none}
+}
+</style>
 </head>
 <body>
-<div class="top"><b data-i="title">看课评审</b><span class="sp"></span><label id="preloadSetting" hidden><input id="preloadToggle" type="checkbox"><span data-i="preload"></span></label><div class="lng"></div><button id="whoBtn" type="button">填名字</button></div>
+<div class="top"><svg class="logo" viewBox="4 4 40 26" aria-hidden="true"><path d="M5 14V10Q5 5 10 5H38Q43 5 43 10V14Z" fill="#b8502e"/><rect x="4" y="14" width="40" height="15" rx="2.5" fill="#8c2f1c"/><path d="M4 14H44" stroke="#f2c14e" stroke-width="1.6"/><path d="M24 27V22M24 22C24 18.5 28.5 17 30.5 19C32 20.6 31 23 29 22.7C27.8 22.5 27.8 21 29 21M24 22C24 18.5 19.5 17 17.5 19C16 20.6 17 23 19 22.7C20.2 22.5 20.2 21 19 21" fill="none" stroke="#f2c14e" stroke-width="1.5" stroke-linecap="round"/><rect x="21.5" y="11" width="5" height="5" rx="1" fill="#f2c14e"/></svg><b data-i="title">看课评审</b><span class="sp"></span><label id="preloadSetting" hidden><input id="preloadToggle" type="checkbox"><span data-i="preload"></span></label><div class="lng"></div><button id="whoBtn" type="button">填名字</button></div>
 <div id="home"></div>
 
 <div id="player">
   <div id="bar"><button id="bTop" type="button" data-i="top">← 返回课程列表</button><span class="ttl" id="pTtl"></span><div class="lng"></div><span class="sec" id="pSec">00:00</span></div>
   <div id="pbody">
-    <div id="stage"><iframe id="lesson" title="lesson"></iframe><div id="ph" data-i="making">制作中</div></div>
+    <div id="stage"><iframe id="lesson" title="lesson" allow="fullscreen" allowfullscreen></iframe><div id="ph" data-i="making">制作中</div></div>
     <div id="side">
       <section id="history" aria-labelledby="historyTitle" hidden>
         <div class="sh" id="historyTitle" data-i="history"></div>
