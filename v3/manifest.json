@@ -235,6 +235,14 @@
    "title": "解决问题",
    "file": "lessons/kk-math-85.html",
    "sha": "8e696eb708ab70287cbbc26f1b6a0f3b9c35e64c1c74e22be4573ff2831aff8d"
+  },
+  {
+   "id": "kk-math-85-c",
+   "no": 85,
+   "subject": "哈语数学",
+   "title": "解决问题",
+   "file": "lessons/kk-math-85-c.html",
+   "sha": "69c7a3a7c13c12f0938fd025761128ed3360171c33b4cc77bb5b2de3021a2a46"
   }
  ]
 }
