@@ -28,6 +28,7 @@ button{border:0;border-radius:12px;cursor:pointer;background:#eef1f5;color:var(-
 .st.r{background:#fde8e6;color:var(--r)}
 .st.y{background:#fff6db;color:var(--y)}
 .st.make{background:#eef1f5;color:var(--mute)}
+.card .unreplied{min-width:20px;border-radius:999px;background:#b92c27;color:#fff;padding:1px 6px;text-align:center;font-size:12px;font-weight:800}
 .card .tt{font-size:15px}
 .card .meta{font-size:12px;color:var(--mute)}
 .mk{display:inline-block;width:6px;height:6px;border-radius:50%;margin-left:3px;vertical-align:middle}
@@ -50,6 +51,24 @@ button{border:0;border-radius:12px;cursor:pointer;background:#eef1f5;color:var(-
 #clist .tx{flex:1;padding-top:6px;white-space:pre-wrap;word-break:break-word}
 #clist .x{background:transparent;color:#fff;min-width:36px;min-height:36px}
 #clist .empty{color:#9aa3ad;padding:6px 0}
+#history{flex:0 1 auto;max-height:65%;min-height:0;overflow-y:auto;border-bottom:1px solid #2a3240}
+#history+.sh{flex:0 0 auto}
+#history .sh{position:sticky;top:0;background:#12171f}
+#historyList{padding:0 12px}
+.history-sub{padding:8px 0;border-bottom:1px solid #2a3240;overflow-wrap:anywhere}
+.history-sub:last-child{border-bottom:0}
+.history-meta{color:#bac3ce;font-size:12px}
+.history-entry{margin-top:6px;font-size:14px}
+.history-line{display:flex;align-items:flex-start;gap:6px}
+.history-line .tm{background:transparent;color:#ffd56a;font-weight:800;padding:0;min-width:48px;min-height:24px}
+.history-text,.history-reply{white-space:pre-wrap;overflow-wrap:anywhere}
+.history-reply{margin:3px 0 0 54px;color:#d4dce6;font-size:13px}
+.history-entry.general .history-reply{margin-left:0}
+.history-badge{display:inline-block;border-radius:999px;padding:1px 7px;font-size:12px;font-weight:800}
+.history-badge.fixed{background:#d9f4df;color:#145c2e}
+.history-badge.nochange,.history-badge.old{background:#e3e8ef;color:#384352}
+.history-badge.wip{background:#fff0bd;color:#664600}
+.history-badge.unreplied{background:#fce2e1;color:#982a26}
 #dock{display:flex;flex-wrap:wrap;gap:6px;padding:6px 8px;background:#171c24;flex:0 0 auto}
 #dock button{flex:1 1 90px;min-height:48px;font-weight:800;font-size:15px;color:#fff}
 #bNote{background:#d4a017;color:#1a1300}
@@ -85,7 +104,12 @@ button{border:0;border-radius:12px;cursor:pointer;background:#eef1f5;color:var(-
   <div id="bar"><button id="bTop" type="button" data-i="top">← 返回课程列表</button><span class="ttl" id="pTtl"></span><div class="lng"></div><span class="sec" id="pSec">00:00</span></div>
   <div id="pbody">
     <div id="stage"><iframe id="lesson" title="lesson"></iframe><div id="ph" data-i="making">制作中</div></div>
-    <div id="side"><div class="sh"><span data-i="cmts">本课评论</span><small data-i="cmtsHint">点时间跳到那一秒;✕ 删除</small></div><div id="clist"></div></div>
+    <div id="side">
+      <section id="history" aria-labelledby="historyTitle" hidden>
+        <div class="sh" id="historyTitle" data-i="history"></div>
+        <div id="historyList"></div>
+      </section>
+      <div class="sh"><span data-i="cmts">本课评论</span><small data-i="cmtsHint">点时间跳到那一秒;✕ 删除</small></div><div id="clist"></div></div>
   </div>
   <div id="dock">
     <button id="bNote" type="button" data-i="note">评论</button>
@@ -128,10 +152,10 @@ const comments=l=>(st.c[lid(l)]||[]).filter(x=>x.sha&&x.sha===shaOf(l)).sort((a,
 /* J 261120 982:整页界面四语(中 / 英 / 俄 / 哈)切换;课件自己的语言按钮不归这里管 */
 const LANGS=[["zh","中"],["en","EN"],["ru","РУ"],["kk","ҚАЗ"]];
 const UI={
- zh:{title:"看课评审",who:"填名字",top:"← 返回课程列表",making:"制作中",cmts:"本课评论",cmtsHint:"点时间跳到那一秒;✕ 删除",note:"评论",pass:"通过",fail:"不通过",send:"提交本课反馈",back:"← 返回列表",cmtSub:"课件已暂停。写一句就行,可以写多条。",cmtPh:"哪里不对?",cancel:"取消",save:"保存",nmTtl:"先填你的名字",nmSub:"只在第一次提交前问一次,存在这台设备上,之后不再问。",nmPh:"你的名字",ok:"确定",stG:"通过",stR:"不通过",stY:"没判",stM:"制作中",empty:"还没有评论",del:"删除",lesson:n=>"第 "+n+" 课",nc:n=>"意见 "+n+" 条",docT:(g,r,a)=>"看课评审 · 通过 "+g+" · 不通过 "+r+" / "+a,noSha:"这节课的校验还没载入,稍后再试",needV:"先点通过或不通过,或写一条评论",sending:"正在提交…",sent:"已提交,谢谢",offline:"网络不通,已存在本机,恢复后自动补交"},
- en:{title:"Lesson review",who:"Enter name",top:"← Back to lesson list",making:"In production",cmts:"Comments on this lesson",cmtsHint:"Tap a time to jump there; ✕ deletes",note:"Comment",pass:"Pass",fail:"Fail",send:"Submit feedback",back:"← Back to list",cmtSub:"The lesson is paused. One sentence is enough; you can add several.",cmtPh:"What is wrong?",cancel:"Cancel",save:"Save",nmTtl:"Enter your name first",nmSub:"Asked only once before your first submission and saved on this device.",nmPh:"Your name",ok:"OK",stG:"Passed",stR:"Failed",stY:"Not rated",stM:"In production",empty:"No comments yet",del:"Delete",lesson:n=>"Lesson "+n,nc:n=>n+(n===1?" comment":" comments"),docT:(g,r,a)=>"Lesson review · passed "+g+" · failed "+r+" / "+a,noSha:"This lesson's checksum has not loaded yet. Try again shortly.",needV:"Tap Pass or Fail, or write a comment first",sending:"Submitting…",sent:"Submitted. Thank you!",offline:"Offline. Saved on this device and will be sent automatically."},
- ru:{title:"Отзыв об уроках",who:"Введите имя",top:"← К списку уроков",making:"В работе",cmts:"Комментарии к уроку",cmtsHint:"Нажмите на время, чтобы перейти; ✕ удалить",note:"Комментарий",pass:"Принято",fail:"Не принято",send:"Отправить отзыв",back:"← К списку",cmtSub:"Урок на паузе. Достаточно одной фразы, можно написать несколько.",cmtPh:"Что не так?",cancel:"Отмена",save:"Сохранить",nmTtl:"Сначала введите своё имя",nmSub:"Спросим один раз перед первой отправкой, имя сохранится на этом устройстве.",nmPh:"Ваше имя",ok:"Готово",stG:"Принято",stR:"Не принято",stY:"Не оценено",stM:"В работе",empty:"Пока нет комментариев",del:"Удалить",lesson:n=>"Урок "+n,nc:n=>"замечаний: "+n,docT:(g,r,a)=>"Отзыв об уроках · принято "+g+" · не принято "+r+" / "+a,noSha:"Проверка урока ещё не загрузилась, попробуйте чуть позже",needV:"Сначала нажмите «Принято» или «Не принято» либо напишите комментарий",sending:"Отправляем…",sent:"Отправлено, спасибо!",offline:"Нет сети. Сохранено на устройстве, отправится автоматически."},
- kk:{title:"Сабақтарды бағалау",who:"Атыңызды жазыңыз",top:"← Сабақтар тізіміне",making:"Дайындалуда",cmts:"Сабаққа пікірлер",cmtsHint:"Уақытты бассаңыз, сол секундқа өтеді; ✕ өшіру",note:"Пікір",pass:"Өтті",fail:"Өтпеді",send:"Пікірді жіберу",back:"← Тізімге",cmtSub:"Сабақ кідіртілді. Бір сөйлем жеткілікті, бірнешеуін жазуға болады.",cmtPh:"Не дұрыс емес?",cancel:"Болдырмау",save:"Сақтау",nmTtl:"Алдымен атыңызды жазыңыз",nmSub:"Алғашқы жіберу алдында бір рет қана сұралады, осы құрылғыда сақталады.",nmPh:"Атыңыз",ok:"Дайын",stG:"Өтті",stR:"Өтпеді",stY:"Бағаланбаған",stM:"Дайындалуда",empty:"Әзірге пікір жоқ",del:"Өшіру",lesson:n=>n+"-сабақ",nc:n=>"пікір: "+n,docT:(g,r,a)=>"Сабақтарды бағалау · өтті "+g+" · өтпеді "+r+" / "+a,noSha:"Сабақ тексерісі әлі жүктелмеді, сәлден кейін қайталаңыз",needV:"Алдымен «Өтті» не «Өтпеді» басыңыз немесе пікір жазыңыз",sending:"Жіберілуде…",sent:"Жіберілді, рахмет!",offline:"Желі жоқ. Құрылғыда сақталды, желі қосылғанда өзі жіберіледі."}
+ zh:{history:"以往评论",fixed:"已改",nochange:"不改",wip:"处理中",unreplied:"未回复",oldVersion:"旧版",beijing:"北京时间",unrepliedCount:n=>n+" 条未回复评论",title:"看课评审",who:"填名字",top:"← 返回课程列表",making:"制作中",cmts:"本课评论",cmtsHint:"点时间跳到那一秒;✕ 删除",note:"评论",pass:"通过",fail:"不通过",send:"提交本课反馈",back:"← 返回列表",cmtSub:"课件已暂停。写一句就行,可以写多条。",cmtPh:"哪里不对?",cancel:"取消",save:"保存",nmTtl:"先填你的名字",nmSub:"只在第一次提交前问一次,存在这台设备上,之后不再问。",nmPh:"你的名字",ok:"确定",stG:"通过",stR:"不通过",stY:"没判",stM:"制作中",empty:"还没有评论",del:"删除",lesson:n=>"第 "+n+" 课",nc:n=>"意见 "+n+" 条",docT:(g,r,a)=>"看课评审 · 通过 "+g+" · 不通过 "+r+" / "+a,noSha:"这节课的校验还没载入,稍后再试",needV:"先点通过或不通过,或写一条评论",sending:"正在提交…",sent:"已提交,谢谢",offline:"网络不通,已存在本机,恢复后自动补交"},
+ en:{history:"Previous comments",fixed:"Fixed",nochange:"No change",wip:"In progress",unreplied:"Awaiting reply",oldVersion:"Older version",beijing:"Beijing time",unrepliedCount:n=>"Comments awaiting reply: "+n,title:"Lesson review",who:"Enter name",top:"← Back to lesson list",making:"In production",cmts:"Comments on this lesson",cmtsHint:"Tap a time to jump there; ✕ deletes",note:"Comment",pass:"Pass",fail:"Fail",send:"Submit feedback",back:"← Back to list",cmtSub:"The lesson is paused. One sentence is enough; you can add several.",cmtPh:"What is wrong?",cancel:"Cancel",save:"Save",nmTtl:"Enter your name first",nmSub:"Asked only once before your first submission and saved on this device.",nmPh:"Your name",ok:"OK",stG:"Passed",stR:"Failed",stY:"Not rated",stM:"In production",empty:"No comments yet",del:"Delete",lesson:n=>"Lesson "+n,nc:n=>n+(n===1?" comment":" comments"),docT:(g,r,a)=>"Lesson review · passed "+g+" · failed "+r+" / "+a,noSha:"This lesson's checksum has not loaded yet. Try again shortly.",needV:"Tap Pass or Fail, or write a comment first",sending:"Submitting…",sent:"Submitted. Thank you!",offline:"Offline. Saved on this device and will be sent automatically."},
+ ru:{history:"Предыдущие комментарии",fixed:"Исправлено",nochange:"Без изменений",wip:"В работе",unreplied:"Без ответа",oldVersion:"Старая версия",beijing:"Пекинское время",unrepliedCount:n=>"Комментариев без ответа: "+n,title:"Отзыв об уроках",who:"Введите имя",top:"← К списку уроков",making:"В работе",cmts:"Комментарии к уроку",cmtsHint:"Нажмите на время, чтобы перейти; ✕ удалить",note:"Комментарий",pass:"Принято",fail:"Не принято",send:"Отправить отзыв",back:"← К списку",cmtSub:"Урок на паузе. Достаточно одной фразы, можно написать несколько.",cmtPh:"Что не так?",cancel:"Отмена",save:"Сохранить",nmTtl:"Сначала введите своё имя",nmSub:"Спросим один раз перед первой отправкой, имя сохранится на этом устройстве.",nmPh:"Ваше имя",ok:"Готово",stG:"Принято",stR:"Не принято",stY:"Не оценено",stM:"В работе",empty:"Пока нет комментариев",del:"Удалить",lesson:n=>"Урок "+n,nc:n=>"замечаний: "+n,docT:(g,r,a)=>"Отзыв об уроках · принято "+g+" · не принято "+r+" / "+a,noSha:"Проверка урока ещё не загрузилась, попробуйте чуть позже",needV:"Сначала нажмите «Принято» или «Не принято» либо напишите комментарий",sending:"Отправляем…",sent:"Отправлено, спасибо!",offline:"Нет сети. Сохранено на устройстве, отправится автоматически."},
+ kk:{history:"Бұрынғы пікірлер",fixed:"Түзетілді",nochange:"Өзгеріссіз",wip:"Орындалуда",unreplied:"Жауап жоқ",oldVersion:"Бұрынғы нұсқа",beijing:"Бейжің уақыты",unrepliedCount:n=>"Жауапсыз пікірлер: "+n,title:"Сабақтарды бағалау",who:"Атыңызды жазыңыз",top:"← Сабақтар тізіміне",making:"Дайындалуда",cmts:"Сабаққа пікірлер",cmtsHint:"Уақытты бассаңыз, сол секундқа өтеді; ✕ өшіру",note:"Пікір",pass:"Өтті",fail:"Өтпеді",send:"Пікірді жіберу",back:"← Тізімге",cmtSub:"Сабақ кідіртілді. Бір сөйлем жеткілікті, бірнешеуін жазуға болады.",cmtPh:"Не дұрыс емес?",cancel:"Болдырмау",save:"Сақтау",nmTtl:"Алдымен атыңызды жазыңыз",nmSub:"Алғашқы жіберу алдында бір рет қана сұралады, осы құрылғыда сақталады.",nmPh:"Атыңыз",ok:"Дайын",stG:"Өтті",stR:"Өтпеді",stY:"Бағаланбаған",stM:"Дайындалуда",empty:"Әзірге пікір жоқ",del:"Өшіру",lesson:n=>n+"-сабақ",nc:n=>"пікір: "+n,docT:(g,r,a)=>"Сабақтарды бағалау · өтті "+g+" · өтпеді "+r+" / "+a,noSha:"Сабақ тексерісі әлі жүктелмеді, сәлден кейін қайталаңыз",needV:"Алдымен «Өтті» не «Өтпеді» басыңыз немесе пікір жазыңыз",sending:"Жіберілуде…",sent:"Жіберілді, рахмет!",offline:"Желі жоқ. Құрылғыда сақталды, желі қосылғанда өзі жіберіледі."}
 };
 /* 分组名 / 风格 / 课名:按中文原值查表,查不到显示中文原值(新加的课先显示中文,在这里补一行即可) */
 const TR={
@@ -179,7 +203,7 @@ function applyLang(){
   if(!DATA)document.title=T("title");
 }
 function setLang(k){if(!UI[k])return;LANG=k;try{localStorage.setItem("c51tl:lang",k)}catch(e){}applyLang();
-  if(DATA){renderHome();const l=curLesson();if($("player").classList.contains("on")&&l){setTtl(l);renderList()}}}
+  if(DATA){renderHome();const l=curLesson();if($("player").classList.contains("on")&&l){setTtl(l);renderList();renderHistory(l)}}}
 function setTtl(l){$("pTtl").textContent=tr(l.subject)+" · "+lbl(l)+" · "+tr(l.title)}
 
 function toast(t){const n=$("toast");n.textContent=t;n.classList.add("on");clearTimeout(toast._t);toast._t=setTimeout(()=>n.classList.remove("on"),2400)}
@@ -203,6 +227,7 @@ function renderHome(){
       const badge=ok?(col==="g"?'<span class="st g">'+esc(T("stG"))+'</span>':col==="r"?'<span class="st r">'+esc(T("stR"))+'</span>':'<span class="st y">'+esc(T("stY"))+'</span>'):'<span class="st make">'+esc(T("stM"))+'</span>';
       b.innerHTML=(ok&&l.thumb?'<img class="th" alt="" src="'+l.thumb+'">':'')+'<div class="hd"><span class="no">'+esc(lbl(l))+'</span>'+badge+'</div><div class="tt"></div><div class="meta"></div>';
       b.querySelector(".tt").textContent=tr(l.title);
+      if(ok)renderUnreplied(b,lid(l));
       const ns=ok?comments(l).length:0;
       {const sg=trStyle(l.style).split(" · "),dc={ccc:"#f08a24",codex:"#3b82f6"}[l.by];b.querySelector(".meta").innerHTML=esc(sg[0])+(dc?'<i class="mk" style="background:'+dc+'"></i>':"")+esc((sg.length>1?" · "+sg.slice(1).join(" · "):"")+(ns?" · "+T("nc")(ns):""))}
       b.disabled=!ok;
@@ -236,15 +261,18 @@ function openLesson(l){
   setTtl(l);
   $("lesson").src=l.file;
   markVerdict();renderList();
+  loadHistory(l);
   clearInterval(tick);tick=setInterval(()=>$("pSec").textContent=fmt(curT()),500);
 }
 function closeLesson(){
+  historyView=null;
   clearInterval(tick);
   $("player").classList.remove("on");
   $("lesson").src="about:blank";
   document.querySelector(".top").style.display="";
   $("home").style.display="";
   renderHome();
+  loadSummary();
 }
 function markVerdict(){const l=curLesson();const v=l&&st.v[lid(l)];const on=v&&v.sha===shaOf(l)?v.v:"";
   $("bPass").classList.toggle("on",on==="g");$("bFail").classList.toggle("on",on==="r")}
@@ -315,6 +343,120 @@ function submitLesson(){
     else toast(T("offline"));});
 }
 const COLLECT="https://review.ooii.top/submit", QKEY="c51tl:queue";
+const COLLECT_BASE=COLLECT.replace(/\/submit$/, "");
+const HISTORY_STATES=["fixed","nochange","wip"];
+let summary={}, summaryRequest=0, historyView=null;
+
+async function getReviewData(path){
+  try{
+    const controller=new AbortController();
+    const timeout=setTimeout(()=>controller.abort(),5000);
+    try{
+      const response=await fetch(COLLECT_BASE+path,{signal:controller.signal,cache:"no-store"});
+      if(!response.ok)return null;
+      const data=await response.json();
+      return data?.ok===true?data:null;
+    }finally{clearTimeout(timeout)}
+  }catch(e){return null}
+}
+
+function renderUnreplied(card,id){
+  card.querySelector(".unreplied")?.remove();
+  const count=summary[id]?.unreplied;
+  if(!Number.isSafeInteger(count)||count<=0)return;
+  const badge=document.createElement("span");
+  badge.className="unreplied";
+  badge.textContent=count;
+  badge.title=T("unrepliedCount")(count);
+  badge.setAttribute("aria-label",badge.title);
+  card.querySelector(".hd").appendChild(badge);
+}
+
+async function loadSummary(){
+  const request=++summaryRequest;
+  const data=await getReviewData("/summary");
+  if(request!==summaryRequest)return;
+  summary=data?.lessons&&typeof data.lessons==="object"?data.lessons:{};
+  $("home").querySelectorAll(".card:not(:disabled)").forEach(card=>{
+    renderUnreplied(card,lid({file:card.dataset.file}));
+  });
+}
+
+async function loadHistory(l){
+  const view={items:[]};
+  historyView=view;
+  renderHistory(l);
+  const data=await getReviewData("/thread?lesson="+encodeURIComponent(lid(l)));
+  if(historyView!==view||!Array.isArray(data?.items))return;
+  view.items=data.items;
+  renderHistory(l);
+}
+
+const reviewText=value=>typeof value==="string"?value:"";
+const lastReply=replies=>Array.isArray(replies)?replies[replies.length-1]:null;
+function reviewDate(value){
+  const date=new Date(reviewText(value));
+  return Number.isFinite(date.getTime())
+    ?date.toLocaleDateString("sv-SE",{timeZone:"Asia/Shanghai"}):"";
+}
+
+function appendHistoryEntry(group,text,seconds,replies){
+  const reply=lastReply(replies);
+  const status=HISTORY_STATES.includes(reply?.status)?reply.status:"unreplied";
+  const entry=document.createElement("div");
+  const timed=Number.isFinite(seconds)&&seconds>=0;
+  entry.className="history-entry"+(timed?"":" general");
+  entry.innerHTML='<div class="history-line"><span class="history-text"></span></div><div class="history-reply"><span class="history-badge"></span> <span class="history-answer"></span></div>';
+  if(timed){
+    const time=document.createElement("button");
+    time.type="button";
+    time.className="tm";
+    time.textContent="["+fmt(seconds)+"]";
+    time.onclick=()=>{seek(seconds);pause()};
+    entry.firstElementChild.prepend(time);
+  }
+  entry.querySelector(".history-text").textContent=text;
+  const badge=entry.querySelector(".history-badge");
+  badge.classList.add(status);
+  badge.textContent=T(status);
+  entry.querySelector(".history-answer").textContent=[reviewText(reply?.text),reviewText(reply?.version)].filter(Boolean).join(" · ");
+  group.appendChild(entry);
+}
+
+function renderHistory(l){
+  const list=$("historyList");
+  list.replaceChildren();
+  const id=lid(l), currentSha=shaOf(l);
+  for(const item of historyView?.items||[]){
+    if(!item||typeof item!=="object")continue;
+    const cs=Array.isArray(item.comments)?item.comments.filter(c=>reviewText(c?.c).trim()):[];
+    const note=reviewText(item.note).trim();
+    // The submission form also sends an auto-generated copy of its timed comments.
+    const mark={g:"🟩",r:"🟥",y:"🟨"}[reviewText(item.verdict)];
+    const generated=[id+" "+mark,...cs.map(c=>"["+fmt(Number.isFinite(c.s)?c.s:0)+"] "+c.c)].join("\n");
+    const showNote=lastReply(item.note_replies)||(note&&note!==generated);
+    if(!cs.length&&!showNote)continue;
+    const group=document.createElement("div");
+    group.className="history-sub";
+    const meta=document.createElement("div");
+    meta.className="history-meta";
+    meta.textContent=[reviewText(item.reviewer),reviewDate(item.received_at)].filter(Boolean).join(" · ");
+    meta.title=T("beijing");
+    const itemSha=reviewText(item.sha);
+    if(currentSha&&itemSha&&itemSha!==(itemSha.length===8?currentSha.slice(0,8):currentSha)){
+      const old=document.createElement("span");
+      old.className="history-badge old";
+      old.textContent=T("oldVersion");
+      meta.append(" · ",old);
+    }
+    group.appendChild(meta);
+    if(showNote)appendHistoryEntry(group,note===generated?note.split("\n")[0]:note,null,item.note_replies);
+    for(const comment of cs)appendHistoryEntry(group,comment.c,comment.s,comment.replies);
+    list.appendChild(group);
+  }
+  $("history").hidden=!list.childElementCount;
+}
+
 function queueGet(){try{return JSON.parse(localStorage.getItem(QKEY)||"[]")}catch(e){return[]}}
 function queueSet(q){try{localStorage.setItem(QKEY,JSON.stringify(q))}catch(e){}}
 function queuePush(r){const q=queueGet();q.push(r);queueSet(q)}
@@ -350,6 +492,7 @@ Promise.all([
   DATA=d;
   (m.items||[]).forEach(it=>{if(it.id&&it.sha)SHA[it.id]=it.sha});
   renderHome();
+  loadSummary();
 });
 </script>
 </body>
