@@ -138,7 +138,7 @@ button{border:0;border-radius:12px;cursor:pointer;background:#eef1f5;color:var(-
 <script>
 const PAGE_ID="c51-feedback-v3";
 const KEY="c51tl:"+PAGE_ID;
-let DATA=null, SHA={}, st={name:"",v:{},c:{},cur:null};
+let FEISHU_NAME="", DATA=null, SHA={}, st={name:"",v:{},c:{},cur:null};
 try{const s=JSON.parse(localStorage.getItem(KEY)||"null");if(s&&s.v&&s.c)st=Object.assign(st,s)}catch(e){}
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}};
 const $=id=>document.getElementById(id);
@@ -208,7 +208,7 @@ function setTtl(l){$("pTtl").textContent=tr(l.subject)+" · "+lbl(l)+" · "+tr(l
 
 function toast(t){const n=$("toast");n.textContent=t;n.classList.add("on");clearTimeout(toast._t);toast._t=setTimeout(()=>n.classList.remove("on"),2400)}
 function renderHome(){
-  $("whoBtn").textContent=st.name?("👤 "+st.name):T("who");
+  if(!FEISHU_NAME)$("whoBtn").textContent=st.name?("👤 "+st.name):T("who");
   const groups=[];
   DATA.lessons.forEach(l=>{let g=groups.find(x=>x.s===l.subject);if(!g)groups.push(g={s:l.subject,ls:[]});g.ls.push(l)});
   const h=$("home");h.innerHTML="";
@@ -480,12 +480,16 @@ document.addEventListener("keydown",e=>{if(e.key!=="Escape")return;if($("cmtOv")
 $("cCancel").onclick=closeComment;
 $("cSave").onclick=saveComment;
 $("txt").addEventListener("keydown",e=>{if(e.key==="Enter"&&(e.metaKey||e.ctrlKey))$("cSave").click()});
-let FEISHU_NAME="";
+
 $("whoBtn").onclick=()=>{if(!FEISHU_NAME)askName(null)};
 // 在 review.ooii.top(飞书登录版)上:右上角名字取飞书登录身份,不用手填;老 GitHub 页照旧手填
 if(location.host==="review.ooii.top")fetch("/auth/me",{credentials:"same-origin",cache:"no-store"})
   .then(r=>r.ok?r.json():null).then(j=>{if(!j||!j.ok||!j.name)return;
-    FEISHU_NAME=j.name;st.name=j.name;save();$("whoBtn").textContent="👤 "+j.name;$("whoBtn").style.cursor="default";
+    FEISHU_NAME=j.name;st.name=j.name;save();const w=$("whoBtn");w.textContent="";w.style.cursor="default";w.title="已用飞书登录";
+    if(j.avatar){const im=document.createElement("img");im.src=j.avatar;im.alt="";im.referrerPolicy="no-referrer";
+      im.style.cssText="width:28px;height:28px;border-radius:50%;vertical-align:middle;margin-right:8px;object-fit:cover";
+      im.onerror=()=>im.remove();w.appendChild(im)}
+    w.appendChild(document.createTextNode(j.name));
     if(DATA)renderHome();}).catch(()=>{});
 $("nameOk").onclick=confirmName;
 $("nameIn").addEventListener("keydown",e=>{if(e.key==="Enter")confirmName()});
