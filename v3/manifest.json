@@ -259,6 +259,62 @@
    "title": "解决问题",
    "file": "lessons/kk-math-85-c.html",
    "sha": "69c7a3a7c13c12f0938fd025761128ed3360171c33b4cc77bb5b2de3021a2a46"
+  },
+  {
+   "id": "ru-lang-66-c",
+   "no": 66,
+   "subject": "俄语",
+   "title": "基数词与序数词的拼写（第一课）｜瀑布",
+   "file": "lessons/ru-lang-66-c.html",
+   "sha": "334ccbe7e203b2509f3564166f2b33d79a23090f93a2f1151ba90b8e9cada2a5"
+  },
+  {
+   "id": "ru-lang-67-c",
+   "no": 67,
+   "subject": "俄语",
+   "title": "基数词与序数词的拼写（第二课）｜瀑布",
+   "file": "lessons/ru-lang-67-c.html",
+   "sha": "1fb1f081d73838b6ceb7dd49576d96728745e8d825805be04585d31bc5b55203"
+  },
+  {
+   "id": "ru-lang-68-c",
+   "no": 68,
+   "subject": "俄语",
+   "title": "数词词组、句子与形态分析（第一课，含抄写）｜风的力量",
+   "file": "lessons/ru-lang-68-c.html",
+   "sha": "c2b4b3bc73152d08bb48c336eea80709a67d0d75590e9394c36af00ae19b0589"
+  },
+  {
+   "id": "ru-math-82-c",
+   "no": 82,
+   "subject": "俄语数学",
+   "title": "单位面积产量（新知）",
+   "file": "lessons/ru-math-82-c.html",
+   "sha": "7a06231eece24313110b37a4c07610852ff9de8579eeb6d4d2c203b51f29adcb"
+  },
+  {
+   "id": "ru-math-83-c",
+   "no": 83,
+   "subject": "俄语数学",
+   "title": "单位面积产量（巩固）",
+   "file": "lessons/ru-math-83-c.html",
+   "sha": "308b821f9bcccc98ddb6f02a8ac41fda02be2546ca47cf4075cbefd11b1990f1"
+  },
+  {
+   "id": "kk-lang-67-c",
+   "no": 67,
+   "subject": "哈语",
+   "title": "名词（第一课）",
+   "file": "lessons/kk-lang-67-c.html",
+   "sha": "6d70dd8e3301607abd706f37a50697d378ed0656539e6c9ed1af698807cafa19"
+  },
+  {
+   "id": "kk-math-83-lgm-c",
+   "no": 83,
+   "subject": "哈语数学",
+   "title": "单位面积产量（巩固）（小绿人重做）",
+   "file": "lessons/kk-math-83-lgm-c.html",
+   "sha": "4849778365fda460040877b6fc2703fcdfeec1760115c0c742ec0ff9a3280ba3"
   }
  ]
 }
