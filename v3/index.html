@@ -21,7 +21,12 @@ button{border:0;border-radius:12px;cursor:pointer;background:#eef1f5;color:var(-
 .preload-badge.new-version,#pNewVersion{background:#fff0bd;color:#664600}
 #pNewVersion{border-radius:6px;padding:2px 6px;white-space:nowrap;font-size:12px}
 #lessonRetry{position:absolute;inset:0;margin:auto;width:max-content;height:max-content;padding:8px 14px}
-.card:not(:has(.th)):has(.preload-badge:not([hidden])){padding-top:24px}
+.card:not(:has(.th)):has(.preload-badge.new-version:not([hidden])){padding-top:24px}
+.preload-badge.dot{width:8px;height:8px;padding:0;border-radius:50%;top:8px;right:8px;box-shadow:0 0 0 1.5px #fff}
+.preload-badge.dot.loading{background:#f08a24;animation:c51blink 1.6s ease-in-out infinite}
+.preload-badge.dot.done{background:#8bd448}
+@keyframes c51blink{0%,100%{opacity:1}50%{opacity:.25}}
+@media (prefers-reduced-motion:reduce){.preload-badge.dot.loading{animation:none}}
 @media(max-width:560px){.top:has(#preloadSetting:not([hidden])){flex-wrap:wrap}}
 .top .sp{flex:1}
 .last{outline:3px solid #f5b301;outline-offset:2px}
@@ -385,17 +390,21 @@ function preloadURL(file, sha) {
 
 function paintPreload(entry) {
   if (!entry.badge) return;
-  let label = "";
+  // K 261121:缓存状态不写字,下载中 = 慢闪橙点,已缓存 = 嫩绿点;「有新版」仍用文字。
+  let label = "", dot = "", tip = "";
   if (entry.newVersion) label = T("newVersion") + (entry.state === "failed" ? " · " + T("preloadFailed") : "");
-  else if (entry.state === "cached") label = T("preloadCached");
-  else if (preloadOn && !preloadLow) {
-    if (entry.state === "downloading") {
-      label = entry.percent == null ? T("preloadDownloading") : T("preloadPercent")(entry.percent);
-    } else label = T(entry.state === "failed" ? "preloadFailed" : "preloadQueued");
+  else if (entry.state === "cached") { dot = "done"; tip = T("preloadCached"); }
+  else if (preloadOn && !preloadLow && entry.state === "downloading") {
+    dot = "loading";
+    tip = entry.percent == null ? T("preloadDownloading") : T("preloadPercent")(entry.percent);
   }
   entry.badge.classList.toggle("new-version", Boolean(entry.newVersion));
+  entry.badge.classList.toggle("dot", Boolean(dot));
+  entry.badge.classList.toggle("loading", dot === "loading");
+  entry.badge.classList.toggle("done", dot === "done");
   entry.badge.textContent = label;
-  entry.badge.hidden = !label;
+  if (tip) entry.badge.setAttribute("aria-label", tip); else entry.badge.removeAttribute("aria-label");
+  entry.badge.hidden = !label && !dot;
 }
 
 function renderPreloadBadge(card) {
