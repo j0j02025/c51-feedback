@@ -49,23 +49,37 @@ function mutateCache(action) {
 function refreshManifest() {
   if (manifestRequest) return manifestRequest;
   manifestRequest = (async () => {
-    const response = await fetch(new URL("manifest.json", scope), {
-      cache: "no-store", mode: "same-origin", redirect: "error"
-    });
-    if (!response.ok) throw new Error("Manifest unavailable");
-    const manifest = await response.json();
+    const url = new URL("manifest.json", scope);
+    // The review proxy keys its edge cache by c51-sha even for the manifest.
+    if (url.hostname === "review.ooii.top") {
+      const nonce = crypto.getRandomValues(new Uint8Array(32));
+      url.searchParams.set(shaParam, hex(nonce));
+    }
+    const aborter = new AbortController();
+    const timeout = setTimeout(() => aborter.abort(), 8000);
+    let manifest;
+    try {
+      const response = await fetch(url, {
+        cache: "no-store", mode: "same-origin", redirect: "error", signal: aborter.signal
+      });
+      if (!response.ok) throw new Error("Manifest unavailable");
+      manifest = await response.json();
+    } finally {
+      clearTimeout(timeout);
+    }
     if (!Array.isArray(manifest.items)) throw new Error("Invalid manifest");
     const current = new Set();
     for (const item of manifest.items) {
       const url = lessonURL(item?.file);
       if (url && /^[a-f0-9]{64}$/.test(item.sha)) current.add(cacheKey(url, item.sha));
     }
-    return mutateCache(async cache => {
-      versions = current;
+    versions = current;
+    const keys = await mutateCache(async cache => {
       const keys = await cache.keys();
       await Promise.all(keys.filter(key => !current.has(key.url)).map(key => cache.delete(key)));
       return keys.filter(key => current.has(key.url)).map(key => key.url);
-    });
+    }).catch(() => []);
+    return { manifest, keys };
   })().finally(() => { manifestRequest = null; });
   return manifestRequest;
 }
@@ -101,15 +115,18 @@ function trackForeground(key, stored) {
   });
 }
 
-async function storeLesson(key, response, { signal, progress, manual } = {}) {
+function hex(bytes) {
+  return Array.from(bytes, byte => byte.toString(16).padStart(2, "0")).join("");
+}
+
+async function verifyLesson(key, response, { signal, progress } = {}) {
   if (!response.ok || response.status !== 200 || response.redirected ||
       !/^text\/html(?:\s*;|$)/i.test(response.headers.get("Content-Type") || "")) {
     await response.body?.cancel().catch(() => {});
     return false;
   }
 
-  // Read once, verify the actual bytes, then write the complete version atomically.
-  // The proxy's edge cache can briefly serve an older body for the same filename.
+  // Hash the decoded bytes before either caching or displaying the lesson.
   let body = response.body;
   if (progress && body) {
     const encoding = response.headers.get("Content-Encoding");
@@ -129,18 +146,20 @@ async function storeLesson(key, response, { signal, progress, manual } = {}) {
   const bytes = await new Response(body).arrayBuffer();
   if (signal?.aborted) return false;
   const digest = await crypto.subtle.digest("SHA-256", bytes);
-  const sha = Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, "0")).join("");
-  if (sha !== new URL(key).searchParams.get(shaParam)) return false;
+  if (hex(new Uint8Array(digest)) !== new URL(key).searchParams.get(shaParam)) return false;
+  const headers = new Headers(response.headers);
+  headers.delete("Content-Encoding");
+  headers.set("Content-Length", String(bytes.byteLength));
+  return new Response(bytes, { headers });
+}
 
+async function storeLesson(key, response, { signal, manual } = {}) {
   if (!versions) await refreshManifest();
   const trim = manual && await lowStorage();
   return mutateCache(async cache => {
     if (signal?.aborted || !versions?.has(key)) return false;
     if (trim) await trimToLesson(cache, key);
-    const headers = new Headers(response.headers);
-    headers.delete("Content-Encoding");
-    headers.set("Content-Length", String(bytes.byteLength));
-    await cache.put(key, new Response(bytes, { headers }));
+    await cache.put(key, response);
     return true;
   });
 }
@@ -166,7 +185,7 @@ self.addEventListener("message", event => {
     const { type, file, sha } = event.data || {};
     try {
       if (type === "sync") {
-        port.postMessage({ keys: await refreshManifest() });
+        port.postMessage(await refreshManifest());
         return;
       }
       const url = lessonURL(file);
@@ -201,11 +220,12 @@ self.addEventListener("message", event => {
 
         const download = (async () => {
           const response = await fetch(key, {
-            cache: "reload", mode: "same-origin", redirect: "error", signal: aborter.signal
+            cache: "no-store", mode: "same-origin", redirect: "error", signal: aborter.signal
           });
-          return storeLesson(key, response, {
+          const verified = await verifyLesson(key, response, {
             signal: aborter.signal, progress: percent => port.postMessage({ percent })
           });
+          return verified && storeLesson(key, verified, { signal: aborter.signal });
         })().catch(() => false);
         background.set(key, download);
         try {
@@ -223,6 +243,13 @@ self.addEventListener("message", event => {
     }
   })());
 });
+
+function unavailableLesson() {
+  return new Response('<!doctype html><html data-c51-unavailable><meta charset="utf-8"></html>', {
+    status: 503,
+    headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" }
+  });
+}
 
 self.addEventListener("fetch", event => {
   const request = event.request;
@@ -246,11 +273,16 @@ self.addEventListener("fetch", event => {
       return { response: cached, stored };
     }
 
-    const response = await fetch(request, { cache: "reload" });
-    const stored = storeLesson(key, response.clone(), { manual: true }).catch(() => false);
+    if (versions && !versions.has(key)) return { response: unavailableLesson() };
+    const response = await fetch(request, { cache: "no-store" });
+    // Preserve the login redirect so an expired session can be renewed.
+    if (response.type === "opaqueredirect") return { response };
+    const verified = await verifyLesson(key, response);
+    if (!verified || (versions && !versions.has(key))) return { response: unavailableLesson() };
+    const stored = storeLesson(key, verified.clone(), { manual: true }).catch(() => false);
     trackForeground(key, stored);
-    return { response, stored };
-  })().catch(async () => ({ response: await fetch(request) }));
+    return { response: verified, stored };
+  })().catch(() => ({ response: unavailableLesson() }));
 
   event.respondWith(result.then(value => value.response));
   event.waitUntil(result.then(value => value.stored).catch(() => {}));

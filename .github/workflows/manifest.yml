@@ -1,0 +1,56 @@
+name: Update lesson manifest
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'v3/lessons/**'
+      - 'v3/lessons.json'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+
+concurrency:
+  group: c51-lesson-manifest
+  cancel-in-progress: false
+
+jobs:
+  manifest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Regenerate and commit manifest
+        id: manifest
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          # If a lesson push lands during generation, rebuild from the new tip.
+          for attempt in 1 2 3; do
+            git fetch --no-tags origin main
+            git reset --hard FETCH_HEAD
+            python3 v3/tools/build_manifest.py
+            git add -- v3/manifest.json
+            if git diff --cached --quiet -- v3/manifest.json; then
+              exit 0
+            fi
+            git commit -m 'chore: regenerate lesson manifest'
+            if git push origin HEAD:refs/heads/main; then
+              echo 'changed=true' >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            if [[ "$(git ls-remote origin refs/heads/main | cut -f1)" == "$(git rev-parse HEAD^)" ]]; then
+              exit 1
+            fi
+          done
+          exit 1
+      # GITHUB_TOKEN pushes don't trigger the branch-based GitHub Pages build.
+      - name: Request GitHub Pages build
+        if: steps.manifest.outputs.changed == 'true' || github.event_name == 'workflow_dispatch'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api --method POST "repos/$GITHUB_REPOSITORY/pages/builds" --silent
