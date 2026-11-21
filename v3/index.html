@@ -30,6 +30,7 @@ button{border:0;border-radius:12px;cursor:pointer;background:#eef1f5;color:var(-
 .st.make{background:#eef1f5;color:var(--mute)}
 .card .tt{font-size:15px}
 .card .meta{font-size:12px;color:var(--mute)}
+.mk{display:inline-block;width:6px;height:6px;border-radius:50%;margin-left:3px;vertical-align:middle}
 .card.off{opacity:.55}
 #player{display:none;position:fixed;inset:0;background:#0e1116;z-index:20;flex-direction:column}
 #player.on{display:flex}
@@ -203,7 +204,7 @@ function renderHome(){
       b.innerHTML=(ok&&l.thumb?'<img class="th" alt="" src="'+l.thumb+'">':'')+'<div class="hd"><span class="no">'+esc(lbl(l))+'</span>'+badge+'</div><div class="tt"></div><div class="meta"></div>';
       b.querySelector(".tt").textContent=tr(l.title);
       const ns=ok?comments(l).length:0;
-      b.querySelector(".meta").textContent=trStyle(l.style)+(ns?" · "+T("nc")(ns):"");
+      {const sg=trStyle(l.style).split(" · "),dc={ccc:"#f08a24",codex:"#3b82f6"}[l.by];b.querySelector(".meta").innerHTML=esc(sg[0])+(dc?'<i class="mk" style="background:'+dc+'"></i>':"")+esc((sg.length>1?" · "+sg.slice(1).join(" · "):"")+(ns?" · "+T("nc")(ns):""))}
       b.disabled=!ok;
       b.onclick=()=>openLesson(l);
       c.appendChild(b);
