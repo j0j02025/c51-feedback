@@ -488,8 +488,12 @@ function recordV(s,p,x,y,compact=false) {
   }
 }
 
+const countdownStart = endV(7), countdownEnd = cues[8];
+const countdownStep = (countdownEnd-countdownStart)/3;
+const quizWaiting = (s,t) => s===7&&t>=countdownStart&&t<countdownEnd;
+
 function quizV(s,t,p) {
-  const waiting=s===7&&t>=endV(7);
+  const waiting=quizWaiting(s,t);
   const answer=s===8&&p>.58;
   for (let i=0;i<3;i++) {
     if (s<5+i || s===5+i&&p<.54) continue;
@@ -520,10 +524,10 @@ function quizV(s,t,p) {
     labelV('ABC'[i],x,y+24,45,i===1&&answer?color.good:color.ink);
   }
   if (waiting) {
-    const remaining=cues[8]-t, cx=980,cy=225;
+    const remaining=(countdownEnd-t)/countdownStep, cx=980,cy=225;
     ctx.beginPath(); ctx.arc(cx,cy,49,-Math.PI/2,-Math.PI/2+Math.PI*2*remaining/3);
     ctx.strokeStyle=color.yield; ctx.lineWidth=10; ctx.stroke();
-    labelV(String(Math.max(1,Math.ceil(remaining))),cx,cy,52,color.ink,74,false);
+    labelV(String(t>=countdownStart+2*countdownStep?1:t>=countdownStart+countdownStep?2:3),cx,cy,52,color.ink,74,false);
   }
 }
 
@@ -536,27 +540,28 @@ const walk = (action,a,b,x0,y0,x1,y1,face,cargo) =>
 const pose = (action,x,y,face,a=0,b=1,cargo) =>
   walk(action,a,b,x,y,x,y,face,cargo);
 
-function actorV(segment,t,p,height,view,character) {
+function actorV(segment,p,height,view,character) {
   const {action,a,b,x0,y0,x1,y1,face,cargo} = segment;
   const frames = village.anchors[action].frames;
   const scale = height/village.anchors[action].height;
   const f = between(p,a,b);
   const d = Math.hypot(x1-x0,y1-y0);
   const cycle = gait[action] && d ? gait[action] : 0;
-  const frameDistance = cycle ? cycle/frames.length : 0;
+  const hopFrames = cycle&&action==='rabbit-hop'
+    ? Math.max(1,Math.round(d/cycle))*frames.length+1 : 0;
+  const frameDistance = hopFrames ? d/hopFrames : cycle ? cycle/frames.length : 0;
   const idx = cycle ? Math.floor(f*d/frameDistance) :
     action==='lamb-think' ? Math.floor(f*28) : Math.min(frames.length-1, Math.floor(f*frames.length));
-  const fr = frames[idx % frames.length];
+  // Hop clips begin and end on the standing-height frame of the existing cycle.
+  const poseIndex = hopFrames ? Math.min(idx,hopFrames-1)+4 : idx;
+  const fr = frames[poseIndex % frames.length];
   // Advance by one frame's fraction of the stride, with the feet anchored to
   // each supplied baseline. The displayed position holds over each footfall.
   const foot = cycle ? Math.min(d,idx*frameDistance)/d : f;
   const x = mixV(x0,x1,foot), y=mixV(y0,y1,foot);
-  const breath = character==='rabbit' && !d && action==='rabbit-point'
-    ? 1+.02*Math.sin(t*3.8) : 1;
-  const vertical = scale*breath;
-  const h = fr.h*vertical, w = fr.w*scale;
-  const point = pair => [x+face*(pair[0]-fr.base[0])*scale,y+(pair[1]-fr.base[1])*vertical];
-  const top=y-fr.base[1]*vertical, left=x-fr.base[0]*scale;
+  const h = fr.h*scale, w = fr.w*scale;
+  const point = pair => [x+face*(pair[0]-fr.base[0])*scale,y+(pair[1]-fr.base[1])*scale];
+  const top=y-fr.base[1]*scale, left=x-fr.base[0]*scale;
   ctx.beginPath(); ctx.ellipse(x,y+4,Math.min(97,w*.31),15,0,0,2*Math.PI);
   ctx.fillStyle='rgba(77,48,24,.19)'; ctx.fill();
   ctx.save(); ctx.translate(x,0); ctx.scale(face,1);
@@ -586,7 +591,7 @@ function castV(s,t,p,view) {
   const hop='rabbit-hop', point='rabbit-point', carry='rabbit-carry', drop='rabbit-drop', push='rabbit-push';
   const lamb='lamb-walk', chalk='lamb-write';
   let rabbit, sheep, dog;
-  const waiting=s===7&&t>=endV(7);
+  const waiting=quizWaiting(s,t);
   if (s===0) {
     dog=[
       walk('dog-walk',0,.18,2055,805,1745,805,-1),
@@ -665,7 +670,7 @@ function castV(s,t,p,view) {
     const foot=between(time,clip.a,clip.b || 1);
     const x=Number.isFinite(foot)?mixV(clip.x0,clip.x1,foot):clip.x1;
     if (x<view-260||x>view+W+260) continue;
-    const rig=actorV(clip,t,time,height,view,name);
+    const rig=actorV(clip,time,height,view,name);
     if (name==='rabbit') rabbitRig=rig;
   }
   return rabbitRig;
@@ -825,7 +830,10 @@ function propsV(s,t,p) {
 
 function grasses(slot,x,y,width,t,phase) {
   const lean=Math.sin(t*2.3+phase)+.3*Math.sin(t*3.7+phase);
-  ctx.save();ctx.translate(x+width/2,y+64);
+  // A brief gust moves the existing grass during the 73s hold.
+  const gustPhase=t-73;
+  const gust=LG==='kk'&&gustPhase>0&&gustPhase<1 ? Math.sin(Math.PI*gustPhase**2.5) : 0;
+  ctx.save();ctx.translate(x+width/2+36*gust,y+64-24*gust);
   ctx.transform(1,0,.22*lean,1,0,0);
   art(slot,-width/2,-64,width);
   ctx.restore();
@@ -905,7 +913,9 @@ function sceneState(t) {
     goldBagCentners:100,fieldBRows:5,fieldBColumns:10};
 }
 
-const SCENE_EVENTS=[];
+const SCENE_EVENTS=Array.from({length:3}, (_,i)=>({
+  t:countdownStart+i*countdownStep, id:'block'
+}));
 function soundV(s,p,id,v=0) {
   SCENE_EVENTS.push({t:mixV(startV(s),endV(s),p),id,v});
 }
