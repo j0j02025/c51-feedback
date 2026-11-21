@@ -229,7 +229,7 @@ const wideFields = [
   [[810,605],[1343,605],[1270,750],[687,750]],
   [[1361,605],[1688,605],[1813,750],[1398,750]]
 ];
-const wideGroups = [[485,695],[625,695]];
+const wideGroups = [[485,665],[625,665]];   // ccc-021 (#3:6): raised as a group (was 695)
 const pileWidth = 116;
 const yardTop = wideGroups[0][1] - pileWidth/5.15*(.78*3+1.19);
 const samples = [[446,538],[1007,538]];
@@ -304,8 +304,12 @@ const shots=[
   panorama(1.12,96,197,22,.05,.75), panorama(1.12,96,48,4,.07,.89),
   panorama(1.12,96,160,87,.09,.88), yard, station, high, overview
 ];
+// ccc-021 (#3:4, #3:9): no aimless pans. Every wide shot holds one camera position per framing;
+// characters keep the world positions they had (xWorld still uses shot.x).
+for(const sh of shots)if(sh.map==='wide')sh.cam=sh.zoom===1.1?54:sh.zoom===1.12&&sh.y===96?118:sh.zoom===1.72?32:sh.x;
+const camStart=sh=>sh.cam??sh.x, camEnd=sh=>sh.cam??sh.to;
 const backdropSlot={opening:'BG-1-tile-1',wide:'BG-1-wide',high:'BG-2',close:'BG-3'};
-const cameraX=(shot,p)=>shot.x===shot.to?shot.x:mix(shot.x,shot.to,
+const cameraX=(shot,p)=>shot.cam!=null?shot.cam:shot.x===shot.to?shot.x:mix(shot.x,shot.to,
   clamp((p-shot.a)/(shot.b-shot.a)));
 const backdropKey=shot=>[shot.map,shot.zoom,shot.y].join(':');
 function backdrop(shot) {
@@ -331,34 +335,60 @@ const frameID=(role,action,frame)=>role.id+'-'+action+'-'+String(frame+1).padSta
 const cargoDimensions={record:[105,34],'sack-tied':[74,87],plank:[200,24]};
 const groupFade=.15;
 const standingFrame=[7,8];
+// ccc-021 motion data (sources/patch.py; measured from these bitmaps by artreg.py):
+// GAIT[group].w = relative duration of each frame = planted-hoof travel to the next frame + a floor;
+// stride = hoof travel per cycle (source px); start = phase of the standing frame.
+const GAIT={"A-walk": {"w": [9.36, 2.36, 7.86, 19.36, 6.86, 10.86, 10.36, 14.86, 2.36, 2.36, 2.36, 2.36], "total": 91.32, "stride": 63.0, "start": 0.8153}, "D-walk": {"w": [3.05, 2.05, 4.55, 16.05, 9.05, 2.05, 9.55, 9.55, 11.05, 2.05, 3.55, 6.59], "total": 79.14, "stride": 54.5, "start": 0.7762}, "D-trot": {"w": [15.91, 18.91, 9.91, 27.91, 15.82, 13.91, 14.41, 25.91, 26.91, 8.91, 5.41, 5.91], "total": 189.83, "stride": 130.9, "start": 0.2095}};
+// REGX = fixed horizontal anchor (source px) of each gesture group, so the planted hind hoof stays put.
+const REGX={"A-point": [174.3, 385], "A-think": [172.3, 384], "A-happy": [170.9, 384], "D-point": [151.6, 327], "D-think": [150.6, 325], "D-happy": [152.3, 325]};
+const regX=key=>(REGX[key.slice(0,-3)]||scene.anchors[key].foot_bottom_midpoint)[0];
+const regY=key=>(REGX[key.slice(0,-3)]||scene.anchors[key].foot_bottom_midpoint)[1];  // a hop stays a hop
+function gaitIndex(g,phase){
+  const G=GAIT[g], c=(((phase%1)+1)%1)*G.total;
+  let acc=0;for(let k=0;k<G.w.length;k++){acc+=G.w[k];if(c<acc)return k}
+  return G.w.length-1;
+}
+// Eased travel: speed ramps up over the first 22 % and down over the last 22 % (trapezoid).
+function travelCurve(u,r=.22){
+  u=clamp(u);const v=1/(1-r);
+  if(u<r)return v*u*u/(2*r);
+  if(u>1-r){const w=1-u;return 1-v*w*w/(2*r)}
+  return v*(u-r/2);
+}
 function actor(index, choreo, shot) {
-  const {x,y,h,action,frame,face,carry,blend}=choreo;
-  const role=squad[index], id=frameID(role,action,frame), a=scene.anchors[id];
+  const {x,y,h,action,face,carry,blend}=choreo;
+  const role=squad[index], n=role.frames[action];
+  const fl=Math.max(0,Math.min(n-1,choreo.frame)), f0=Math.floor(fl+1e-6), fr=fl-f0;
+  const id=frameID(role,action,f0), a=scene.anchors[id];
   const scale=h/(index===0?292:304);
 
   function sprite(key,opacity,direction) {
-    const anchor=scene.anchors[key], [fx,fy]=anchor.foot_bottom_midpoint;
+    const anchor=scene.anchors[key], fx=regX(key), fy=regY(key);
     const [l,u,r,b]=anchor.bounds;
     if(slotReady(key)&&opacity>0){
       const im=SLOTS[key], projection=ctx.getTransform(), pixels=scale*shot.zoom;
-      // Draw the complete gait frame at the same scale as the rest pose.
       ctx.save();ctx.globalAlpha*=opacity;
       ctx.setTransform(direction,0,0,1,projection.a*x+projection.e,projection.d*y+projection.f);
       ctx.drawImage(im,l,u,r-l,b-u,(l-fx)*pixels,(u-fy)*pixels,(r-l)*pixels,(b-u)*pixels);
       ctx.restore();
     }
     const map=([px,py])=>[x+direction*(px-fx)*scale,y+(py-fy)*scale];
+    // ccc-021 (#3:0, #3:1): the pony's load sits on the middle of the saddle, behind the mane.
+    const cargo=anchor.saddle_cargo_point?[anchor.saddle_cargo_point[0]-17,anchor.saddle_cargo_point[1]+5]:
+      anchor.back_cargo_point||[mix(l,r,.43),mix(u,b,.41)];
     return {
-      back:map(anchor.saddle_cargo_point||anchor.back_cargo_point||
-        [mix(l,r,.43),mix(u,b,.41)]),
+      back:map(cargo),
       hitch:anchor.saddle_rear_tie_point?map(anchor.saddle_rear_tie_point):null,
-      hoof:index===1&&action==='point'?map([mix(l,r,frame>=4?.95:.82),mix(u,b,frame>=4?.57:.76)]):null
+      hoof:index===1&&action==='point'?map([mix(l,r,f0>=4?.95:.82),mix(u,b,f0>=4?.57:.76)]):null
     };
   }
-  const [l,u,r,b]=a.bounds, [fx,fy]=a.foot_bottom_midpoint;
+  const [l,u,r,b]=a.bounds, fx=regX(id), fy=regY(id);
   shadow(x,y+5/shot.zoom,(r-l)*scale*.36,10/shot.zoom,.19);
   const old=blend?sprite(blend.id,1-blend.alpha,blend.face??face):null;
-  const result=sprite(id,blend?blend.alpha:1,face);
+  const main=blend?blend.alpha:1;
+  const result=sprite(id,main,face);
+  // Slow gestures: the next registered frame fades in over this one (no stepping at 5 fps).
+  if(fr>.02&&f0+1<n&&action!=='walk'&&action!=='trot')sprite(frameID(role,action,f0+1),main*fr,face);
   const drawX=face===1?x+(l-fx)*scale:x-(r-fx)*scale;
   reg('char',role.id,drawX,y+(u-fy)*scale,(r-l)*scale,(b-u)*scale);
   if(old){
@@ -366,10 +396,32 @@ function actor(index, choreo, shot) {
     if(result.hitch&&old.hitch)result.hitch=result.hitch.map((n,i)=>mix(old.hitch[i],n,blend.alpha));
   }
   if(carry){
-    const [w,h]=cargoDimensions[carry];
-    prop(carry,...result.back,w/shot.zoom,h/shot.zoom);
+    const [w,h]=cargoDimensions[carry], k=index===1?.86:1;
+    prop(carry,...result.back,w*k/shot.zoom,h*k/shot.zoom);
   }
   return result;
+}
+// ccc-021 (#3:2): 'think' is one gesture per thinking spell: raise, hold (with a blink), lower.
+function thinkWindow(i,t){
+  const s=sentence(t);
+  if(s===21)return [cues[21],cues[22]];
+  if(s>=3&&s<=6)return [i===0?cues[4]:start(3)+(end(3)-start(3))*.55,cues[6]];
+  return [cues[s],cues[Math.min(s+1,cues.length-1)]];
+}
+function thinkFrame(i,t){
+  const [t0,t1]=thinkWindow(i,t), u=t-t0, left=t1-t;
+  if(i===0){                                   // camel: hoof to chin (frames 1-4), blink (5), lower (6-8)
+    if(left<.5)return 5+2*ease(1-Math.max(0,left)/.5);
+    if(u<.7)return 3*ease(u/.7);
+    // hold: a slow hoof-on-chin sway (2 s, cross-faded between frames 3 and 2, never stepped) + a blink every 2.8 s
+    const c=(u-.7)%2.8, sway=.45*(.5-.5*Math.cos(2*Math.PI*(u-.7)/2));
+    return 3-sway+(c>2.2&&c<2.5?Math.sin(Math.PI*(c-2.2)/.3):0);
+  }
+  if(left<.45)return 2*ease(Math.max(0,left)/.45);   // pony: looks up (1-3), slow blink (3-5)
+  if(u<.6)return 2*ease(u/.6);
+  // hold: a slow look-up sway (2.2 s, cross-faded between frames 2 and 1) + a slow blink every 3.1 s
+  const c=(u-.6)%3.1, sway=.4*(.5-.5*Math.cos(2*Math.PI*(u-.6)/2.2));
+  return 2-sway+(c>2.5&&c<3.0?2*Math.sin(Math.PI*(c-2.5)/.5):0);
 }
 function stageActors(s,t,p,shot) {
   const span=end(s)-start(s), elapsed=span*p, zoom=shot.zoom;
@@ -377,22 +429,14 @@ function stageActors(s,t,p,shot) {
   const h=(shot.map==='close'?405:shot.map==='high'?231:257)/zoom;
   const xWorld=x=>(x+shot.x)/zoom;
   const pose=(i,action,x,k=0,face=1)=>({
-    x:xWorld(x),y,h,action,frame:action==='think'?
-      Math.floor((t+i*.17)*5.7)%squad[i].frames[action]:action==='walk'?standingFrame[i]:
-      Math.min(squad[i].frames[action]-1,Math.floor(k*squad[i].frames[action])),face
+    x:xWorld(x),y,h,action,frame:action==='think'?thinkFrame(i,t):action==='walk'?standingFrame[i]:
+      clamp(k)*(squad[i].frames[action]-1),face
   });
   function move(i,action,from,to,a,b,options={}) {
     const {carry='',release=b,finish='walk',face=to<from?-1:1}=options;
-    const duration=span*(b-a), age=elapsed-span*a;
-    const count=squad[i].frames[action];
-    const cycles=Math.max(1,Math.round(duration*gaitFPS/count));
-    const frames=cycles*count+1;
-    // Start and finish the stride on the same planted frame. Each frame is
-    // translated as a whole, with the shot's fixed projection.
-    const phase=i===0?0:action==='trot'?2:3;
-    const movingFace=to<from?-1:1;
-    const travel=Math.min(frames,Math.floor(clamp(age/duration)*frames));
-    const walking=age>=0&&age<duration, after=age-duration;
+    const duration=span*(b-a), age=elapsed-span*a, after=age-duration;
+    const walking=age>=0&&age<duration, movingFace=to<from?-1:1;
+    const g=squad[i].id+'-'+action, G=GAIT[g];
     const settling=finish==='point'&&i===0&&after>=Math.max(0,(1-b)*span-.15);
     const k=finish==='point'?play(after,0,Math.max(.28,(1-b)*span-.15)):
       finish==='happy'?play(after,0,Math.max(.36,(1-b)*span)):0;
@@ -401,14 +445,20 @@ function stageActors(s,t,p,shot) {
       id:frameID(squad[i],finish,squad[i].frames[finish]-1),
       alpha:clamp((after-(1-b)*span+.15)/.15),face
     };
-    d.x=mix(xWorld(from),xWorld(to),travel/frames);
+    // ccc-021 (#3:2, #3:8): the root moves every display frame; the stride follows the distance.
+    const scale=h/(i===0?292:304);
+    const want=Math.abs(xWorld(to)-xWorld(from))/scale/G.stride;
+    const cycles=Math.max(1,Math.round(Math.min(duration*20/12,Math.max(duration,want))));
+    const u=walking?travelCurve(age/duration):age<0?0:1;
+    d.x=mix(xWorld(from),xWorld(to),u);
     d.carry=p<release?carry:'';
     if(walking){
-      d.frame=(travel+phase)%count;
-      if(age<groupFade)d.blend={id:frameID(squad[i],'walk',standingFrame[i]),alpha:clamp(age/groupFade),face};
-    }else if(after>=0&&after<groupFade){
-      const last=(frames-1+phase)%count, id=frameID(squad[i],action,last);
-      d.blend={id,alpha:clamp(after/groupFade),face:movingFace};
+      d.frame=gaitIndex(g,G.start+cycles*u);
+      if(action!=='walk'&&age<groupFade)d.blend={id:frameID(squad[i],'walk',standingFrame[i]),alpha:clamp(age/groupFade),face};
+    }else if(action==='walk'&&finish!=='walk'&&!settling&&after>=0&&after<groupFade){
+      d.blend={id:frameID(squad[i],'walk',standingFrame[i]),alpha:clamp(after/groupFade),face};
+    }else if(action!=='walk'&&after>=0&&after<groupFade){
+      d.blend={id:frameID(squad[i],action,gaitIndex(g,G.start+cycles)),alpha:clamp(after/groupFade),face:movingFace};
     }
     return d;
   }
@@ -432,37 +482,41 @@ function stageActors(s,t,p,shot) {
     case 6:
       roles=[move(0,'walk',1550,1461,.05,.53,{finish:'point',face:-1}),pose(1,'walk',360,0,-1)];
       if(elapsed<groupFade)for(const [i,role] of roles.entries())role.blend={
-        id:frameID(squad[i],'think',Math.floor((start(s)+i*.17)*5.7)%squad[i].frames.think),
+        id:frameID(squad[i],'think',Math.round(thinkFrame(i,start(s)-.001))),
         alpha:elapsed/groupFade
       };break;
     case 7:
-      roles=[pose(0,'point',230,.75),move(1,'trot',1637,1605,.03,.68)];break;
+      // ccc-021 (#3:3): no trotting on the spot; Dana points at her five extra sacks when they glow.
+      roles=[pose(0,'point',230,.75),pose(1,'point',1637,play(p,.44,.56)*(1-play(p,.86,.99)),-1)];break;
     case 8:
       roles=[move(0,'walk',758,1229,.15,.93),move(1,'trot',1536,1847,.15,.70)];break;
     case 9:case 20:
       roles=[move(0,'walk',126,660,.04,.56,{carry:'plank',finish:'point'}),
         pose(1,s===20?'happy':'walk',1322,play(p,.57,.97),-1)];break;
     case 10:
-      roles=[move(0,'walk',451,858,.04,.86),move(1,'walk',169,357,.11,.94)];break;
+      // ccc-021 (#3:5): the camel comes in from the right and stops right of Askar's field.
+      roles=[move(0,'walk',1780,1668,.04,.86),move(1,'walk',169,357,.11,.94)];break;
     case 11:
-      roles=[pose(0,'point',858,play(p,.04,.80)*(1-play(p,.83,.99))),pose(1,'walk',357)];
+      roles=[pose(0,'point',1668,play(p,.04,.80)*(1-play(p,.83,.99)),-1),pose(1,'walk',357)];
       if(elapsed<groupFade)roles[0].blend={
         id:frameID(squad[0],'walk',standingFrame[0]),alpha:elapsed/groupFade
       };break;
     case 12:
-      roles=[pose(0,'walk',414),move(1,'trot',1213,968,.02,.36,{finish:'point',face:-1})];
-      roles[1].y=(536+shot.y)/zoom;
+      // ccc-021 (#3:6): Dana walks along the path (starting clear of Askar) and stops on the path right of the
+      // signpost (not on it, not in front of the raised piles), then points up at Askar's pile.
+      roles=[pose(0,'walk',370),move(1,'walk',600,690,.02,.36,{finish:'point',face:1})];
+      roles[1].y=(536+shot.y)/zoom+60;
       roles[1].h=h*.67;
       if(p>=.36)roles[1].frame=Math.round(7*play(p,.36,.49)*(1-play(p,.54,.73)));
       break;
     case 13:
-      roles=[move(0,'walk',738,1275,.08,.91),pose(1,'walk',1630,0,-1)];break;
+      roles=[move(0,'walk',738,1275,.08,.91),pose(1,'walk',1630,0,1)];break;
     case 14:
-      roles=[pose(0,'walk',1176),move(1,'trot',1531,1810,.09,.76)];break;
+      roles=[pose(0,'walk',1176),move(1,'walk',1531,1640,.09,.50)];break;   // ccc-021: stays in frame (static camera); a 2-cycle walk, no trotting on the spot
     case 15:
-      roles=[pose(0,'walk',725),move(1,'trot',1643,1215,.09,.83)];break;
+      roles=[pose(0,'walk',560),move(1,'trot',1643,1215,.09,.83)];break;
     case 16:
-      roles=[move(0,'walk',725,1168,.05,.50,{finish:'point',face:-1}),pose(1,'walk',1505,0,-1)];break;
+      roles=[move(0,'walk',560,650,.05,.50,{finish:'point'}),pose(1,'walk',1215,0,-1)];break;
     case 17:
       roles=[move(0,'walk',877,408,.05,.75,{finish:'happy'}),
         move(1,'walk',1595,764,.10,.81,{finish:'happy'})];break;
@@ -578,7 +632,7 @@ function rowWidthTags(q,s,p){
     const columns=s===22&&i===0?hectares[0]-Math.floor(fadedColumns(p)+.0001):hectares[i];
     tag(columns+' × '+depth,x,y,C.soil,36,186);
   }
-  if(s===8)tag('□ = '+area(1),1210,498,C.soil,32,240);
+  if(s===8)tag('□ = '+area(1),1180,498,C.soil,32,240);   // ccc-021: clear of the ledger with the static camera
 }
 function bagPile(x,y,w,count,highlight=false) {
   const levels=Math.ceil(count/5), size=w/5.15, shift=size*.78;
@@ -611,7 +665,8 @@ function equalYard(s,t,p,shot,mark=false){
   const align=s===1&&p>.79||[4,5,9,17,20,21,23].includes(s);
   if(align||s===18||s===19){
     line(lx-width*.50,top,rx+width*.50,top,C.blue,large?3.6:3);
-    if(large)tag(weight(harvest),mid,top-52,C.blue,29,165);
+    // ccc-021: with the piles raised, the equation plate (s20) would cover this tag; it moves beside the right pile, below the ledger.
+    if(large)heroSentences.has(s)?tag(weight(harvest),rx+width*.5+57,top+70,C.blue,29,165):tag(weight(harvest),mid,top-52,C.blue,29,165);
     if(s===1){
       const compare=play(p,.76,.995);
       const sweep=(rx-lx+pileWidth)*compare;
@@ -974,7 +1029,7 @@ function teachingLinks(s,p,t){
     if(stage===1)sampleBox(545,747,133,53);
     if(stage===2)polygon(wideFields[0],null,C.soil,6);
     const b=[[x,yardTop+28],[650,751],point(wideFields[0],.26,.29)][stage];
-    const from=[stage===2?889:707,656];
+    const from=[1418,742];   // ccc-021 (#3:5): the camel's raised hoof, right of the field
     const bend=[mix(from[0],b[0],.5),Math.min(from[1],b[1])-34];
     curvedArrow(from,bend,b,a,play(p,[.03,.36,.64][stage],[.23,.52,.81][stage]),'',false);
   }
@@ -1011,7 +1066,7 @@ function drawShot(s,t,p,shot,x) {
   if(s===15||s===16)ropeBox(s,p,t,ropeHitch(s,t,p,shot));
   const actors=stageActors(s,t,p,shot);
   if(s===12&&p>=.46&&p<.55&&actors[1].hoof){
-    const [x,y]=actors[1].hoof;
+    const [x,y]=[wideGroups[0][0]+42,yardTop-6];   // ccc-021 (#3:6): spill at the opened sack
     kernels(t*2,x,y,5,1-play(p,.51,.55));
   }
   if(s===2)sackFlights(s,p);
@@ -1158,41 +1213,28 @@ function bigCountdown(s,t){
   txt(String(n),cx,cy+6,150*beat,'center',C.gold,'#fff7d8');
 }
 
-const dissolveSeconds=.4;
-const outgoing=document.createElement('canvas');
-outgoing.width=W;outgoing.height=H;
-const outgoingContext=outgoing.getContext('2d');
+// ccc-021 (#3:7): a change of framing fades out (0.22 s, in the silent tail of the sentence)
+// and the new shot fades in (0.30 s). One shot on screen at a time: no hard cut, no double exposure.
+const DIP_OUT=.22, DIP_IN=.30, DIP_COLOR='#2b2016';
+// Same places as the base dissolves (new map / framing, or the characters re-staged between sentences).
+// s18 re-stages both riders inside the same static framing (the check-by-multiplying beat starts at the field):
+// that boundary dips too, instead of a jump of 500 px.
+const isCut=s=>s>0&&s<shots.length&&(backdropKey(shots[s-1])!==backdropKey(shots[s])||shots[s-1].to!==shots[s].x||s===18);
+function dipAmount(t){
+  const s=sentence(t), elapsed=t-cues[s], left=(s+1<cues.length?cues[s+1]:1e9)-t;
+  let k=0;
+  if(isCut(s)&&elapsed<DIP_IN)k=1-ease(elapsed/DIP_IN);
+  if(isCut(s+1)&&left<DIP_OUT)k=Math.max(k,ease(1-left/DIP_OUT));
+  return k;
+}
 function renderScene(t) {
   timer.textContent='';
-  const s=sentence(t), p=fraction(t,s), shot=shots[s], previous=shots[s-1];
-  const elapsed=t-cues[s], x=cameraX(shot,p);
-  // A change of map or framing dissolves the entire scene including its
-  // grounded props. Continuous pans stay on the same map and projection.
-  const changing=previous&&elapsed<dissolveSeconds&&
-    (backdropKey(previous)!==backdropKey(shot)||previous.to!==shot.x);
-  if(changing){
-    const pt=cues[s]-.001;
-    shotLabels=[];BOXES=[];
-    drawShot(s-1,pt,fraction(pt,s-1),previous,previous.to);
-    outgoingContext.drawImage(canvas,0,0);
-  }
+  const s=sentence(t), p=fraction(t,s), shot=shots[s], x=cameraX(shot,p);
   shotLabels=[];BOXES=[];
   drawShot(s,t,p,shot,x);
-  if(changing){
-    const mixIn=clamp(elapsed/dissolveSeconds);
-    ctx.save();ctx.globalAlpha=1-mixIn;
-    ctx.drawImage(outgoing,0,0);
-    ctx.globalAlpha=.22*Math.sin(Math.PI*mixIn);
-    const warm=ctx.createLinearGradient(0,0,W,H);
-    warm.addColorStop(0,'#fff3c4');warm.addColorStop(.6,'#ffd77a');warm.addColorStop(1,'rgba(255,215,122,0)');
-    ctx.fillStyle=warm;ctx.fillRect(0,0,W,H);
-    ctx.restore();
-    drawLabels(s,t,p,shot,x,shotLabels,play(mixIn,.29,1));
-  }else {
-    const next=shots[s+1], left=cues[s+1]-t;
-    const willDissolve=next&&(backdropKey(shot)!==backdropKey(next)||shot.to!==next.x);
-    drawLabels(s,t,p,shot,x,shotLabels,willDissolve?ease(left/.13):1);
-  }
+  drawLabels(s,t,p,shot,x,shotLabels,1);
+  const k=dipAmount(t);
+  if(k>0){ctx.save();ctx.globalAlpha=k;ctx.fillStyle=DIP_COLOR;ctx.fillRect(0,0,W,H);ctx.restore()}
   return {s,harvest,areas,depth,hectares,excess};
 }
 function auditFrame(n) {
