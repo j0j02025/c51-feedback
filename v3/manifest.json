@@ -45,6 +45,14 @@
    "sha": "b01aa2ad91cb2b3b603ebb89f03c3b6469179cf7dbe9094b0d70807b7a86d170"
   },
   {
+   "id": "ru-dl-16-c",
+   "no": 16,
+   "subject": "俄语数字素养",
+   "title": "演示文稿所需的信息",
+   "file": "lessons/ru-dl-16-c.html",
+   "sha": "826dd934c2cb198742f135595d0d73f106aec9841fa8e2d2b01dde977bd38e04"
+  },
+  {
    "id": "ru-math-81",
    "no": 81,
    "subject": "俄语数学",
@@ -85,6 +93,14 @@
    "sha": "0676f2ea6013948555cf8c4a375f7bcb3e54e84ffa3af5a526c144423bb1eaf0"
   },
   {
+   "id": "ru-math-84-c",
+   "no": 84,
+   "subject": "俄语数学",
+   "title": "图像",
+   "file": "lessons/ru-math-84-c.html",
+   "sha": "5b847b29e4efa3ca9b01755a20a0e907d88befe9bc22e9c5c40cb48c42e0bcfd"
+  },
+  {
    "id": "ru-math-85",
    "no": 85,
    "subject": "俄语数学",
@@ -98,7 +114,7 @@
    "subject": "哈语",
    "title": "词法世界之旅",
    "file": "lessons/kk-lang-65.html",
-   "sha": "93909b4d0a4ec1fee96ba0638832f8dc1ea69f9abb719bd56a54d3cb63b90399"
+   "sha": "dc5acaf23b893ca52598984cf19c73000473befecf44bb73014c961e9eaff283"
   },
   {
    "id": "kk-lang-66",
@@ -138,7 +154,7 @@
    "subject": "哈语数学",
    "title": "数量关系与圆形图",
    "file": "lessons/kk-math-81.html",
-   "sha": "733f16bf4e484e368e99df4793f3c115aa4d142923c85941d464e85dffed445d"
+   "sha": "664ae00aa5a6e63ea91194ac290bc67915f81a2ca472de39da8d624478b6065b"
   },
   {
    "id": "kk-math-82",
@@ -163,6 +179,14 @@
    "title": "图像",
    "file": "lessons/kk-math-84.html",
    "sha": "11d06ada47e01583c7fe3721dcc71bd7b7ec35adefc8763d8c9bed4cdf28ac04"
+  },
+  {
+   "id": "kk-math-84-c",
+   "no": 84,
+   "subject": "哈语数学",
+   "title": "图像",
+   "file": "lessons/kk-math-84-c.html",
+   "sha": "896c68d1bf8c140e41466b95227fe8f0214ca07aee51f2ed8085070707fac467"
   },
   {
    "id": "kk-math-85",

@@ -132,7 +132,7 @@ const TW={
  paintT:BT(10,.05),paintC:BT(10,.45),
  share:BT(11,.02),rect:BT(11,.47),
  pot2:BT(12,.40),parts:BT(12,.70),
- optA:BT(13,.0),optB:BT(14,.0),optC:BT(15,.0),cd0:BT(15,1)+.02,cd1:CUE(16)-.02,
+ optA:BT(13,.0),optB:BT(14,.0),optC:BT(15,.0),cd0:BT(15,1)+.02,cd1:CUE(16)-.45,
  ansB:BT(16,.50),
  half:BT(17,.05),
  e3:BT(18,.05),e3r:BT(18,.72),
@@ -511,7 +511,7 @@ function flights(tt){
  for(const[j,t0,q]of blobs){const k=K(t0,.62,tt);if(k<=0||k>=1)continue;const p0=[CARD[j].x,CARD_IMG_Y-20],m=qMid(q),p2=[x+Math.cos(m)*r*.8,y+Math.sin(m)*r*.8],p1=[(p0[0]+p2[0])/2,90];
   const u=eio(k),p=bez(p0,p1,p2,u),col=C[QCOL[q]];
   for(let i=5;i>=1;i--){const q2=bez(p0,p1,p2,Math.max(0,u-i*.035));disc(q2[0],q2[1],18-i*2.4,col)}
-  const sq=1+.25*Math.sin(u*Math.PI*3);ctx.save();ctx.translate(p[0],p[1]);ctx.scale(sq,1/sq);disc(0,0,26,col);disc(-8,-8,8,'rgba(255,255,255,.55)');ctx.restore()}
+  disc(p[0],p[1],26,col);disc(p[0]-8,p[1]-8,8,'rgba(255,255,255,.55)')} // rigid drop, no squash/stretch (J 11-21)
  // Aya's brown pencil ribbon while she paints the potato half
  const pb=K(TW.ansB+.2,1.3,tt);if(pb>0&&pb<1){const h=ayaHand(tt),a=lerp(0,Math.PI,pb),tip=[x+Math.cos(a)*r*.7,y+Math.sin(a)*r*.7];
   ctx.save();ctx.globalAlpha*=.85;ctx.strokeStyle=C.pot;ctx.lineWidth=9;ctx.lineCap='round';ctx.setLineDash([2,16]);ctx.lineDashOffset=-tt*120;ctx.beginPath();ctx.moveTo(h[0],h[1]);ctx.quadraticCurveTo((h[0]+tip[0])/2,Math.max(h[1],tip[1])+80,tip[0],tip[1]);ctx.stroke();ctx.restore();disc(tip[0],tip[1],14,C.potD)}
@@ -623,7 +623,7 @@ const SCENE_EVENTS=(()=>{const ev=[],add=(t,id,v=0)=>{if(t>=0&&t<AUDIO_DUR)ev.pu
  add(TW.share,'chime',1);add(TW.rect-.2,'sweep',1);
  add(TW.pot2-.3,'pop',1);add(TW.parts,'query');
  add(TW.optA,'pop',2);add(TW.optB,'pop',3);add(TW.optC,'pop',0);
- for(let i=0;i<3;i++)add(TW.cd0+i*(TW.cd1-TW.cd0)/3,'tick',i);
+ for(let i=0;i<3;i++)add(TW.cd0+i*(TW.cd1-TW.cd0)/3,'cdTick',i);add(TW.cd1,'cdEnd'); // 3-2-1: one tick per number, a distinct final tone (J 11-21)
  add(TW.ansB,'ding');add(TW.ansB+.02,'confetti');add(TW.ansB+.2,'brush');
  add(TW.half,'sparkle',1);
  add(TW.e3,'scribble',1);add(TW.e3r,'ding');add(TW.e3r+.25,'pop',1);
@@ -673,10 +673,12 @@ Object.assign(RECIPES,{
  sparkle(o,d,v){[1568,2093,2637,3136].forEach((f,i)=>tone(o,d,{f0:f*(v%2?1.06:1),at:i*.06,dur:.32,gain:.15,a:.003}))},
  confetti(o,d){for(let i=0;i<10;i++)tone(o,d,{f0:900+((i*373)%900),at:i*.045,dur:.06,gain:.11,a:.002,type:'triangle'})},
  brush(o,d){burst(o,d,{dur:1.2,gain:.2,type:'bandpass',f:1400,f1:2200,q:1.4,a:.1,seed:360})},
- compass(o,d){burst(o,d,{dur:1.8,gain:.16,type:'bandpass',f:2600,f1:3400,q:2.2,a:.1,seed:370})}
+ compass(o,d){burst(o,d,{dur:1.8,gain:.16,type:'bandpass',f:2600,f1:3400,q:2.2,a:.1,seed:370})},
+ cdTick(o,d){burst(o,d,{dur:.035,gain:.5,type:'bandpass',f:2200,q:1.6,a:.001,seed:380});tone(o,d,{f0:988,dur:.13,gain:.62,a:.002,type:'triangle'});tone(o,d,{f0:1976,dur:.07,gain:.14,a:.002})},
+ cdEnd(o,d){tone(o,d,{f0:1319,dur:.42,gain:.5,a:.004,type:'triangle'});tone(o,d,{f0:1760,dur:.42,gain:.42,a:.004,type:'triangle'});tone(o,d,{f0:2637,dur:.22,gain:.1,a:.003})}
 });
-Object.assign(LEN,{step:.12,paper:1.3,tape:1.4,drop:.26,tick:.05,whoosh:.6,splash:.32,sparkle:.55,confetti:.55,brush:1.3,compass:1.9});
-Object.assign(SFX_TRIM,{step:.5,paper:.55,tape:.45,drop:.55,tick:.45,whoosh:.45,splash:.5,sparkle:.4,confetti:.5,brush:.4,compass:.4});
+Object.assign(LEN,{step:.12,paper:1.3,tape:1.4,drop:.26,tick:.05,whoosh:.6,splash:.32,sparkle:.55,confetti:.55,brush:1.3,compass:1.9,cdTick:.16,cdEnd:.46});
+Object.assign(SFX_TRIM,{step:.5,paper:.55,tape:.45,drop:.55,tick:.45,whoosh:.45,splash:.5,sparkle:.4,confetti:.5,brush:.4,compass:.4,cdTick:.5,cdEnd:.5});
 ['step','drop','tick','whoosh','splash','sparkle','pop'].forEach(x=>VARIANTS.add(x));
 
 async function renderSfx(id,v=0){const o=new OfflineAudioContext(2,Math.ceil(LEN[id]*ASR),ASR);RECIPES[id](o,o.destination,v);const r=await o.startRendering();for(let c=0;c<2;c++){const d=r.getChannelData(c);for(let i=0;i<d.length;i++)d[i]*=SFX_TRIM[id]}return r}
@@ -898,9 +900,9 @@ html.cv-min #cvBar button#cvMin{height:20px;min-width:30px}
 `;document.head.appendChild(st);
 // ---- DOM ----
 const bar=document.createElement('div');bar.id='cvBar';bar.dataset.cvControls='bar';bar.setAttribute('role','toolbar');bar.setAttribute('aria-label','播放控制');
-bar.innerHTML=`<button type="button" data-cv-ctl="prev" aria-label="上一段" title="上一段">${svg('prev')}</button>`+
+bar.innerHTML=`<button type="button" data-cv-ctl="prev" aria-label="上一句" title="上一句">${svg('prev')}</button>`+
  `<button type="button" data-cv-ctl="play" aria-label="暂停" title="暂停">${svg('pause')}</button>`+
- `<button type="button" data-cv-ctl="next" aria-label="下一段" title="下一段">${svg('next')}</button>`+
+ `<button type="button" data-cv-ctl="next" aria-label="下一句" title="下一句">${svg('next')}</button>`+
  `<span id="cvSeg"></span><div id="cvTrack" data-cv-ctl="seek" title="跳到这里"><div id="cvFill"></div>${SEG.slice(1).map(s=>`<i style="left:${(100*s/AUDIO_DUR).toFixed(3)}%"></i>`).join('')}</div>`+
  '<button type="button" data-cv-ctl="mute" aria-pressed="false"></button>'+
  (hasBackground?'<button type="button" data-cv-ctl="bgm" aria-pressed="false">🎵</button>':'')+
@@ -920,7 +922,7 @@ for(const el of[bar,rp]){
 const play=()=>{if(typeof audioKick==='function')audioKick();narration.play().catch(()=>{})};
 function go(s){const keep=!narration.paused||atEnd();sync(s);if(keep)play()}
 function replay(){sync(0);play()}
-$('prev').onclick=()=>{const k=segOf(t);go(SEG[t-SEG[k]>1.5?k:Math.max(0,k-1)])};
+$('prev').onclick=()=>{const k=segOf(t);go(SEG[Math.max(0,k-1)])}; // start of the previous sentence (CV_SEG = every sentence)
 $('next').onclick=()=>{const k=segOf(t);if(k+1<M)go(SEG[k+1])};
 $('play').onclick=()=>{if(atEnd())replay();else if(narration.paused)play();else narration.pause()};
 rp.onclick=replay;
@@ -935,10 +937,10 @@ narration.addEventListener('pause',()=>{if(atEnd())return;if(typeof bgm!=='undef
 narration.addEventListener('play',()=>{if(typeof live==='object'&&live&&live.ctx&&live.ctx.state==='suspended')live.ctx.resume().catch(()=>{})});
 // ---- 控件文字:多语切换片(CFG.lang_switch,templates/lang4.js)跟当前语言(<html lang>)走,四语;单语片 / 老片一律中文,与改前相同 ----
 const UI={
- zh:{seg:(k,m)=>`第 ${k} / 共 ${m} 段`,prev:'上一段',next:'下一段',play:'继续',pause:'暂停',replay:'重放',seek:'跳到这里',fs:'全屏',fsx:'退出全屏',min:'收起控制条',max:'展开控制条',bar:'播放控制'},
- kk:{seg:(k,m)=>`Бөлім ${k} / ${m}`,prev:'Алдыңғы бөлім',next:'Келесі бөлім',play:'Жалғастыру',pause:'Кідірту',replay:'Қайта ойнату',seek:'Осы жерге өту',fs:'Толық экран',fsx:'Толық экраннан шығу',min:'Басқару жолағын жасыру',max:'Басқару жолағын көрсету',bar:'Ойнату басқаруы'},
- ru:{seg:(k,m)=>`Часть ${k} / ${m}`,prev:'Предыдущая часть',next:'Следующая часть',play:'Продолжить',pause:'Пауза',replay:'Повторить',seek:'Перейти сюда',fs:'Полный экран',fsx:'Выйти из полного экрана',min:'Скрыть панель',max:'Показать панель',bar:'Управление воспроизведением'},
- en:{seg:(k,m)=>`Part ${k} / ${m}`,prev:'Previous part',next:'Next part',play:'Resume',pause:'Pause',replay:'Replay',seek:'Jump here',fs:'Full screen',fsx:'Exit full screen',min:'Hide controls',max:'Show controls',bar:'Playback controls'}};
+ zh:{seg:(k,m)=>`第 ${k} / 共 ${m} 句`,prev:'上一句',next:'下一句',play:'继续',pause:'暂停',replay:'重放',seek:'跳到这里',fs:'全屏',fsx:'退出全屏',min:'收起控制条',max:'展开控制条',bar:'播放控制'},
+ kk:{seg:(k,m)=>`Сөйлем ${k} / ${m}`,prev:'Алдыңғы сөйлем',next:'Келесі сөйлем',play:'Жалғастыру',pause:'Кідірту',replay:'Қайта ойнату',seek:'Осы жерге өту',fs:'Толық экран',fsx:'Толық экраннан шығу',min:'Басқару жолағын жасыру',max:'Басқару жолағын көрсету',bar:'Ойнату басқаруы'},
+ ru:{seg:(k,m)=>`Фраза ${k} / ${m}`,prev:'Предыдущая фраза',next:'Следующая фраза',play:'Продолжить',pause:'Пауза',replay:'Повторить',seek:'Перейти сюда',fs:'Полный экран',fsx:'Выйти из полного экрана',min:'Скрыть панель',max:'Показать панель',bar:'Управление воспроизведением'},
+ en:{seg:(k,m)=>`Sentence ${k} / ${m}`,prev:'Previous sentence',next:'Next sentence',play:'Resume',pause:'Pause',replay:'Replay',seek:'Jump here',fs:'Full screen',fsx:'Exit full screen',min:'Hide controls',max:'Show controls',bar:'Playback controls'}};
 const controlLang=()=>CFG.lang_switch?.all?.length>1?document.documentElement.lang:(CFG.scene?.control_lang||C.language);
 const ui=()=>UI[controlLang()]||UI.zh;
 const lab=(el,s)=>{if(el){el.setAttribute('aria-label',s);el.title=s}};
