@@ -716,7 +716,7 @@ const SCENE_EVENTS=(()=>{const ev=[],add=(t,id,v=0)=>{if(t>=0&&t<AUDIO_DUR)ev.pu
  add(TW.ret,'swish',3);add(TW.k1,'scribble',0);add(TW.k2,'scribble',1);add(TW.k3,'scribble',2);add(TW.endTx,'chime');add(TW.wave,'bell',1);
  return ev.sort((p,q)=>p.t-q.t)})();
 
-const SFXCFG=Object.assign({ambience:'room'},TH.sfx||{});
+const SFXCFG=Object.assign({},TH.sfx||{});
 const ASR=44100,prng=seed=>{let x=seed>>>0||1;return()=>{x^=x<<13;x>>>=0;x^=x>>>17;x^=x<<5;x>>>=0;return x/4294967296}};
 function tone(o,dest,{type='sine',f0,f1,at=0,dur=.2,gain=.5,a=.003,lp,hp,q=.7}){
  const s=o.createOscillator(),g=o.createGain();s.type=type;s.frequency.setValueAtTime(f0,at);if(f1)s.frequency.exponentialRampToValueAtTime(f1,at+dur);
@@ -765,25 +765,17 @@ Object.assign(SFX_TRIM,{pedal:.35,bell:.42,tick:.45,drop:.55,plop:.5,whoosh:.45,
 // countdown tick level per voice track (ccc-013, K 261121: 75 % of the voice; the voices differ in loudness and mix.sfx is 1 for all)
 const CD_LV={kk:1.097,en:.479,zh:1.122};
 async function renderSfx(id,v=0){const o=new OfflineAudioContext(2,Math.ceil(LEN[id]*ASR),ASR);RECIPES[id](o,o.destination,v);const r=await o.startRendering();for(let c=0;c<2;c++){const d=r.getChannelData(c);for(let i=0;i<d.length;i++)d[i]*=SFX_TRIM[id]}return r}
-// 环境底音:20 秒循环噪声,首尾交叉淡化。room = 低通的室内空气声
-async function renderAmbience(kind){
- const o=new OfflineAudioContext(1,Math.ceil(21*ASR),ASR),s=o.createBufferSource(),f=o.createBiquadFilter(),f2=o.createBiquadFilter();s.buffer=noiseBuf(o,21,5151);f.type='bandpass';f.frequency.value=kind==='room'?320:620;f.Q.value=kind==='room'?.7:.55;f2.type='lowpass';f2.frequency.value=kind==='room'?900:1500;s.connect(f);f.connect(f2);f2.connect(o.destination);s.start(0);
- const r=(await o.startRendering()).getChannelData(0),N=20*ASR,X=ASR,out=new AudioBuffer({numberOfChannels:1,length:N,sampleRate:ASR}),d=out.getChannelData(0);
- for(let i=0;i<N;i++)d[i]=r[i]*2;for(let i=0;i<X;i++){const k=i/X;d[i]=(r[i]*k+r[N+i]*(1-k))*2}
- return out;
-}
 function buildEvents(){return (typeof SCENE_EVENTS!=='undefined'?SCENE_EVENTS:[]).filter(e=>RECIPES[e.id]).map(e=>({t:+e.t.toFixed(4),id:e.id,v:e.v||0})).sort((x,y)=>x.t-y.t)}
-const SFXG=()=>MIXG.sfx==null?.35:MIXG.sfx,AMBG=()=>MIXG.ambience==null?.05:MIXG.ambience;
+const SFXG=()=>MIXG.sfx==null?.35:MIXG.sfx;
 let SBUF=null,EVENTS=[];
-const audioReady=(async()=>{if(!window.OfflineAudioContext)return false;try{EVENTS=buildEvents();const out={sfx:{},amb:SFXCFG.ambience?await renderAmbience(SFXCFG.ambience):null};for(const id of new Set(EVENTS.map(e=>e.id)))out.sfx[id]=await Promise.all((VARIANTS.has(id)?[0,1,2,3]:[0]).map(v=>renderSfx(id,v)));SBUF=out;return true}catch(e){console.log('AUDIO-SYNTH-FAIL',e&&e.message);return false}})();
+const audioReady=(async()=>{if(!window.OfflineAudioContext)return false;try{EVENTS=buildEvents();const out={sfx:{},amb:null};for(const id of new Set(EVENTS.map(e=>e.id)))out.sfx[id]=await Promise.all((VARIANTS.has(id)?[0,1,2,3]:[0]).map(v=>renderSfx(id,v)));SBUF=out;return true}catch(e){console.log('AUDIO-SYNTH-FAIL',e&&e.message);return false}})();
 const sbuf=e=>{const a=SBUF.sfx[e.id];return a[e.v%a.length]};
-const live={ctx:null,master:null,sfx:null,amb:null,src:null,next:0,offset:null,done:false};
-function audioKick(){if(!window.AudioContext)return;if(!live.ctx){const c=live.ctx=new AudioContext({latencyHint:'interactive'});live.master=c.createGain();live.master.gain.value=0;live.master.connect(c.destination);live.sfx=c.createGain();live.sfx.gain.value=SFXG();live.sfx.connect(live.master);live.amb=c.createGain();live.amb.gain.value=0;syncAudioGates();live.amb.connect(live.master)}if(live.ctx.state!=='running')live.ctx.resume().catch(()=>{})}
+const live={ctx:null,master:null,sfx:null,next:0,offset:null,done:false};
+function audioKick(){if(!window.AudioContext)return;if(!live.ctx){const c=live.ctx=new AudioContext({latencyHint:'interactive'});live.master=c.createGain();live.master.gain.value=0;live.master.connect(c.destination);live.sfx=c.createGain();live.sfx.gain.value=SFXG();live.sfx.connect(live.master);syncAudioGates()}if(live.ctx.state!=='running')live.ctx.resume().catch(()=>{})}
 function audioTick(tt){
  const c=live.ctx;if(!c||!SBUF||c.state!=='running')return;
  if(live.done&&tt<AUDIO_DUR){live.done=false;syncAudioGates()}
- if(SBUF.amb&&!live.src&&!narration.paused){const s=c.createBufferSource();s.buffer=SBUF.amb;s.loop=true;s.connect(live.amb);s.start();live.src=s;live.next=EVENTS.findIndex(e=>e.t>=tt);if(live.next<0)live.next=EVENTS.length}
- if(tt>=AUDIO_DUR){if(!live.done){live.done=true;live.amb.gain.setTargetAtTime(0,c.currentTime,.6)}return}
+ if(tt>=AUDIO_DUR){if(!live.done){live.done=true}return}
  if(narration.paused)return;
  const off=c.currentTime-narration.currentTime;
  if(live.offset===null||Math.abs(off-live.offset)>.25){live.offset=off;live.next=EVENTS.findIndex(e=>e.t>=tt);if(live.next<0)live.next=EVENTS.length}else live.offset=live.offset*.92+off*.08;
@@ -794,7 +786,7 @@ function audioTick(tt){
 window.__renderStems=async(unity=true)=>{
  await audioReady;const len=Math.ceil((AUDIO_DUR+2)*ASR),enc=r=>{const a=r.getChannelData(0),b=r.getChannelData(1),f=new Float32Array(len>>1);for(let i=0;i<f.length;i++)f[i]=(a[2*i]+a[2*i+1]+b[2*i]+b[2*i+1])/4;let bin='';const u=new Uint8Array(f.buffer);for(let i=0;i<u.length;i+=32768)bin+=String.fromCharCode.apply(null,u.subarray(i,i+32768));return btoa(bin)};
  const o1=new OfflineAudioContext(2,len,ASR),g1=o1.createGain();g1.gain.value=unity?1:SFXG();g1.connect(o1.destination);for(const e of EVENTS){const s=o1.createBufferSource();s.buffer=sbuf(e);s.connect(g1);s.start(e.t)}
- const o2=new OfflineAudioContext(2,len,ASR),g2=o2.createGain();g2.gain.value=unity?1:AMBG();g2.connect(o2.destination);const a=o2.createBufferSource();if(SBUF.amb){a.buffer=SBUF.amb;a.loop=true;a.connect(g2);a.start(0)}
+ const o2=new OfflineAudioContext(2,len,ASR);
  return{sr:ASR/2,len:len>>1,sfx:enc(await o1.startRendering()),ambience:enc(await o2.startRendering())};
 };
 
@@ -815,8 +807,7 @@ function loop(){if(playing)t=Math.min(AUDIO_DUR,TMAP.a2s(narration.currentTime))
 const narration=document.querySelector('#narration');
 // 背景声偏好独立于整体静音。BGM 跟配音时钟走,尾声保留淡出。
 let userMuted=false;
-const hasAmbience=typeof renderAmbience==='function'&&
- (typeof SFXCFG==='undefined'||!!SFXCFG.ambience)&&CFG.langs.some(lg=>CFG.mix?.[lg]?.ambience!==0);
+const hasAmbience=false;
 const bgm=typeof BGM_SRC==='string'&&BGM_SRC?document.createElement('audio'):null;let BGMV=MIXG.bgm==null?0.25:MIXG.bgm,bgmEnd=null;
 if(bgm){bgm.id='bgm';bgm.src=BGM_SRC;bgm.preload='auto';bgm.volume=BGMV;bgm.muted=true;bgm.style.display='none';document.querySelector('.card').appendChild(bgm)}
 const hasBackground=!!bgm||hasAmbience;
@@ -831,12 +822,6 @@ function syncAudioGates(){
  if(bgm)bgm.muted=!backgroundAudible;
  if(typeof live!=='object'||!live.ctx)return;
  live.master.gain.value=narration.muted?0:1;
- if(!backgroundAudible||!live.done){
-  const gain=live.amb.gain,level=backgroundAudible&&hasAmbience?AMBG():0;
-  if(gain.value!==level||(!backgroundAudible&&live.done)){
-   gain.cancelScheduledValues(live.ctx.currentTime);gain.value=level;
-  }
- }
 }
 function bgmTick(){syncAudioGates();if(!bgm)return;if(bgm.muted){if(!bgm.paused)bgm.pause();return}const end=t>=AUDIO_DUR-1e-3;if(end&&bgmEnd===null)bgmEnd=performance.now();if(!end)bgmEnd=null;const k=bgmEnd===null?1:Math.max(0,1-(performance.now()-bgmEnd)/2000);bgm.volume=BGMV*k;if(k===0){if(!bgm.paused)bgm.pause();return}if(bgm.paused&&!narration.paused)bgm.play().catch(()=>{});const ta=TMAP.s2a(t);if(!end&&Math.abs(bgm.currentTime-ta)>.3)bgm.currentTime=ta}   // BGM 跟配音秒走:多语片画面秒和配音秒不等速
 narration.src=AUDIO[LG];narration.muted=false;
