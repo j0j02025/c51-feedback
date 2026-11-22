@@ -18,7 +18,7 @@
    "subject": "俄语",
    "title": "数词：基数词与序数词｜自然现象有哪些",
    "file": "lessons/ru-lang-65-c.html",
-   "sha": "1ee0c831bacc59763f27b4db14cfaaa65aaa84bc1ead7f360c4a8b7051ba46ee"
+   "sha": "c3dc16d007c0d35bc89fb1699619227b3c02d65b5fc2884fa7d7310ba4e7bf8c"
   },
   {
    "id": "ru-lang-66",
@@ -58,7 +58,7 @@
    "subject": "俄语数字素养",
    "title": "演示文稿所需的信息",
    "file": "lessons/ru-dl-16-c.html",
-   "sha": "826dd934c2cb198742f135595d0d73f106aec9841fa8e2d2b01dde977bd38e04"
+   "sha": "ba2403c5d1f0be180d893989d785dd6140e4a7ba0c813a53ed14094c684c4044"
   },
   {
    "id": "ru-math-81",
@@ -74,7 +74,7 @@
    "subject": "俄语数学",
    "title": "数量关系与圆形图",
    "file": "lessons/ru-math-81-c.html",
-   "sha": "07c68de5f61f04cbbe03238c6f9df932bb979f8aef9e1d582280526a8a963fa2"
+   "sha": "9fdab531dd189dcfbf2d1345d7e4891358588b60e90fd6d39ed03959fbb7e9c7"
   },
   {
    "id": "ru-math-82",
@@ -106,7 +106,7 @@
    "subject": "俄语数学",
    "title": "图像",
    "file": "lessons/ru-math-84-c.html",
-   "sha": "5b847b29e4efa3ca9b01755a20a0e907d88befe9bc22e9c5c40cb48c42e0bcfd"
+   "sha": "bae7d7f9e656283eb2cb7eca0f41bc09c3bd109def21c85f1956ead2df4ba7f7"
   },
   {
    "id": "ru-math-85",
@@ -122,7 +122,7 @@
    "subject": "俄语数学",
    "title": "解决问题",
    "file": "lessons/ru-math-85-c.html",
-   "sha": "2448a5bee207912357f93f3029427f9ebc23ebf0c4c90fb193cd622645aea200"
+   "sha": "f86bf4c9967e815559405c126c3c27cada0e6cd9739bee44c70a76649b87b7bc"
   },
   {
    "id": "kk-lang-65",
@@ -138,7 +138,7 @@
    "subject": "哈语",
    "title": "词法世界之旅",
    "file": "lessons/kk-lang-65-c.html",
-   "sha": "56f4d82e95d28c4e0d814ce75853e155473f4b686a331868c432caf61847261b"
+   "sha": "4b440cfb4b2531cc9488de37841f203b626c70ab1d309799a51e94d29e82c451"
   },
   {
    "id": "kk-lang-66",
@@ -154,7 +154,7 @@
    "subject": "哈语",
    "title": "词类",
    "file": "lessons/kk-lang-66-c.html",
-   "sha": "b4364c3df91d00b6e421d57b2cce25c492cc64dcce8d0c77f907485b1cdffcb2"
+   "sha": "90f7104e8957dd222b0cdcb65b23f6ebd0ccd4ccda0afb878c8a010e66bd94c4"
   },
   {
    "id": "kk-lang-67",
@@ -186,7 +186,7 @@
    "subject": "哈语数字素养",
    "title": "演示文稿所需的信息",
    "file": "lessons/kk-dl-17-c.html",
-   "sha": "eac272c391e98591d1c8dff5ec91328badcd88bf6a84019946481d055160575f"
+   "sha": "d52f343744d0a5a6f5e573ec1bf1cc14125ead46d948936d48f6c04d1c07bc67"
   },
   {
    "id": "kk-math-81",
@@ -194,7 +194,7 @@
    "subject": "哈语数学",
    "title": "数量关系与圆形图",
    "file": "lessons/kk-math-81.html",
-   "sha": "2ef3570c14157c66adfed909d6e5f818f7034a28aaca0e224653a154ba3b9497"
+   "sha": "ef99ee75cc477665707c0c59bfc43029336e4fed4273f765fb8647522f40b0b1"
   },
   {
    "id": "kk-math-82",
@@ -226,7 +226,7 @@
    "subject": "哈语数学",
    "title": "单位面积产量（巩固）",
    "file": "lessons/kk-math-83-c.html",
-   "sha": "73f1336fb7b25df38a8156eb98aed7a45f2f48b64675d9ee4a3a53b96be2c04b"
+   "sha": "4244521e58656dd9edcde6e1cf1ad71aabb31ae4745a16ad9a9a23bac4734c20"
   },
   {
    "id": "kk-math-84",
@@ -242,7 +242,7 @@
    "subject": "哈语数学",
    "title": "图像",
    "file": "lessons/kk-math-84-c.html",
-   "sha": "f72a4f40dff3756207a4a112069df9cd3eadbe9c8c6b56ecf8ff61f45471643d"
+   "sha": "0a9eee7c63a8097161f9a373ad8544a88c4a250d5ecfc4fa88a7d9929097c7c6"
   },
   {
    "id": "kk-math-85",
@@ -258,7 +258,7 @@
    "subject": "哈语数学",
    "title": "解决问题",
    "file": "lessons/kk-math-85-c.html",
-   "sha": "69c7a3a7c13c12f0938fd025761128ed3360171c33b4cc77bb5b2de3021a2a46"
+   "sha": "c3ae4c915a903bea28605a34fc2a544a2a9a87db7824c412c5d74e376939d386"
   },
   {
    "id": "ru-lang-66-c",
@@ -282,7 +282,7 @@
    "subject": "俄语",
    "title": "数词词组、句子与形态分析（第一课，含抄写）｜风的力量",
    "file": "lessons/ru-lang-68-c.html",
-   "sha": "c2b4b3bc73152d08bb48c336eea80709a67d0d75590e9394c36af00ae19b0589"
+   "sha": "b4e8ab1ed821c0a5c9799cdfb10d4141148530978142e3d0d513e7077874b481"
   },
   {
    "id": "ru-math-82-c",
@@ -298,7 +298,7 @@
    "subject": "俄语数学",
    "title": "单位面积产量（巩固）",
    "file": "lessons/ru-math-83-c.html",
-   "sha": "41882931d6c46d6138444c6523877127caea6addf5fc9f97ddabfb78af957faa"
+   "sha": "8cf8cab84b1949e6fbb6a03bba49ac628459187ae9a1e87008dc957c9b273c1b"
   },
   {
    "id": "kk-lang-67-c",
@@ -330,7 +330,7 @@
    "subject": "俄语",
    "title": "基数词与序数词的拼写（第一课）｜瀑布(重构版)",
    "file": "lessons/ru-lang-66-rb.html",
-   "sha": "5c326610a5e52e7ca52f25f39d0d87a1fde4007c99a85f34b1a0d8099a31cd20"
+   "sha": "ee180761b235f710082435a515afc47292390e58a67208bd39a5879f8c56f553"
   },
   {
    "id": "ru-lang-67-rb",
@@ -338,7 +338,7 @@
    "subject": "俄语",
    "title": "基数词与序数词的拼写（第二课）｜瀑布(重构版)",
    "file": "lessons/ru-lang-67-rb.html",
-   "sha": "99c1e8e7e12b2d2486b0d264bb583e0018d692d2795ceb61905e41466b3d699a"
+   "sha": "499f54f18a4fe52a678fdf97235a0082d56a61c4eeea5477cf544863f7b4f4d3"
   },
   {
    "id": "kk-lang-68-rb",
@@ -362,7 +362,7 @@
    "subject": "哈语",
    "title": "名词（第一课）(重构版)",
    "file": "lessons/kk-lang-67-rb.html",
-   "sha": "83a37076ff48470277ea7e0eacfb281725a4b050c9a33dd040a7d61732578caa"
+   "sha": "f0bc3648052366454041a71bad9bd26d58011e4df7cfb64b11a9b5780164ee70"
   }
  ]
 }
