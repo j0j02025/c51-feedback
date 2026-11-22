@@ -295,9 +295,16 @@ button:focus-visible{outline:3px solid var(--gold2);outline-offset:2px}
   #c51Rotate{display:inline-flex;margin:6px 0}
 }
 #player.c51-css-landscape,#player.c51-native-landscape{animation:none;overflow:hidden;background:#000}
-:is(.c51-css-landscape,.c51-native-landscape) :is(#bar,#pFix,#side,#dock){display:none}
+:is(.c51-css-landscape,.c51-native-landscape) :is(#bar,#pFix,#side){display:none}
 :is(.c51-css-landscape,.c51-native-landscape) #pbody{
-  position:absolute;flex-direction:column;overflow:hidden;background:#000}
+  position:absolute;flex-direction:row;overflow:hidden;background:#000}
+#lsRail{display:none}
+/* 横屏时右侧竖栏放「竖屏看 / 暂停并评论 / 通过」,不压在课件上(261121 J:竖屏看挡住中文、横屏没有通过和评论) */
+:is(.c51-css-landscape,.c51-native-landscape) #lsRail{display:flex;flex-direction:column;justify-content:center;gap:10px;
+  flex:0 0 120px;padding:8px calc(8px + var(--rotate-right)) 8px 8px;background:#171c24}
+:is(.c51-css-landscape,.c51-native-landscape) #lsRail #dock{display:flex;flex-direction:column;gap:10px;padding:0;border:0;background:none}
+:is(.c51-css-landscape,.c51-native-landscape) #lsBack{min-height:48px;font-size:13px;font-weight:700;color:#fff;background:#2b3442;padding:4px 6px;line-height:1.25}
+:is(.c51-css-landscape,.c51-native-landscape) #lsRail #dock button{flex:0 0 auto;min-height:56px;font-size:15px;padding:4px 6px}
 .c51-css-landscape #pbody{
   top:0;left:100%;width:100vh;height:100vw;width:100dvh;height:100dvw;
   transform-origin:top left;transform:rotate(90deg);
@@ -309,8 +316,8 @@ button:focus-visible{outline:3px solid var(--gold2);outline-offset:2px}
 :is(.c51-css-landscape,.c51-native-landscape) #stage{flex:1;width:100%;height:100%}
 :is(.c51-css-landscape,.c51-native-landscape) #lesson{position:absolute;inset:0;width:100%;height:100%}
 :is(.c51-css-landscape,.c51-native-landscape) #c51Rotate{
-  display:inline-flex;position:absolute;z-index:2;top:calc(8px + var(--rotate-top));
-  right:calc(8px + var(--rotate-right));margin:0;background:#171c24;color:#fff}
+  display:inline-flex;flex-direction:column;gap:2px;min-width:0;min-height:64px;padding:6px 4px;font-size:14px;
+  margin:0;background:#2b3442;color:#fff}
 :is(.c51-css-landscape,.c51-native-landscape) #c51Rotate .rotate-go{display:none}
 :is(.c51-css-landscape,.c51-native-landscape) #c51Rotate .rotate-back{display:inline}
 @keyframes rotSpin{to{transform:rotate(360deg)}}
@@ -340,6 +347,7 @@ button:focus-visible{outline:3px solid var(--gold2);outline-offset:2px}
       <span class="rotate-go" data-i="rotateLandscape"></span>
       <span class="rotate-back" data-i="rotatePortrait"></span>
     </button>
+    <div id="lsRail"><button id="lsBack" type="button" data-i="top">← 返回课程列表</button></div>
     <div id="side">
       <section id="history" aria-labelledby="historyTitle" hidden>
         <div class="sh" id="historyTitle" data-i="history"></div>
@@ -1041,6 +1049,18 @@ let rotationOptOut=false;
 let rotationDismissed=false;
 let rotationLock=null;
 
+// 横屏时把旋转键、评审按钮、评论框挪进旋转容器(容器带 transform,里面的 fixed 浮层也跟着转);回竖屏放回原位
+const rotateHome={btn:$("c51Rotate").nextSibling,dock:$("dock").nextSibling,ov:$("cmtOv").parentNode,ovNext:$("nameOv").nextSibling};
+$("lsBack").onclick=()=>$("bTop").click();
+function placeLandscapeControls(on){
+  const rail=$("lsRail"),pb=$("pbody"),btn=$("c51Rotate"),dock=$("dock");
+  if(on){
+    if(btn.parentNode!==rail){rail.append(btn,dock);pb.append($("cmtOv"),$("nameOv"))}
+  }else if(btn.parentNode===rail){
+    pb.insertBefore(btn,rotateHome.btn);rotationPlayer.insertBefore(dock,rotateHome.dock);
+    rotateHome.ov.insertBefore($("cmtOv"),rotateHome.ovNext);rotateHome.ov.insertBefore($("nameOv"),rotateHome.ovNext);
+  }
+}
 function syncRotation(){
   const active=rotationPlayer.classList.contains("on")&&!rotationOptOut;
   const useCss=active&&phonePortrait.matches;
@@ -1050,6 +1070,7 @@ function syncRotation(){
   // A failed transform restores the review layout and leaves the existing dialog as a fallback.
   const cssWorked=useCss&&getComputedStyle($("pbody")).transform!=="none";
   if(useCss&&!cssWorked)rotationPlayer.classList.remove("c51-css-landscape");
+  placeLandscapeControls(rotationPlayer.classList.contains("c51-css-landscape")||Boolean(native));
   const show=useCss&&!cssWorked&&!rotationDismissed&&!rotationLock;
   if(show&&!rotatePrompt.open)rotatePrompt.showModal();
   if(!show&&rotatePrompt.open)rotatePrompt.close();
