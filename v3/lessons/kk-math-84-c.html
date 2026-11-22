@@ -716,7 +716,7 @@ const SCENE_EVENTS=(()=>{const ev=[],add=(t,id,v=0)=>{if(t>=0&&t<AUDIO_DUR)ev.pu
  add(TW.ret,'swish',3);add(TW.k1,'scribble',0);add(TW.k2,'scribble',1);add(TW.k3,'scribble',2);add(TW.endTx,'chime');add(TW.wave,'bell',1);
  return ev.sort((p,q)=>p.t-q.t)})();
 
-const SFXCFG=Object.assign({ambience:'room'},TH.sfx||{});
+const SFXCFG=Object.assign({ambience:'room'},TH.sfx||{},{ambience:null});
 const ASR=44100,prng=seed=>{let x=seed>>>0||1;return()=>{x^=x<<13;x>>>=0;x^=x>>>17;x^=x<<5;x>>>=0;return x/4294967296}};
 function tone(o,dest,{type='sine',f0,f1,at=0,dur=.2,gain=.5,a=.003,lp,hp,q=.7}){
  const s=o.createOscillator(),g=o.createGain();s.type=type;s.frequency.setValueAtTime(f0,at);if(f1)s.frequency.exponentialRampToValueAtTime(f1,at+dur);
