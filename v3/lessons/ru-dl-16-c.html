@@ -893,7 +893,7 @@ Object.assign(RECIPES,{
 });
 Object.assign(LEN,{click:.06,key:.07});Object.assign(SFX_TRIM,{click:.5,key:.38});VARIANTS.add('click');VARIANTS.add('key');
 
-async function renderSfx(id,v=0){const o=new OfflineAudioContext(2,Math.ceil(LEN[id]*ASR),ASR);RECIPES[id](o,o.destination,v);const r=await o.startRendering();for(let c=0;c<2;c++){const d=r.getChannelData(c);for(let i=0;i<d.length;i++)d[i]=SFX_SAT(d[i]*SFX_TRIM[id])}return r}
+async function renderSfx(id,v=0){const o=new OfflineAudioContext(2,Math.ceil(LEN[id]*ASR),ASR);RECIPES[id](o,o.destination,v);const r=await o.startRendering();for(let c=0;c<2;c++){const d=r.getChannelData(c);for(let i=0;i<d.length;i++)d[i]*=SFX_TRIM[id]}return r}
 // 环境底音:20 秒循环噪声,首尾交叉淡化。room = 低通的室内空气声
 async function renderAmbience(kind){
  const o=new OfflineAudioContext(1,Math.ceil(21*ASR),ASR),s=o.createBufferSource(),f=o.createBiquadFilter(),f2=o.createBiquadFilter();s.buffer=noiseBuf(o,21,5151);f.type='bandpass';f.frequency.value=kind==='room'?320:620;f.Q.value=kind==='room'?.7:.55;f2.type='lowpass';f2.frequency.value=kind==='room'?900:1500;s.connect(f);f.connect(f2);f2.connect(o.destination);s.start(0);
@@ -902,18 +902,13 @@ async function renderAmbience(kind){
  return out;
 }
 function buildEvents(){return (typeof SCENE_EVENTS!=='undefined'?SCENE_EVENTS:[]).filter(e=>RECIPES[e.id]).map(e=>({t:+e.t.toFixed(4),id:e.id,v:e.v||0})).sort((x,y)=>x.t-y.t)}
-// ccc-011 (K 261121: effects at 90 % of the voice): each effect buffer is soft-saturated after its trim
-// (tanh, ceiling -1 dBFS) because short clicks cannot reach voice loudness by gain alone; bus gain per language.
-const SFX_DRIVE=20.0,SFX_CEIL=Math.pow(10,-1/20),SFX_SAT=x=>SFX_CEIL*Math.tanh(SFX_DRIVE*x/SFX_CEIL);
-const SFX_LANG={"ru": 0.795, "en": 0.786, "zh": 0.834};
-const SFXG=()=>SFX_LANG[(window.__lang&&window.__lang.cur)||LG]??(MIXG.sfx==null?.35:MIXG.sfx),AMBG=()=>MIXG.ambience==null?.05:MIXG.ambience;
+const SFXG=()=>MIXG.sfx==null?.35:MIXG.sfx,AMBG=()=>MIXG.ambience==null?.05:MIXG.ambience;
 let SBUF=null,EVENTS=[];
 const audioReady=(async()=>{if(!window.OfflineAudioContext)return false;try{EVENTS=buildEvents();const out={sfx:{},amb:SFXCFG.ambience?await renderAmbience(SFXCFG.ambience):null};for(const id of new Set(EVENTS.map(e=>e.id)))out.sfx[id]=await Promise.all((VARIANTS.has(id)?[0,1,2,3]:[0]).map(v=>renderSfx(id,v)));SBUF=out;return true}catch(e){console.log('AUDIO-SYNTH-FAIL',e&&e.message);return false}})();
 const sbuf=e=>{const a=SBUF.sfx[e.id];return a[e.v%a.length]};
 const live={ctx:null,master:null,sfx:null,amb:null,src:null,next:0,offset:null,done:false};
 function audioKick(){if(!window.AudioContext)return;if(!live.ctx){const c=live.ctx=new AudioContext({latencyHint:'interactive'});live.master=c.createGain();live.master.gain.value=0;live.master.connect(c.destination);live.sfx=c.createGain();live.sfx.gain.value=SFXG();live.sfx.connect(live.master);live.amb=c.createGain();live.amb.gain.value=0;syncAudioGates();live.amb.connect(live.master)}if(live.ctx.state!=='running')live.ctx.resume().catch(()=>{})}
 function audioTick(tt){
- {const g=SFXG();if(live.sfx&&Math.abs(live.sfx.gain.value-g)>1e-4)live.sfx.gain.value=g;}   // ccc-011: follows the language switch
  const c=live.ctx;if(!c||!SBUF||c.state!=='running')return;
  if(live.done&&tt<AUDIO_DUR){live.done=false;syncAudioGates()}
  if(SBUF.amb&&!live.src&&!narration.paused){const s=c.createBufferSource();s.buffer=SBUF.amb;s.loop=true;s.connect(live.amb);s.start();live.src=s;live.next=EVENTS.findIndex(e=>e.t>=tt);if(live.next<0)live.next=EVENTS.length}
@@ -1071,8 +1066,6 @@ const ICON=PAPER?{
  fsx:`<path ${S} d="M9.1 4.4c0 1.5.1 3-.1 4.6-1.5.2-3 .1-4.6.2M19.6 9.1c-1.6 0-3.1.1-4.6-.1-.2-1.5-.1-3-.2-4.6M14.9 19.6c0-1.5-.1-3 .1-4.6 1.5-.2 3-.1 4.6-.2M4.4 14.9c1.6 0 3.1-.1 4.6.1.2 1.5.1 3 .2 4.6"/>`,
  down:`<path ${S} d="M6.2 9.3c2 1.9 3.9 3.9 5.9 5.8 1.9-2 3.8-4 5.8-5.9"/>`,
  up:`<path ${S} d="M6.2 14.7c2-1.9 3.9-3.9 5.9-5.8 1.9 2 3.8 4 5.8 5.9"/>`,
- sprev:`<path ${S} d="M14.6 5.8c-2 2.1-4 4.1-6 6.2 2 2 4.1 4 6.1 6.1"/><path ${S} d="M18.1 7.9c-.1 2.7.1 5.4-.1 8.2"/>`,
- snext:`<path ${S} d="M9.4 5.8c2 2.1 4 4.1 6 6.2-2 2-4.1 4-6.1 6.1"/><path ${S} d="M5.9 7.9c.1 2.7-.1 5.4.1 8.2"/>`,
 }:{
  play:`<path ${F} d="M8 5.6v12.8a1.2 1.2 0 0 0 1.8 1l10-6.4a1.2 1.2 0 0 0 0-2l-10-6.4A1.2 1.2 0 0 0 8 5.6z"/>`,
  pause:`<rect ${F} x="6" y="5" width="4.6" height="14" rx="1.6"/><rect ${F} x="13.4" y="5" width="4.6" height="14" rx="1.6"/>`,
