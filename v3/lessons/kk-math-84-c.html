@@ -26,7 +26,9 @@ html[data-chrome=flat] .title{text-shadow:none;letter-spacing:0;max-width:38vw;f
 html[data-chrome=flat] .badge{background:transparent;border:none;box-shadow:none;padding:0}
 #audioStatus:not(:empty){position:absolute;top:16%;left:50%;transform:translateX(-50%);background:#fff;padding:8px;border:2px solid var(--ink);z-index:4}
 img[data-slot]{display:none}
-</style></head>
+</style>
+<style id="c51-no-bgm">[data-cv-ctl=bgm],#bgmToggle,#bgmBtn,#music{display:none!important}</style>
+</head>
 <body><div class="stage"><main class="card"><canvas id="c" width="1920" height="1080"></canvas><div class="top"><div><div class="title" id="title"></div><div class="sub" id="sub"></div></div><div class="badge" id="timer"></div></div><div id="soundHint" hidden></div><div class="bottom"><div class="lang" id="lang"></div><div class="caption" id="caption"></div></div><video id="narration" preload="auto" playsinline style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none"></video><div id="audioStatus" aria-hidden="true"></div></main></div>
 <!-- 位图槽:build.py 把 img/<slot>.png 内嵌成 data URI;没有图时 src 为空,场景画占位色块 -->
 
@@ -1062,7 +1064,7 @@ paint();
 const R0=window.render;window.render=s=>{if(document.documentElement.classList.contains('cv-on')){bar.remove();rp.remove();st.remove();document.documentElement.classList.remove('cv-on','cv-min')}return R0(s)};
 window.__cvControls={segments:SEG.slice(),version:1};
 })();
-</script>
+</script><script>if(typeof setBgm==="function"){setBgm(false);setBgm=function(){}}</script>
 <!-- controls:end -->
 <!-- lang4:begin -->
 <script>

@@ -31,6 +31,7 @@ figure{margin:0;background:#234941;overflow:hidden;border-radius:12px;box-shadow
 audio{display:none}
 @media(max-width:730px){.heading small,#ai{display:none}.controls{gap:4px}button{padding:4px 5px}footer{flex-wrap:wrap}}
 </style>
+<style id="c51-no-bgm">[data-cv-ctl=bgm],#bgmToggle,#bgmBtn,#music{display:none!important}</style>
 </head>
 <body>
 <main>
@@ -124,7 +125,7 @@ let captureBounds = false;
 let lastState;
 let lang = locales.includes(query.get('lang')) ? query.get('lang') : 'kk';
 let ready = false, heldTime = null, switchEpoch = 0, silentStart = false, master = true;
-let music = query.get('bgm') === '1';
+let music = false;
 let soundContext, SBUF, mixBus, previousT = -1;
 let debugCaptions = true;
 

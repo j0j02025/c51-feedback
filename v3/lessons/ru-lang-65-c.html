@@ -76,7 +76,9 @@ html[data-capture] #cvBar,html[data-capture] #cvReplay{display:none}
  #caption canvas{width:76%;height:72%;inset:14% 12%}
  #caption[lang=zh] span{width:76%}
 }
-</style></head><body>
+</style>
+<style id="c51-no-bgm">[data-cv-ctl=bgm],#bgmToggle,#bgmBtn,#music{display:none!important}</style>
+</head><body>
 <div id="languages" data-cv-controls role="group" aria-label="Язык">
 <button type="button" data-cv-ctl="lang" data-lang="ru" data-paper lang="ru" aria-pressed="true">Рус</button>
 <button type="button" data-cv-ctl="lang" data-lang="en" data-paper lang="en" aria-pressed="false">Eng</button>
@@ -36600,7 +36602,7 @@ void main() {
   bgm.muted = true;
   bgm.style.display = "none";
   document.body.appendChild(bgm);
-  var bgmOn = new URLSearchParams(location.search).get("bgm") === "1";
+  var bgmOn = false;
   window.__state = () => ({ bgm_on: bgmOn, muted: media.muted, lang });
   function syncBgm() {
     const audible = bgmOn && !media.muted;
