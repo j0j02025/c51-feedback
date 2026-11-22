@@ -323,6 +323,38 @@
    "title": "名词（第二课）",
    "file": "lessons/kk-lang-68-c.html",
    "sha": "a533f8221e0145aac10bafcd7bfe339af8de27bc803f5ee6b79596a26bff82a0"
+  },
+  {
+   "id": "ru-lang-66-rb",
+   "no": 66,
+   "subject": "俄语",
+   "title": "基数词与序数词的拼写（第一课）｜瀑布(重构版)",
+   "file": "lessons/ru-lang-66-rb.html",
+   "sha": "ece1626f5b2ca909a1df5311f9e9df2fe93af4d162924c98e0be81ec89db2469"
+  },
+  {
+   "id": "ru-lang-67-rb",
+   "no": 67,
+   "subject": "俄语",
+   "title": "基数词与序数词的拼写（第二课）｜瀑布(重构版)",
+   "file": "lessons/ru-lang-67-rb.html",
+   "sha": "b49e96223a083e264f875d8cd1391bb3e1a04b5c06b9933cdf6b1d8e50cb5cae"
+  },
+  {
+   "id": "kk-lang-68-rb",
+   "no": 68,
+   "subject": "哈语",
+   "title": "名词（第二课）(重构版)",
+   "file": "lessons/kk-lang-68-rb.html",
+   "sha": "a533f8221e0145aac10bafcd7bfe339af8de27bc803f5ee6b79596a26bff82a0"
+  },
+  {
+   "id": "math-82-rb",
+   "no": 82,
+   "subject": "哈语数学",
+   "title": "单位面积产量（新知）(重构版 · 哈俄合一)",
+   "file": "lessons/math-82-rb.html",
+   "sha": "2f9eeb33d8766f466d583a257a5d6bd833102b697bdb5e1957dc1268b21aaf4a"
   }
  ]
 }
