@@ -674,10 +674,10 @@ Object.assign(RECIPES,{
  confetti(o,d){for(let i=0;i<10;i++)tone(o,d,{f0:900+((i*373)%900),at:i*.045,dur:.06,gain:.11,a:.002,type:'triangle'})},
  brush(o,d){burst(o,d,{dur:1.2,gain:.2,type:'bandpass',f:1400,f1:2200,q:1.4,a:.1,seed:360})},
  compass(o,d){burst(o,d,{dur:1.8,gain:.16,type:'bandpass',f:2600,f1:3400,q:2.2,a:.1,seed:370})},
- cdTick(o,d){burst(o,d,{dur:.035,gain:.5,type:'bandpass',f:2200,q:1.6,a:.001,seed:380});tone(o,d,{f0:988,dur:.13,gain:.62,a:.002,type:'triangle'});tone(o,d,{f0:1976,dur:.07,gain:.14,a:.002})},
- cdEnd(o,d){tone(o,d,{f0:1319,dur:.42,gain:.5,a:.004,type:'triangle'});tone(o,d,{f0:1760,dur:.42,gain:.42,a:.004,type:'triangle'});tone(o,d,{f0:2637,dur:.22,gain:.1,a:.003})}
+ cdTick(o,d){burst(o,d,{dur:.035,gain:.3,type:'bandpass',f:2200,q:1.6,a:.001,seed:380});tone(o,d,{f0:988,dur:.34,gain:.9,a:.002,type:'triangle'});tone(o,d,{f0:1976,dur:.2,gain:.12,a:.002})},
+ cdEnd(o,d){tone(o,d,{f0:1319,dur:.42,gain:.55,a:.004,type:'triangle'});tone(o,d,{f0:1760,dur:.42,gain:.46,a:.004,type:'triangle'});tone(o,d,{f0:2637,dur:.22,gain:.11,a:.003})}
 });
-Object.assign(LEN,{step:.12,paper:1.3,tape:1.4,drop:.26,tick:.05,whoosh:.6,splash:.32,sparkle:.55,confetti:.55,brush:1.3,compass:1.9,cdTick:.16,cdEnd:.46});
+Object.assign(LEN,{step:.12,paper:1.3,tape:1.4,drop:.26,tick:.05,whoosh:.6,splash:.32,sparkle:.55,confetti:.55,brush:1.3,compass:1.9,cdTick:.4,cdEnd:.46});
 Object.assign(SFX_TRIM,{step:.5,paper:.55,tape:.45,drop:.55,tick:.45,whoosh:.45,splash:.5,sparkle:.4,confetti:.5,brush:.4,compass:.4,cdTick:.5,cdEnd:.5});
 ['step','drop','tick','whoosh','splash','sparkle','pop'].forEach(x=>VARIANTS.add(x));
 
@@ -691,6 +691,7 @@ async function renderAmbience(kind){
 }
 function buildEvents(){return (typeof SCENE_EVENTS!=='undefined'?SCENE_EVENTS:[]).filter(e=>RECIPES[e.id]).map(e=>({t:+e.t.toFixed(4),id:e.id,v:e.v||0})).sort((x,y)=>x.t-y.t)}
 const SFXG=()=>MIXG.sfx==null?.35:MIXG.sfx,AMBG=()=>MIXG.ambience==null?.05:MIXG.ambience;
+const CD_LV={kk:2.118,en:1.967,zh:2.22}; // countdown only: 75% of each voice (t2917; other sfx untouched)
 let SBUF=null,EVENTS=[];
 const audioReady=(async()=>{if(!window.OfflineAudioContext)return false;try{EVENTS=buildEvents();const out={sfx:{},amb:SFXCFG.ambience?await renderAmbience(SFXCFG.ambience):null};for(const id of new Set(EVENTS.map(e=>e.id)))out.sfx[id]=await Promise.all((VARIANTS.has(id)?[0,1,2,3]:[0]).map(v=>renderSfx(id,v)));SBUF=out;return true}catch(e){console.log('AUDIO-SYNTH-FAIL',e&&e.message);return false}})();
 const sbuf=e=>{const a=SBUF.sfx[e.id];return a[e.v%a.length]};
@@ -705,12 +706,12 @@ function audioTick(tt){
  const off=c.currentTime-narration.currentTime;
  if(live.offset===null||Math.abs(off-live.offset)>.25){live.offset=off;live.next=EVENTS.findIndex(e=>e.t>=tt);if(live.next<0)live.next=EVENTS.length}else live.offset=live.offset*.92+off*.08;
  const now=c.currentTime-live.offset;
- while(live.next<EVENTS.length&&TMAP.s2a(EVENTS[live.next].t)<now+.16){const e=EVENTS[live.next++],ea=TMAP.s2a(e.t);if(ea<now-.03)continue;const s=c.createBufferSource();s.buffer=sbuf(e);s.connect(live.sfx);s.start(Math.max(c.currentTime,ea+live.offset))}
+ while(live.next<EVENTS.length&&TMAP.s2a(EVENTS[live.next].t)<now+.16){const e=EVENTS[live.next++],ea=TMAP.s2a(e.t);if(ea<now-.03)continue;const s=c.createBufferSource();s.buffer=sbuf(e);let n=s;if(e.id==='cdTick'||e.id==='cdEnd'){n=c.createGain();n.gain.value=CD_LV[window.__lang?window.__lang.cur:LG]??1;s.connect(n)}n.connect(live.sfx);s.start(Math.max(c.currentTime,ea+live.offset))}
 }
 // 离线渲染:templates/mix_calibrate.py 用,和实时走同一批缓冲区、同一个事件表
 window.__renderStems=async(unity=true)=>{
  await audioReady;const len=Math.ceil((AUDIO_DUR+2)*ASR),enc=r=>{const a=r.getChannelData(0),b=r.getChannelData(1),f=new Float32Array(len>>1);for(let i=0;i<f.length;i++)f[i]=(a[2*i]+a[2*i+1]+b[2*i]+b[2*i+1])/4;let bin='';const u=new Uint8Array(f.buffer);for(let i=0;i<u.length;i+=32768)bin+=String.fromCharCode.apply(null,u.subarray(i,i+32768));return btoa(bin)};
- const o1=new OfflineAudioContext(2,len,ASR),g1=o1.createGain();g1.gain.value=unity?1:SFXG();g1.connect(o1.destination);for(const e of EVENTS){const s=o1.createBufferSource();s.buffer=sbuf(e);s.connect(g1);s.start(e.t)}
+ const o1=new OfflineAudioContext(2,len,ASR),g1=o1.createGain();g1.gain.value=unity?1:SFXG();g1.connect(o1.destination);for(const e of EVENTS){const s=o1.createBufferSource();s.buffer=sbuf(e);let n=s;if(!unity&&(e.id==='cdTick'||e.id==='cdEnd')){n=o1.createGain();n.gain.value=CD_LV[window.__lang?window.__lang.cur:LG]??1;s.connect(n)}n.connect(g1);s.start(e.t)}
  const o2=new OfflineAudioContext(2,len,ASR),g2=o2.createGain();g2.gain.value=unity?1:AMBG();g2.connect(o2.destination);const a=o2.createBufferSource();if(SBUF.amb){a.buffer=SBUF.amb;a.loop=true;a.connect(g2);a.start(0)}
  return{sr:ASR/2,len:len>>1,sfx:enc(await o1.startRendering()),ambience:enc(await o2.startRendering())};
 };
