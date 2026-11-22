@@ -36453,14 +36453,32 @@ void main() {
       return ctx;
     } };
   }
-  function stepEvents(cues) {
+  // ccc-031.1 (review #34 at 00:15): every footfall used to get a thud, 5-9 a second during the narration, so several stacked in each
+  // 400 ms loudness window and the walk read at about the voice's loudness. Now a footfall gets a sound only if it is >= STEP_GAP s
+  // after the last one that got one, on the voice clock of every language, so no window holds two. Kept sounds stay on their footfall.
+  var STEP_GAP = 0.5;
+  function stepEvents(cues, timeline2, tracks2) {
     const out = [];
+    const langs = Object.keys(tracks2 || {}).filter((l) => l !== "ru");
+    const voiceAt = (l, t) => {
+      const lines = timeline2.lines, tr = tracks2[l];
+      let i = 0;
+      while (i + 1 < lines.length && lines[i + 1].start <= t) i++;
+      return tr.starts[i] + (t - lines[i].start) * tr.lengths[i] / lines[i].duration;
+    };
+    const farEnough = (t, last) => last === null || (t - last >= STEP_GAP && langs.every((l) => voiceAt(l, t) - voiceAt(l, last) >= STEP_GAP));
+    let last = null;
     for (const c of cues) {
       if (c.clip !== "walk" && c.clip !== "run" || !c.cycles) continue;
       const n49 = c.cycles * 2;
       // ccc-019: footfalls follow the eased travel (travelPhase), so each step sound lands with its foot
       const inv = (f) => f < 1 / 6 ? Math.sqrt(0.375 * f) : f > 5 / 6 ? 1 - Math.sqrt(0.375 * (1 - f)) : 0.75 * f + 0.125;
-      for (let k = 0; k < n49; k++) out.push({ t: +(c.start + inv((k + 0.5) / n49) * (c.end - c.start)).toFixed(3), id: "step", v: k % 4 });
+      for (let k = 0; k < n49; k++) {
+        const t = +(c.start + inv((k + 0.5) / n49) * (c.end - c.start)).toFixed(3);
+        if (!farEnough(t, last)) continue;
+        last = t;
+        out.push({ t, id: "step", v: k % 4 });
+      }
     }
     return out;
   }
@@ -36634,7 +36652,7 @@ void main() {
   var actor = null;
   var actorCanvas = byId("actor");
   var blocking = makeBlocking(actions, timeline);
-  var sound = makeSound([...sceneEvents(timeline), ...stepEvents(blocking.cues)]);
+  var sound = makeSound([...sceneEvents(timeline), ...stepEvents(blocking.cues, timeline, tracks)]);
   window.EVENTS = sound.EVENTS;
   sound.ready.then((ok2) => {
     window.SBUF = ok2 ? true : null;
