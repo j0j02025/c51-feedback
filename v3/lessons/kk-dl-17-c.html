@@ -209,13 +209,25 @@ function TWm(s,px,w=700,f=FX){fnt(px,w,f);return ctx.measureText(s).width}
 function fitPx(s,px,maxW,w=700,f=FX){const tw=TWm(s,px,w,f);return tw>maxW?Math.max(22,Math.floor(px*maxW/tw)):px}
 // windows cover what is beneath them: text and photos under an open window are not drawn (UNDER = drawing a lower layer)
 // layers: each open window covers lower layers (LV = layer being drawn; COV = window rects with their layer)
-let COV=[],LV=9;
+let COV=[],LV=9,FLYING=[];
+const screenTextSize=px=>Math.max(px,Math.ceil(21/Math.min(1,ctx.getTransform().a)));
 function covered(x,y,w,h){if(!COV.length)return false;const m=ctx.getTransform(),X=m.a*x+m.e,Y=m.d*y+m.f,Wd2=w*m.a,Hd=h*m.d;const A=Math.abs(Wd2*Hd)||1;return COV.some(r=>{if(r.lv<=LV)return false;const iw=Math.min(X+Wd2,r.x+r.w)-Math.max(X,r.x),ih=Math.min(Y+Hd,r.y+r.h)-Math.max(Y,r.y);return iw>0&&ih>0&&iw*ih/A>.15})}
-function tx(s,x,y,px,c=C.inkD,al='center',w=700,f=FX){if(!s)return 0;px=Math.max(px,21);fnt(px,w,f);const tw=ctx.measureText(s).width,x0=al==='left'?x:al==='right'?x-tw:x-tw/2;if(covered(x0,y-px*.55,tw,px*1.1))return tw;ctx.textAlign=al;ctx.textBaseline='middle';ctx.fillStyle=c;ctx.fillText(s,x,y);
+function tx(s,x,y,px,c=C.inkD,al='center',w=700,f=FX){if(!s)return 0;px=screenTextSize(px);fnt(px,w,f);const tw=ctx.measureText(s).width,x0=al==='left'?x:al==='right'?x-tw:x-tw/2;if(covered(x0,y-px*.55,tw,px*1.1)||underFlyingCard(x0,y,tw,px))return tw;ctx.textAlign=al;ctx.textBaseline='middle';ctx.fillStyle=c;ctx.fillText(s,x,y);
  const m=ctx.getTransform();
  TBX.push({x:m.a*x0+m.e,y:m.d*(y-px*.55)+m.f,w:tw*m.a,h:px*1.1*m.d,s});return tw}
+function underFlyingCard(x,y,w,h){
+ if(!FLYING.length)return false;
+ const m=ctx.getTransform(), left=m.a*x+m.e, right=left+m.a*w;
+ const cy=m.d*y+m.f, halfH=m.d*h*.55;
+ return FLYING.some(f=>left<f.x+CARD_W/2&&right>f.x-CARD_W/2&&cy-halfH<f.y+CARD_H/2&&cy+halfH>f.y-CARD_H/2);
+}
 const ux=(s,x,y,px,c=C.uiInk,al='left',w=500)=>tx(s,x,y,px,c,al,w,UF);
 function sg(x1,y1,x2,y2,c,w,cap='round'){ctx.strokeStyle=c;ctx.lineWidth=w;ctx.lineCap=cap;ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke()}
+function focusFill(x,y,w,h,k,color){
+ if(k<=0)return;
+ ctx.fillStyle='#edf4ff';ctx.fillRect(x,y,w,h);
+ ctx.fillStyle=color;ctx.fillRect(x,y,w*cl(k),h);
+}
 function dashR(x,y,w,h,c,lw=3,d=[10,8],off=0){ctx.save();ctx.setLineDash(d);ctx.lineDashOffset=off;ctx.strokeStyle=c;ctx.lineWidth=lw;ctx.strokeRect(x,y,w,h);ctx.restore()}
 function disc(x,y,r,c){ctx.fillStyle=c;ctx.beginPath();ctx.arc(x,y,r,0,TAU);ctx.fill()}
 function ring(x,y,r,c,w){ctx.strokeStyle=c;ctx.lineWidth=w;ctx.beginPath();ctx.arc(x,y,r,0,TAU);ctx.stroke()}
@@ -304,11 +316,11 @@ function drawExplorer(tt){const st=exState(tt),{x,y,w,h}=EXW;winChrome(x,y,w,h,'
 const NP={x:SX+230,y:SY+170,w:720,h:250};
 function npSel(tt){// selection grows with the drag: line 1 first (cursor runs down the left margin), then along under line 2
  const k=K(T.selA+.15,T.selB-T.selA-.15,tt);return{l1:cl(k*2.2),l2:cl(k*2.2-1.2)}}
-function drawNotepad(tt){const op=K(T.dbl2+.1,.25,tt)*(1-K(T.npClose,.3,tt));if(op<=0)return;const lift=tt>=T.lift;ctx.save();ctx.globalAlpha*=op;const {x,y,w,h}=NP;
+function drawNotepad(tt){const op=K(T.dbl2+.1,.25,tt)*(1-K(T.npClose,.3,tt));if(op<=0)return;ctx.save();ctx.globalAlpha*=op;const {x,y,w,h}=NP;
  winChrome(x,y,w,h,TXT.txt+' — Блокнот',tt,'doc');const L1=TXT.b1,L2=TXT.b2,lx=x+30,y1=y+82,y2=y+130;
- const s=npSel(tt),w1=TWm(L1,26,500,UF),w2=TWm(L2,26,500,UF),cardK=K(T.lift,.35,tt);
- if(!lift||cardK<1){ctx.save();ctx.globalAlpha*=1-cardK;if(s.l1>0)ctx.fillStyle='rgba(159,208,172,.85)',ctx.fillRect(lx-3,y1-19,(w1+6)*s.l1,38);if(s.l2>0)ctx.fillStyle='rgba(159,208,172,.85)',ctx.fillRect(lx-3,y2-19,(w2+6)*s.l2,38);
-  ux(L1,lx,y1,26,C.uiInk,'left',500);ux(L2,lx,y2,26,C.uiInk,'left',500);ctx.restore()}
+ const s=npSel(tt),w1=TWm(L1,26,500,UF),w2=TWm(L2,26,500,UF);
+ if(tt<=T.lift){if(s.l1>0)ctx.fillStyle='rgba(159,208,172,.85)',ctx.fillRect(lx-3,y1-19,(w1+6)*s.l1,38);if(s.l2>0)ctx.fillStyle='rgba(159,208,172,.85)',ctx.fillRect(lx-3,y2-19,(w2+6)*s.l2,38);
+  ux(L1,lx,y1,26,C.uiInk,'left',500);ux(L2,lx,y2,26,C.uiInk,'left',500)}
  ctx.restore()}
 // ---------- image viewer (sentences 8–9) ----------
 const VW={x:SX+150,y:SY+70,w:776,h:450};
@@ -317,7 +329,7 @@ function drawViewer(tt){const op=K(T.dbl3+.1,.3,tt)*(1-K(T.vClose+.05,.25,tt));i
  const p=VPH();if(tt<T.vClose+.1&&ready('dombra'))ctx.drawImage(ICON.dombra,p.x,p.y,p.w,p.h);ctx.restore()}
 // ---------- start menu (sentence 10) ----------
 function drawStart(tt){const k=K(T.start,.25,tt)*(1-K(T.ppOpen,.2,tt));if(k<=0)return;const x=SX+8,y=SY1-44-300*eo(k),h=300*eo(k);ctx.save();ctx.beginPath();ctx.rect(x-10,SY,400,SY1-44-SY);ctx.clip();
- panel(x,y,360,300,10,'rgba(246,248,252,.98)','#a9b6c9',1.5);ux('Іздеу',x+52,y+32,20,'#8b95a5','left',400);icoMag(x+28,y+32);sg(x+16,y+56,x+344,y+56,C.winLine,1);
+ panel(x,y,360,h,10,'rgba(246,248,252,.98)','#a9b6c9',1.5);ux('Іздеу',x+52,y+32,20,'#8b95a5','left',400);icoMag(x+28,y+32);sg(x+16,y+56,x+344,y+56,C.winLine,1);
  const it=[['p','PowerPoint'],['f','Файл шолғышы'],['d','Блокнот']];it.forEach(([ic,s],j)=>{const iy=y+96+j*60;if(j===0&&tt>=T.pp-.45)rrect(x+12,iy-24,336,48,8,C.sel,null);
   if(ic==='p')icoP(x+40,iy,1);else if(ic==='f')icoFolder(x+40,iy,1);else icoDoc(x+40,iy,.9);ux(s,x+72,iy,22,C.uiInk,'left',500)});
  if(tt>=T.pp-.45)gframe(x+12,y+72,336,48,K(T.pp-.45,.2,tt),tt);ctx.restore()}
@@ -329,34 +341,102 @@ function drawPptStart(tt){const k=K(T.ppOpen,.3,tt);if(k<=0)return;ctx.save();ct
  ux('Бос презентация',tl[0].x+120,y+272,21,C.uiInk,'center',600);ux('Тақырып',tl[1].x+120,y+272,21,C.uiInk,'center',500);
  if(tt>=T.blank)gframe(tl[0].x,tl[0].y,240,136,K(T.blank,.25,tt),tt);ctx.restore()}
 // ---------- PowerPoint editor ----------
+const PPT_CHROME='#b7472a', PPT_BAR=44, RIBBON_EXTRA=30;
+const EDIT_SCALE=(SH-PPT_BAR)/(SH+RIBBON_EXTRA), EDIT_MID=SX+SW/2;
+const EDIT_LEFT=EDIT_MID+(SX-EDIT_MID)/EDIT_SCALE, EDIT_WIDTH=SW/EDIT_SCALE;
+const NEW_SLIDE_X=EDIT_LEFT+12, NEW_SLIDE_W=194;
+const editX=x=>EDIT_MID+(x-EDIT_MID)*EDIT_SCALE;
+// Leave room for the taller ribbon, then scale the workspace uniformly to keep slides 16:9.
+function editY(y){
+ const ribbonOffset=10*cl((y-SY-78)/10)+(RIBBON_EXTRA-10)*cl((y-SY-120)/10);
+ return SY+(y-SY+ribbonOffset)*EDIT_SCALE;
+}
+function drawPptTaskbar(){
+ const y=SY1-PPT_BAR;
+ ctx.fillStyle='#283448';ctx.fillRect(SX,y,SW,PPT_BAR);
+ rrect(SX+8,y+5,106,34,8,'#465266',null);
+ ctx.fillStyle='#8fc3ff';
+ for(const [dx,dy] of [[16,11],[27,11],[16,22],[27,22]])ctx.fillRect(SX+dx,y+dy,9,9);
+ ux('Бастау',SX+43,y+22,21,'#ffffff','left',700);
+ icoFolder(SX+144,y+22,1);
+ icoP(SX+192,y+22,1.05);
+ sg(SX+179,y+41,SX+205,y+41,'#8fc3ff',3);
+ ux('ҚАЗ',SX1-204,y+22,21,'#ffffff','center',700);
+ ux('09:00',SX1-88,y+12,21,'#ffffff','center',700);
+ ux('21.11.2026',SX1-88,y+33,21,'#e5ecf6','center',400);
+}
 const TABS=[['file','Файл'],['home','Басты'],['ins','Кірістіру'],['des','Құрастыру'],['ani','Анимациялар'],['trn','Ауысулар'],['sl','Көрсетілім']];
-let TABX=null;function tabX(){if(TABX)return TABX;TABX={};let x=SX+20;for(const[id,s]of TABS){const w=TWm(s,21,600,UF);TABX[id]={x,w};x+=w+32}return TABX}
+let TABX=null;function tabX(){if(TABX)return TABX;TABX={};let x=EDIT_LEFT+20;for(const[id,s]of TABS){const w=TWm(s,21,600,UF);TABX[id]={x,w};x+=w+32}return TABX}
 function actTab(tt){if(tt>=T.slTab)return'sl';if(tt>=T.file&&tt<T.browse+.2)return'file';if(tt>=T.browse+.2)return'home';if(tt>=T.trn)return'trn';if(tt>=T.ani)return'ani';if(tt>=T.des)return'des';if(tt>=T.ins)return'ins';return'home'}
 const BTN=(x,y,w,h,s,tt,{icon=null,hot=null,fill='#ffffff',px=20,al='c'}={})=>{rrect(x,y,w,h,6,fill,'#c7ccd4',1.5);let tx0=x+w/2;if(icon){icon(x+22,y+h/2);tx0=x+40+(w-40)/2}ux(s,tx0,y+h/2,px,C.uiInk,'center',500);if(hot!=null)gframe(x,y,w,h,hot,tt)};
 const curStyle=tt=>tt<T.thm?0:tt<T.var?1:2;
-function drawRibbon(tt){const a=actTab(tt),y=SY+78;
- if(a==='home'){BTN(640,y+2,170,44,'Жаңа слайд',tt,{icon:(x,yy)=>{rrect(x-11,yy-9,22,18,2,'#ffffff','#7c8796',1.5);ctx.fillStyle=C.ppt;ctx.fillRect(x-7,yy-5,14,3)},hot:tt>=T.newS-.3&&tt<T.lay+.1?K(T.newS-.3,.2,tt):0})}
- else if(a==='ins'){BTN(640,y+2,130,44,'Сурет',tt,{icon:(x,yy)=>icoPic(x,yy,.85),hot:tt>=T.pic-.25&&tt<T.fdlg+.1?K(T.pic-.25,.2,tt):0});BTN(786,y+2,170,44,'Мәтін өрісі',tt)}
- else if(a==='des'){for(let i=0;i<4;i++){const x=640+i*96;rrect(x,y+2,86,44,5,['#ffffff','#fbf7ee','#eef3fa','#2d3540'][i],'#c7ccd4',1.5);ctx.fillStyle=['#9aa3ad','#1f7a6a','#2b5797','#f3c94f'][i];if(i===1)ctx.fillRect(x+4,y+6,7,36);else ctx.fillRect(x+16,y+16,54,5);ctx.fillStyle='#b9c0c8';ctx.fillRect(x+16,y+28,40,4)}
-  if(tt>=T.thm-.45)gframe(736,y+2,86,44,K(T.thm-.45,.2,tt)*(1-K(T.var-.6,.3,tt)),tt);
+function drawRibbon(tt){
+ const a=actTab(tt), top=SY+78, h=52+RIBBON_EXTRA;
+ ctx.fillStyle='#f7f7f8';ctx.fillRect(EDIT_LEFT,top,EDIT_WIDTH,h);
+ sg(EDIT_LEFT,top+h,EDIT_LEFT+EDIT_WIDTH,top+h,'#d9dce3',1.5);
+ const divider=x=>sg(x,top+9,x,top+h-9,'#d9dce3',1.5);
+ if(a==='home'){
+  const x=NEW_SLIDE_X,w=NEW_SLIDE_W;
+  rrect(x,top+4,w,54,6,'#ffffff','#dde1e8',1.2);
+  rrect(x+w/2-15,top+11,30,19,3,'#ffffff','#8a93a5',1.5);
+  rrect(x+w/2-10,top+15,20,4,2,PPT_CHROME,null);
+  ux('Жаңа слайд',x+w/2,top+44,21,C.uiInk,'center',700);
+  ux('Слайдтар',x+w/2,top+69,21,C.uiMute,'center',500);
+  if(tt>=T.newS-.3&&tt<T.lay+.1)gframe(x,top+4,w,54,K(T.newS-.3,.2,tt),tt);
+  for(const [i,label] of ['Қаріп','Абзац'].entries()){
+   const left=x+w+i*151;
+   divider(left+6);
+   for(let j=0;j<3;j++)rrect(left+19+j*42,top+18,34,30,4,'#eceef2','#d9dce3',1.2);
+   ux(label,left+78,top+69,21,C.uiMute,'center',500);
+  }
+  return;
+ }
+ const y=top+10;
+ if(a==='ins'){BTN(640,y+2,130,44,'Сурет',tt,{icon:(x,yy)=>icoPic(x,yy,.85),hot:tt>=T.pic-.25&&tt<T.fdlg+.1?K(T.pic-.25,.2,tt):0});BTN(786,y+2,170,44,'Мәтін өрісі',tt)}
+ else if(a==='des'){divider(1024);for(let i=0;i<4;i++){const x=640+i*96;rrect(x,y+2,86,44,5,['#ffffff','#fbf7ee','#eef3fa','#2d3540'][i],'#c7ccd4',1.5);ctx.fillStyle=['#9aa3ad','#1f7a6a','#2b5797','#f3c94f'][i];if(i===1)ctx.fillRect(x+4,y+6,7,36);else ctx.fillRect(x+16,y+16,54,5);ctx.fillStyle='#b9c0c8';ctx.fillRect(x+16,y+28,40,4)}
+  // Aisha moves from the current theme to the one she will apply, then to its variants.
+  const themeFocus=K(T.des+.2,T.thm-T.des-.2,tt);
+  if(tt>=T.des+.2&&tt<T.var){
+   const focusX=lerp(640,736,sm(themeFocus));
+   ctx.save();ctx.globalAlpha*=1-K(T.var-.25,.25,tt);
+   ctx.fillStyle='rgba(60,123,224,.30)';ctx.fillRect(focusX,y+2,86,44);
+   ctx.strokeStyle='#3c7be0';ctx.lineWidth=5;ctx.strokeRect(focusX-3,y-1,92,50);
+   ctx.fillStyle='#3c7be0';ctx.fillRect(focusX,y+47,86*themeFocus,4);
+   ctx.restore();
+  }
   ux('Нұсқалар',1060,y+24,20,C.uiMute,'left',600);for(let i=0;i<4;i++)disc(1180+i*44,y+24,15,['#2b5797','#1f7a6a','#7a4e9c','#c4532c'][i]);
-  if(tt>=T.var-.45){const k=K(T.var-.45,.2,tt);ctx.save();ctx.globalAlpha*=k;ctx.shadowColor=C.goldF;ctx.shadowBlur=14;ring(1224,y+24,21,C.goldF,4);ctx.restore()}}
- else if(a==='ani'){BTN(640,y+2,90,44,'Жоқ',tt);BTN(742,y+2,150,44,'Пайда болу',tt,{hot:tt>=T.appear-.35?K(T.appear-.35,.2,tt):0,fill:tt>=T.appear?'#fde6db':'#ffffff'});BTN(904,y+2,140,44,'Ұшып кіру',tt);
+  if(tt>=T.var-.45){
+   const k=K(T.var-.45,.45,tt);
+   ring(lerp(1180,1224,sm(k)),y+24,21,'#3c7be0',5);
+  }}
+ else if(a==='ani'){divider(1057);BTN(640,y+2,90,44,'Жоқ',tt);BTN(742,y+2,150,44,'Пайда болу',tt,{hot:tt>=T.appear-.35?K(T.appear-.35,.2,tt):0,fill:tt>=T.appear?'#fde6db':'#ffffff'});BTN(904,y+2,140,44,'Ұшып кіру',tt);
   ux('Бастау:',1070,y+24,20,C.uiMute,'left',600);rrect(1150,y+4,260,40,5,'#ffffff','#9aa7ba',1.5);ux(tt>=T.onclk?'Шерткенде':'Бірге',1166,y+24,20,C.uiInk,'left',500);
   ctx.fillStyle='#5b6675';ctx.beginPath();ctx.moveTo(1388,y+20);ctx.lineTo(1400,y+20);ctx.lineTo(1394,y+28);ctx.closePath();ctx.fill();
   if(tt>=T.onclk-.2)gframe(1150,y+4,260,40,K(T.onclk-.2,.2,tt)*(1-K(T.th2-.5,.3,tt)),tt)}
- else if(a==='trn'){BTN(640,y+2,90,44,'Жоқ',tt);BTN(742,y+2,240,44,'Біртіндеп пайда болу',tt,{hot:tt>=T.fade-.35?K(T.fade-.35,.2,tt):0,fill:tt>=T.fade?'#fde6db':'#ffffff'});BTN(994,y+2,110,44,'Ысыру',tt);
+ else if(a==='trn'){divider(1117);BTN(640,y+2,90,44,'Жоқ',tt);BTN(742,y+2,240,44,'Біртіндеп пайда болу',tt,{hot:tt>=T.fade-.35?K(T.fade-.35,.2,tt):0,fill:tt>=T.fade?'#fde6db':'#ffffff'});BTN(994,y+2,110,44,'Ысыру',tt);
   rrect(1130,y+13,22,22,3,'#ffffff','#5b6675',2);ux('Автоматты түрде',1162,y+24,20,C.uiInk,'left',500);
   if(tt>=T.noX){const k=K(T.noX,.35,tt);ctx.save();ctx.globalAlpha*=k;sg(1124,y+7,1158,y+41,C.red,5);sg(1158,y+7,1124,y+41,C.red,5);ctx.restore()}
   if(tt>=T.auto&&tt<END(28)+.3)gframe(1130,y+13,22,22,K(T.auto,.25,tt),tt,'#e9a0a0')}
  else if(a==='sl'){BTN(640,y+2,160,44,'Басынан',tt,{icon:(x,yy)=>{ctx.fillStyle=C.ppt;ctx.beginPath();ctx.moveTo(x-6,yy-9);ctx.lineTo(x+9,yy);ctx.lineTo(x-6,yy+9);ctx.closePath();ctx.fill()},hot:tt>=T.f5-.3?K(T.f5-.3,.2,tt):0});ux('F5',816,y+24,20,C.uiMute,'left',700)}}
-function drawLayoutMenu(tt){const k=K(T.newS,.2,tt)*(1-K(T.lay+.05,.2,tt));if(k<=0)return;ctx.save();ctx.globalAlpha*=k;panel(640,SY+128,370,130,8,'#ffffff','#a9b6c9',1.5);
- [['Тақырыптық слайд',0],['Тақырып пен мазмұн',1]].forEach(([s,j])=>{const iy=SY+162+j*56;rrect(656,iy-18,50,36,3,'#ffffff','#9aa7ba',1.2);ctx.fillStyle='#9aa7ba';ctx.fillRect(664,iy-10,34,4);if(j){ctx.fillRect(664,iy-1,34,2);ctx.fillRect(664,iy+5,26,2)}else ctx.fillRect(670,iy+3,22,3);
-  ux(s,722,iy,20,C.uiInk,'left',500)});
- if(tt>=T.newS+.3)gframe(650,SY+200,350,48,K(T.newS+.3,.2,tt),tt);ctx.restore()}
+const LAYOUT_MENU={x:NEW_SLIDE_X,y:SY+132,w:370,h:130};
+function drawLayoutMenu(tt){
+ const k=K(T.newS,.2,tt)*(1-K(T.lay+.05,.2,tt));if(k<=0)return;
+ const {x,y,w,h}=LAYOUT_MENU;
+ ctx.save();ctx.globalAlpha*=k;panel(x,y,w,h,8,'#ffffff','#a9b6c9',1.5);
+ ['Тақырыптық слайд','Тақырып пен мазмұн'].forEach((label,j)=>{
+  const iy=y+34+j*56;
+  rrect(x+16,iy-18,50,36,3,'#ffffff','#9aa7ba',1.2);
+  ctx.fillStyle='#9aa7ba';ctx.fillRect(x+24,iy-10,34,4);
+  if(j){ctx.fillRect(x+24,iy-1,34,2);ctx.fillRect(x+24,iy+5,26,2)}
+  else ctx.fillRect(x+30,iy+3,22,3);
+  ux(label,x+82,iy,21,C.uiInk,'left',500);
+ });
+ if(tt>=T.newS+.3)gframe(x+10,y+72,w-20,48,K(T.newS+.3,.2,tt),tt);
+ ctx.restore();
+}
 function drawAniList(tt){const k=K(T.dd,.2,tt)*(1-K(T.onclk+.1,.2,tt));if(k<=0)return;ctx.save();ctx.globalAlpha*=k;panel(1150,SY+128,260,150,6,'#ffffff','#a9b6c9',1.5);
  ['Шерткенде','Бірге','Кейін'].forEach((s,j)=>ux(s,1170,SY+158+j*46,20,C.uiInk,'left',500));if(tt>=T.onclk-.4)gframe(1156,SY+138,248,40,K(T.onclk-.4,.15,tt),tt);ctx.restore()}
-function drawBackstage(tt){const k=K(T.file+.15,.25,tt)*(1-K(T.browse+.2,.2,tt));if(k<=0)return;ctx.save();ctx.globalAlpha*=k;ctx.fillStyle='#ffffff';ctx.fillRect(SX,SY+36,SW,SH-36);ctx.fillStyle='#b4462a';ctx.fillRect(SX,SY+36,240,SH-36);
+function drawBackstage(tt){const k=K(T.file+.15,.25,tt)*(1-K(T.browse+.2,.2,tt));if(k<=0)return;ctx.save();ctx.globalAlpha*=k;ctx.fillStyle='#ffffff';ctx.fillRect(EDIT_LEFT,SY+36-RIBBON_EXTRA,EDIT_WIDTH,SH+RIBBON_EXTRA-36);ctx.fillStyle=PPT_CHROME;ctx.fillRect(EDIT_LEFT,SY+36-RIBBON_EXTRA,SX+240-EDIT_LEFT,SH+RIBBON_EXTRA-36);
  ['Ақпарат','Жаңа','Ашу','Сақтау','Басқаша сақтау','Басып шығару'].forEach((s,i)=>{const iy=SY+88+i*50;if(i===4&&tt>=T.saveAs-.2)rrect(SX+6,iy-21,228,42,4,'#8f3520',null);ux(s,SX+22,iy,20,'#ffffff','left',i===4&&tt>=T.saveAs-.2?700:500)});
  if(tt>=T.saveAs){ux('Басқаша сақтау',SX+290,SY+96,28,C.uiInk,'left',600);BTN(700,SY+150,200,56,'Шолу',tt,{icon:(x,yy)=>icoFolder(x,yy,1),hot:tt>=T.browse-.35?K(T.browse-.35,.2,tt):0})}ctx.restore()}
 // ---------- dialogs ----------
@@ -372,7 +452,13 @@ function drawSaveDialog(tt){const k=K(T.browse+.2,.25,tt)*(1-K(T.saveB+.15,.2,tt
  ctx.fillStyle='#f9fafc';ctx.fillRect(x+20,y+98,w-40,226);if(tt>=T.cr4){ctx.save();ctx.globalAlpha*=.35*K(T.cr4,.4,tt);icoFolder(x+w/2,y+210,2.2);ctx.restore()}
  ux('Файл атауы:',x+20,y+358,20,C.uiMute,'left',600);rrect(x+200,y+340,w-220,36,5,'#ffffff',tt>=T.nmc&&tt<T.typ?'#3c7be0':'#9aa7ba',tt>=T.nmc&&tt<T.typ?2.5:1.5);
  const nm=tt<T.nma?'':typed(TXT.pptx,T.nma,T.nmb,tt);if(nm){const ww=ux(nm,x+214,y+358,22,C.uiInk,'left',500);if(tt<T.typ)caret(x+216+ww,y+358,22,tt)}else if(tt>=T.nmc)caret(x+214,y+358,22,tt);
- ux('Түрі:',x+20,y+406,20,C.uiMute,'left',600);rrect(x+200,y+388,w-220,36,5,'#ffffff','#9aa7ba',1.5);ux('PowerPoint презентациясы (*.pptx)',x+214,y+406,21,C.uiInk,'left',500);if(tt>=T.typ)gframe(x+200,y+388,w-220,36,K(T.typ,.25,tt)*(1-K(T.saveB-.4,.2,tt)),tt);
+ ux('Түрі:',x+20,y+406,20,C.uiMute,'left',600);
+ rrect(x+200,y+388,w-220,36,5,'#ffffff',tt>=T.typ?'#3c7be0':'#9aa7ba',1.5);
+ if(tt>=T.typ&&tt<T.saveB){
+  const k=K(T.typ,END(30)-T.typ,tt);
+  focusFill(x+204,y+392,w-228,28,k,'#a9ceff');
+ }
+ ux('PowerPoint презентациясы (*.pptx)',x+214,y+406,21,C.uiInk,'left',500);
  rrect(x+500,y+452,130,38,6,'#2f6fd6',null);ux('Сақтау',x+565,y+471,20,'#ffffff','center',600);rrect(x+644,y+452,136,38,6,'#ffffff','#9aa7ba',1.5);ux('Болдырмау',x+712,y+471,20,C.uiInk,'center',500);
  if(tt>=T.saveB-.4)gframe(x+500,y+452,130,38,K(T.saveB-.4,.15,tt),tt);ctx.restore()}
 // ---------- the slides (800 × 450 local units) ----------
@@ -415,14 +501,26 @@ function slideContent(n,tt,sty,mode){const edit=mode==='edit';
  // source box
  if(tt>=T.box0){const k=sm(K(T.box0,T.box1-T.box0,tt));if(edit&&tt<T.src2b+.3)dashR(40,368,720*k,74*k,'#9aa7ba',2,[8,6]);
   const s1=tt<T.src1a?'':typed(TXT.src1,T.src1a,T.src1b,tt),s2=tt<T.src2a?'':typed(TXT.src2,T.src2a,T.src2b,tt);
-  stx(s1,52,390,20,sty.src,'left',500);stx(s2,52,420,20,sty.src,'left',500);
-  if(edit&&s2.length===TXT.src2.length){fnt(20,500);const under=(sub,ta,c)=>{const i=TXT.src2.indexOf(sub),x0=52+ctx.measureText(TXT.src2.slice(0,i)).width,w=ctx.measureText(sub).width;if(tt>=ta)sg(x0,433,x0+w*K(ta,.35,tt),433,c,3)};
-   under('Játi Þór Mikjálsson',T.u1,C.brown);under('Wikimedia Commons',T.u2,C.ink);under('CC BY 2.5',T.u3,C.grn);fnt(20,500)}}
+  if(edit&&tt>=T.src2b&&tt<END(20)+.2){
+   const runs=[
+    ['Játi Þór Mikjálsson',T.u1,T.u2,'#f8dfa4'],
+    ['Wikimedia Commons',T.u2,T.u3,'#c4dbf7'],
+    ['CC BY 2.5',T.u3,END(20),'#9acda6']
+   ];
+   for(const [part,start,end,color] of runs){
+    const k=K(start,end-start,tt);
+    if(k<=0)continue;
+    const size=screenTextSize(20);
+    const x=52+TWm(TXT.src2.slice(0,TXT.src2.indexOf(part)),size,500);
+    focusFill(x,405,TWm(part,size,500),29,k,color);
+   }
+  }
+  stx(s1,52,390,20,sty.src,'left',500);stx(s2,52,420,20,sty.src,'left',500);}
  // sentence 21: three dashed frames, then the gaps light up
  if(edit&&tt>=T.fr0&&tt<END(21)+.4){const B=[[40,118,bodyW(tt),230],pr?[pr.x,pr.y,pr.w,pr.h]:null,[40,368,720,74]];B.forEach((b,j)=>{if(!b)return;const k=K(T.fr0+j*.4,.3,tt);if(k>0){ctx.save();ctx.globalAlpha*=k;dashR(b[0]-6,b[1]-6,b[2]+12,b[3]+12,C.grn,3,[10,7],-tt*30);ctx.restore()}});
   const g=pulse(T.gap,1.0,tt);if(g>0&&pr){ctx.fillStyle=`rgba(47,125,79,${.28*g})`;ctx.fillRect(40+bodyW(tt)+8,118,pr.x-(40+bodyW(tt))-16,230);ctx.fillRect(40,356,720,8)}}
  // sentence 23: font size tags
- if(edit&&tt>=T.pt1&&tt<CUE(24)+.2){const tag=(s,x,y,ta)=>{if(tt<ta)return;const k=K(ta,.3,tt);ctx.save();ctx.globalAlpha*=k;fnt(20,700);const w=ctx.measureText(s).width+18;rrect(x,y-15,w,30,15,'#fff3cf',C.gold,2);stx(s,x+w/2,y,20,C.goldD,'center',700);ctx.restore()};
+ if(edit&&tt>=T.pt1&&tt<CUE(24)+.2){const tag=(s,x,y,ta)=>{if(tt<ta)return;const k=K(ta,.3,tt);ctx.save();ctx.globalAlpha*=k;fnt(screenTextSize(20),700);const w=ctx.measureText(s).width+18;rrect(x,y-15,w,30,15,'#fff3cf',C.gold,2);stx(s,x+w/2,y,20,C.goldD,'center',700);ctx.restore()};
   tag('36 pt',48+tw2+16,62,T.pt1);tag('26 pt',40+bodyW(tt)-92,326,T.pt2);tag('14 pt',300,390,T.pt3)}}
 function drawSlide(n,ox,oy,s,tt,mode){SLS=s;ctx.save();ctx.translate(ox,oy);ctx.scale(s,s);ctx.beginPath();ctx.rect(0,0,800,450);ctx.clip();
  const cs=curStyle(tt);let a=0,b=0,k=1;if(cs===1){a=0;b=1;k=K(T.thm,.9,tt)}else if(cs===2){a=1;b=2;k=K(T.var,.9,tt)}
@@ -430,21 +528,43 @@ function drawSlide(n,ox,oy,s,tt,mode){SLS=s;ctx.save();ctx.translate(ox,oy);ctx.
   if(k<1){ctx.save();ctx.globalAlpha*=.6*(1-k);ctx.strokeStyle='#ffffff';ctx.lineWidth=18;ctx.beginPath();ctx.moveTo(k*1300,0);ctx.lineTo(k*1300-300,450);ctx.stroke();ctx.restore()}}
  ctx.restore();ctx.save();ctx.strokeStyle='#c9ced6';ctx.lineWidth=1.5;ctx.strokeRect(ox,oy,800*s,450*s);ctx.restore();SLS=1}
 const has2=tt=>tt>=T.lay+.15;
-function drawEditor(tt){ctx.fillStyle='#e7e7e7';ctx.fillRect(SX,SY,SW,SH);
- ctx.fillStyle=C.ppt;ctx.fillRect(SX,SY,SW,36);ux('PowerPoint',SX+18,SY+18,21,'#ffffff','left',700);
- const fname=tt>=T.saveB+.2?TXT.pptx:'Презентация1';ux(fname,SX+SW/2,SY+18,21,'#ffffff','center',600);
- if(tt>=T.saveB+.2){const w=TWm(fname,21,600,UF);sg(SX+SW/2-w/2,SY+31,SX+SW/2-w/2+w*K(T.saveB+.3,.5,tt),SY+31,C.goldF,4);const f=pulse(T.ctrlS,.8,tt);if(f>0)gframe(SX+SW/2-w/2-6,SY+4,w+12,28,f,tt)}
- ctx.fillStyle='#f6f6f6';ctx.fillRect(SX,SY+36,SW,42);const a=actTab(tt),TX=tabX();
- for(const[id,s]of TABS){const p=TX[id];ux(s,p.x,SY+57,20,id===a?C.ppt:C.uiInk,'left',600);if(id===a)sg(p.x,SY+74,p.x+p.w,SY+74,C.ppt,3)}
- ctx.fillStyle='#fbfbfb';ctx.fillRect(SX,SY+78,SW,52);sg(SX,SY+130,SX1,SY+130,'#d6d9de',1.5);drawRibbon(tt);
- ctx.fillStyle='#f1f1f1';ctx.fillRect(SX,SY+130,198,SH-130);sg(SX+198,SY+130,SX+198,SY1,'#d6d9de',1.5);
+function drawEditor(tt){
+ ctx.save();
+ ctx.translate(EDIT_MID,SY);ctx.scale(EDIT_SCALE,EDIT_SCALE);ctx.translate(-EDIT_MID,-SY);
+ ctx.fillStyle=PPT_CHROME;ctx.fillRect(EDIT_LEFT,SY,EDIT_WIDTH,36);
+ const fname=tt>=T.saveB+.2?TXT.pptx:'Көрсетілім 1';
+ const title=fname+' — PowerPoint', titleSize=25;
+ ux(title,EDIT_MID,SY+17,titleSize,'#ffffff','center',700);
+ if(tt>=T.saveB+.2){const w=TWm(title,titleSize,700,UF);sg(SX+SW/2-w/2,SY+31,SX+SW/2-w/2+w*K(T.saveB+.3,.5,tt),SY+31,C.goldF,4);const f=pulse(T.ctrlS,.8,tt);if(f>0)gframe(SX+SW/2-w/2-6,SY+4,w+12,28,f,tt)}
+ ctx.fillStyle='#ffffff';ctx.fillRect(EDIT_LEFT,SY+36,EDIT_WIDTH,42);const a=actTab(tt),TX=tabX();
+ for(const[id,s]of TABS){
+  const p=TX[id];
+  const labelWidth=TWm(s,screenTextSize(20),700,UF);
+  if(id==='file')rrect(p.x-6,SY+41,labelWidth+12,30,4,PPT_CHROME,null);
+  ux(s,p.x,SY+57,20,id==='file'?'#ffffff':id===a?'#8f3520':C.uiInk,'left',700);
+  if(id===a&&id!=='file')sg(p.x,SY+74,p.x+labelWidth,SY+74,PPT_CHROME,3);
+ }
+ drawRibbon(tt);
+ ctx.translate(0,RIBBON_EXTRA);
+ ctx.fillStyle='#e3e6ec';ctx.fillRect(EDIT_LEFT,SY+130,EDIT_WIDTH,SH-130);
+ ctx.fillStyle='#eceef2';ctx.fillRect(EDIT_LEFT,SY+130,SX+198-EDIT_LEFT,SH-130);
+ sg(SX+198,SY+130,SX+198,SY1,'#d9dce3',1.5);
  const cur=has2(tt)&&tt<T.sort?2:1;
  for(const n of[1,2]){if(n===2&&!has2(tt))continue;const ty=SY+146+(n-1)*114,k=n===2?K(T.lay+.15,.3,tt):1;ctx.save();ctx.globalAlpha*=k;ux(String(n),SX+14,ty+12,20,C.uiMute,'left',600);drawSlide(n,SX+30,ty,.2,tt,'thumb');
-  if(n===cur)rrect(SX+27,ty-3,166,96,3,null,C.ppt,3);if(n===2&&tt>=T.th2-.2&&tt<T.trn+.4)gframe(SX+30,ty,160,90,K(T.th2-.2,.2,tt),tt);
+  if(n===cur)rrect(SX+27,ty-3,166,96,3,null,C.ppt,3);
+  if(tt>=T.var&&tt<END(22)+.2){
+   // The same accent reaches both thumbnails as the shared variant is applied.
+   const k=K(T.var,END(22)-T.var,tt), amount=cl(k*1.55-(n-1)*.48);
+   ctx.fillStyle='#1f7a6a';ctx.fillRect(SX+30,ty+78,160*amount,12);
+  }
+  if(n===2&&tt>=T.th2-.2&&tt<T.trn+.4)gframe(SX+30,ty,160,90,K(T.th2-.2,.2,tt),tt);
   if(n===2&&tt>=T.starT){const k2=K(T.starT,.35,tt);ctx.save();ctx.globalAlpha*=k2;star(SX+16,ty+56,9,C.gold);ctx.restore()}ctx.restore()}
  if(cur===1&&tt>=T.pick+.1)drawSlide(1,SL.x,SL.y,1,tt,'edit');if(cur===2)drawSlide(2,SL.x,SL.y,1,tt,'edit');
  if(tt>=T.fade&&tt<T.fade+.9){ctx.save();ctx.globalAlpha*=1-K(T.fade,.9,tt);ctx.fillStyle='#ffffff';ctx.fillRect(SL.x,SL.y,800,450);ctx.restore()}
- const u=LV;LV=2;drawLayoutMenu(tt);drawAniList(tt);drawPicDialog(tt);drawBackstage(tt);LV=3;drawSaveDialog(tt);LV=u}
+ const u=LV;LV=2;drawLayoutMenu(tt);drawAniList(tt);drawPicDialog(tt);
+ drawBackstage(tt);LV=3;drawSaveDialog(tt);LV=u;
+ ctx.restore();
+}
 function star(x,y,r,c){ctx.fillStyle=c;ctx.beginPath();for(let i=0;i<10;i++){const a=-Math.PI/2+i*Math.PI/5,rr=i%2?r*.45:r;ctx.lineTo(x+Math.cos(a)*rr,y+Math.sin(a)*rr)}ctx.closePath();ctx.fill()}
 // ---------- slideshow ----------
 function drawShow(tt){ctx.fillStyle='#000000';ctx.fillRect(SX,SY,SW,SH);const a=K(T.show,.45,tt);if(a<=0)return;
@@ -483,8 +603,8 @@ function coversNow(tt){const c=[],ph=PH(tt),full={x:SX,y:SY,w:SW,h:SH},add=(r,lv
  if(K(T.dbl2+.1,.25,tt)*(1-K(T.npClose,.3,tt))>.02)add(NP,2);if(K(T.dbl3+.1,.3,tt)*(1-K(T.vClose+.05,.25,tt))>.02)add(VW,2);
  const L0=lensNow(tt);if(L0&&L0.a>.02)add(LENS,2);
  if(ph==='pptstart'&&K(T.ppOpen,.3,tt)>.02)add(full,3);if(ph==='edit'&&tt<T.pick+.4)add(full,3);
- if(K(T.fdlg,.25,tt)*(1-K(T.insB+.05,.2,tt))>.02)add(FD,2);if(K(T.file+.15,.25,tt)*(1-K(T.browse+.2,.2,tt))>.02)add({x:SX,y:SY+36,w:SW,h:SH-36},2);
- if(K(T.browse+.2,.25,tt)*(1-K(T.saveB+.15,.2,tt))>.02)add(DG,3);if(K(T.newS,.2,tt)*(1-K(T.lay+.05,.2,tt))>.02)add({x:640,y:SY+128,w:370,h:130},2);
+ if(K(T.fdlg,.25,tt)*(1-K(T.insB+.05,.2,tt))>.02)add(FD,2);if(K(T.file+.15,.25,tt)*(1-K(T.browse+.2,.2,tt))>.02)add({x:EDIT_LEFT,y:SY+36,w:EDIT_WIDTH,h:SH-36},2);
+ if(K(T.browse+.2,.25,tt)*(1-K(T.saveB+.15,.2,tt))>.02)add(DG,3);if(K(T.newS,.2,tt)*(1-K(T.lay+.05,.2,tt))>.02)add(LAYOUT_MENU,2);
  if(K(T.dd,.2,tt)*(1-K(T.onclk+.1,.2,tt))>.02)add({x:1150,y:SY+128,w:260,h:150},2);return c}
 function drawScreen(tt){ctx.save();ctx.beginPath();ctx.rect(SX,SY,SW,SH);ctx.clip();
  const ph=PH(tt);COV=coversNow(tt);LV=0;
@@ -494,11 +614,17 @@ function drawScreen(tt){ctx.save();ctx.beginPath();ctx.rect(SX,SY,SW,SH);ctx.cli
    LV=2;drawNotepad(tt);drawViewer(tt);drawLens(tt)}
   LV=2;drawStart(tt);
   const pk=K(T.power,.7,tt);if(pk<1){ctx.fillStyle=`rgba(16,21,28,${1-pk})`;ctx.fillRect(SX,SY,SW,SH);const sw=pulse(T.power,.7,tt);if(sw>0){ctx.fillStyle=`rgba(255,255,255,${.5*sw})`;ctx.fillRect(SX,SY+SH*pk-30,SW,60)}}}
- else if(ph==='pptstart'){drawDesktop(tt);LV=3;drawPptStart(tt)}
- else if(ph==='edit'){LV=1;drawEditor(tt);if(tt<T.pick+.4){LV=3;ctx.save();ctx.globalAlpha*=1-K(T.pick+.1,.3,tt);drawPptStart(tt);ctx.restore()}
-  if(tt>=T.esc&&tt<T.esc+.5){ctx.save();ctx.globalAlpha*=1-K(T.esc+.25,.25,tt);ctx.fillStyle='#000';ctx.fillRect(SX,SY,SW,SH);ctx.restore()}}
+ else if(ph==='pptstart'){drawDesktop(tt);LV=3;drawPptStart(tt);drawPptTaskbar()}
+ else if(ph==='edit'){
+  COV=COV.map(({x,y,w,h,lv})=>({x:editX(x),y:editY(y),w:w*EDIT_SCALE,h:editY(y+h)-editY(y),lv}));
+  LV=1;drawEditor(tt);
+  LV=9;
+  if(tt<T.pick+.4){ctx.save();ctx.globalAlpha*=1-K(T.pick+.1,.3,tt);drawPptStart(tt);ctx.restore()}
+  drawPptTaskbar();
+  if(tt>=T.esc&&tt<T.esc+.5){ctx.save();ctx.globalAlpha*=1-K(T.esc+.25,.25,tt);ctx.fillStyle='#000';ctx.fillRect(SX,SY,SW,SH);ctx.restore()}
+ }
  else if(ph==='show')drawShow(tt);
- else if(ph==='sort')drawSorter(tt);
+ else if(ph==='sort'){drawSorter(tt);drawPptTaskbar()}
  // the copied text / photo condensing in place (before it flies)
  LV=9;drawCondense(tt);COV=[];
  ctx.restore()}
@@ -525,8 +651,16 @@ function drawKeycaps(tt){const P=[[T.ctrlC,['Ctrl','C']],[T.ctrlV,['Ctrl','V']],
   ks.forEach((k,i)=>{if(i){tx('+',x+10,y+22,24,C.inkD,'center',700);x+=22}const w=TWm(k,22,700,UF)+30;rrect(x,y+6+down,w,36,7,'#9aa3ad',null);rrect(x,y+down,w,36,7,'#ffffff','#5b6675',2);ux(k,x+w/2,y+18+down,22,C.inkD,'center',700);x+=w+4});ctx.restore()}}
 // ---------- the copied pieces: condense in place, then fly at constant size ----------
 const slotC=j=>({x:SLOT[j].x+CARD_W/2,y:SLOT[j].y+CARD_H/2});
-function drawCard(kind,cx,cy,a=1){ctx.save();ctx.globalAlpha*=a;const x=cx-CARD_W/2,y=cy-CARD_H/2;panel(x,y,CARD_W,CARD_H,10,kind==='t'?'#e3f3e6':'#fffaf0',kind==='t'?C.grn:C.gold,3);
- if(kind==='t'){icoDoc(x+32,cy,1.1,'#ffffff',C.grn);ux(TXT.txt,x+62,cy,22,C.grn,'left',700)}else{if(ready('dombra'))ctx.drawImage(ICON.dombra,x+10,y+9,84,58);ux(TXT.jpg,x+104,cy,22,C.goldD,'left',700)}ctx.restore()}
+function drawCard(kind,cx,cy,a=1,travelling=false){ctx.save();ctx.globalAlpha*=a;const x=cx-CARD_W/2,y=cy-CARD_H/2;panel(x,y,CARD_W,CARD_H,10,kind==='t'?'#e3f3e6':'#fffaf0',kind==='t'?C.grn:C.gold,3);
+ if(kind==='t'){
+  icoDoc(travelling?cx:x+32,cy,1.1,'#ffffff',C.grn);
+  if(!travelling)ux(TXT.txt,x+62,cy,22,C.grn,'left',700);
+ }else{
+  if(ready('dombra'))ctx.drawImage(ICON.dombra,travelling?cx-42:x+10,y+9,84,58);
+  if(!travelling)ux(TXT.jpg,x+104,cy,22,C.goldD,'left',700);
+ }
+ ctx.restore();
+}
 function condenseOf(kind){if(kind==='t'){const L1=TWm(TXT.b1,26,500,UF);return{t0:T.lift,from:{x:NP.x+24,y:NP.y+60,w:L1+16,h:96},at:{x:NP.x+24+(L1+16)/2,y:NP.y+108}}}
  const p=VPH();return{t0:T.vClose+.05,from:p,at:{x:p.x+p.w/2,y:p.y+p.h/2}}}
 function drawCondense(tt){for(const kind of['t','p']){const c=condenseOf(kind),k=K(c.t0,.35,tt);if(k<=0||k>=1)continue;const e=eio(k),w=lerp(c.from.w,CARD_W,e),h=lerp(c.from.h,CARD_H,e);
@@ -534,9 +668,9 @@ function drawCondense(tt){for(const kind of['t','p']){const c=condenseOf(kind),k
 function bez(p0,p1,p2,u){const a=1-u;return[a*a*p0[0]+2*a*u*p1[0]+u*u*p2[0],a*a*p0[1]+2*a*u*p1[1]+u*u*p2[1]]}
 function flights(tt){const out=[];const c1=condenseOf('t'),c2=condenseOf('p');
  const fly=(kind,t0,d,from,to,peak)=>{const k=K(t0,d,tt);if(k<=0||k>=1)return;const u=eio(k),p=bez([from.x,from.y],[(from.x+to.x)/2,peak],[to.x,to.y],u);out.push({kind,x:p[0],y:p[1]})};
- fly('t',T.lift+.35,.85,c1.at,slotC(0),70);fly('p',T.vClose+.4,.85,c2.at,slotC(1),70);
- fly('t',T.card1,T.ctrlV-T.card1,slotC(0),{x:SL.x+40+180,y:SL.y+118+115},90);
- fly('p',T.card2,.75,slotC(1),{x:SL.x+395+190,y:SL.y+95+132},90);
+ fly('t',T.lift+.35,.85,c1.at,slotC(0),630);fly('p',T.vClose+.4,.85,c2.at,slotC(1),520);
+ fly('t',T.card1,T.ctrlV-T.card1,slotC(0),{x:editX(SL.x+220),y:editY(SL.y+233)},460);
+ fly('p',T.card2,.75,slotC(1),{x:editX(SL.x+585),y:editY(SL.y+95+132)},690);
  return out}
 function drawTray(tt){const k=K(T.tray,.5,tt);if(k<=0)return;ctx.save();ctx.globalAlpha*=k;panel(TRAY.x,TRAY.y,TRAY.w,TRAY.h,14,C.card,'rgba(29,79,145,.35)',2);tx(Wd('tray'),TRAY.x+20,TRAY.y+26,26,C.inkD,'left',800);
  SLOT.forEach((s,j)=>dashR(s.x,s.y,CARD_W,CARD_H,'rgba(29,79,145,.35)',2,[9,7]));
@@ -544,7 +678,7 @@ function drawTray(tt){const k=K(T.tray,.5,tt);if(k<=0)return;ctx.save();ctx.glob
  tick(slotC(0).x,slotC(0).y,K(T.ctrlV+.2,.5,tt),C.grn,1.2);tick(slotC(1).x,slotC(1).y,K(T.card2+.9,.5,tt),C.gold,1.2);
  const s1=K(in1,.6,tt),s2=K(in2,.6,tt);sparkle(slotC(0).x,slotC(0).y,s1,C.grnM,10,20,110,7);sparkle(slotC(1).x,slotC(1).y,s2,C.goldF,10,20,110,9);ctx.restore()}
 // card landing on the slide: fades as the text / photo takes its place
-function drawLandings(tt){if(PH(tt)!=='edit')return;const a=1-K(T.ctrlV,.35,tt);if(tt>=T.ctrlV&&a>0)drawCard('t',SL.x+220,SL.y+233,a);}  // the photo card turns straight into the photo (photoRect starts at card size)
+function drawLandings(tt){if(PH(tt)!=='edit')return;const a=1-K(T.ctrlV,.35,tt);if(tt>=T.ctrlV&&a>0)drawCard('t',editX(SL.x+220),editY(SL.y+233),a);}  // the photo card turns straight into the photo (photoRect starts at card size)
 // ---------- the board: both slides grow here; make / save / show get ticked ----------
 function drawBoard(tt){const k=K(T.brdIn,.5,tt);if(k<=0)return;ctx.save();ctx.globalAlpha*=k;panel(BRD.x,BRD.y,BRD.w,BRD.h,14,C.card,'rgba(29,79,145,.35)',2);
  tx(Wd('board'),BRD.x+24,BRD.y+28,30,C.inkD,'left',800);
@@ -582,7 +716,7 @@ function buildCK(){const TX=tabX(),tab=id=>TX[id].x+TX[id].w+6,K0=[];const ck=(t
  ck(T.crumbM,812,262,1);ck(T.clr-.25,1430,256,1);ck(T.rowJ,1000,350);ck(T.dbl3,1000,350,2);ck(T.vClose,1300,262,1);
  ck(T.start,522,752,1);ck(T.pp,740,520,1);ck(T.pick,572,352,1);
  ck(T.t1c,1176,538,1);ck(T.s1c,1260,634,1);ck(T.selT,1183,494,1);ck(T.wid0,1183,494,3);ck(T.wid1,1378,494,4);
- ck(T.home,tab('home'),212,1);ck(T.newS,802,290,1);ck(T.lay,985,398,1);ck(T.t2c,1246,388,1);ck(T.card1+.3,1440,700);
+ ck(T.home,tab('home'),212,1);ck(T.newS,NEW_SLIDE_X+NEW_SLIDE_W-31,SY+107,1);ck(T.lay,LAYOUT_MENU.x+LAYOUT_MENU.w-25,LAYOUT_MENU.y+98,1);ck(T.t2c,1246,388,1);ck(T.card1+.3,1440,700);
  ck(T.nar0-.3,1378,537,1);ck(T.nar0,1378,537,3);ck(T.nar1,1018,537,4);
  ck(T.ins,tab('ins'),212,1);ck(T.pic,762,290,1);ck(T.rowP,1200,478,1);ck(T.insB,1272,628,1);ck(T.card2+.5,1440,700);
  ck(T.crn0-.3,1393,664,1);ck(T.crn0,1393,664,3);ck(T.crn1,1313,608,4);ck(T.mv0-.25,1163,503,3);ck(T.mv1,1218,534,4);
@@ -591,7 +725,7 @@ function buildCK(){const TX=tabX(),tab=id=>TX[id].x+TX[id].w+6,K0=[];const ck=(t
  ck(T.selB2,1012,648,1);ck(T.ani,tab('ani'),212,1);ck(T.appear,886,290,1);ck(T.dd,1402,286,1);ck(T.onclk,1402,338,1);ck(T.onclk+.6,1440,700);
  ck(T.th2,572,516,1);ck(T.trn,tab('trn'),212,1);ck(T.fade,976,290,1);ck(T.auto,1158,292);ck(T.file,tab('file'),212,1);
  ck(T.saveAs,628,468,1);ck(T.browse,892,370,1);ck(T.nmc,1330,608,1);ck(T.saveB,1184,720,1);ck(T.slTab,tab('sl'),212,1);ck(T.show,792,290,1);
- ck(T.esc+.4,1440,720);ck(END(37)+5,1440,740);
+ ck(T.esc+.4,1440,674);ck(END(37)+5,1440,674);
  return K0.sort((a,b)=>a.t-b.t)}
 function cursorAt(tt){if(!CK)CK=buildCK();let i=0;while(i+1<CK.length&&tt>=CK[i+1].t)i++;const a=CK[i],b=CK[i+1];
  if(!b)return{x:a.x,y:a.y,down:false};
@@ -602,10 +736,14 @@ function cursorAt(tt){if(!CK)CK=buildCK();let i=0;while(i+1<CK.length&&tt>=CK[i+
 function clickPressed(tt){if(!CK)CK=buildCK();for(const c of CK){if(c.k===1&&tt>=c.t-.04&&tt<c.t+.1)return true;if(c.k===2&&((tt>=c.t-.04&&tt<c.t+.08)||(tt>=c.t+.16&&tt<c.t+.28)))return true}
  for(const c of[T.clk1,T.clk2,T.clk3])if(tt>=c-.04&&tt<c+.1)return true;return cursorAt(tt).down}
 const ptrVisible=tt=>tt>=5.6&&PH(tt)!=='show';
-function drawPointer(tt){if(!ptrVisible(tt))return;const p=cursorAt(tt);
- for(const c of CK){if(c.k!==1&&c.k!==2)continue;for(const off of c.k===2?[0,.18]:[0]){const k=K(c.t+off,.45,tt);if(k>0&&k<1){ctx.save();ctx.globalAlpha*=1-k;ring(c.x,c.y,8+28*eo(k),C.gold,4);ctx.restore()}}}
- ctx.save();ctx.translate(p.x,p.y);ctx.shadowColor='rgba(0,0,0,.3)';ctx.shadowBlur=6;ctx.shadowOffsetY=3;ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(0,27);ctx.lineTo(7,21);ctx.lineTo(12,32);ctx.lineTo(17,30);ctx.lineTo(12,19);ctx.lineTo(21,19);ctx.closePath();
- ctx.fillStyle=p.down?'#e8f0ff':'#ffffff';ctx.fill();ctx.shadowColor='transparent';ctx.lineWidth=2;ctx.strokeStyle='#1b2430';ctx.stroke();ctx.restore();return{x:p.x,y:p.y,w:22,h:33}}
+function drawPointer(tt){if(!ptrVisible(tt))return;
+ const editor=PH(tt)==='edit', raw=cursorAt(tt);
+ const p=editor?{x:editX(raw.x),y:editY(raw.y),down:raw.down}:raw;
+ for(const c of CK){if(c.k!==1&&c.k!==2)continue;for(const off of c.k===2?[0,.18]:[0]){const k=K(c.t+off,.45,tt);if(k>0&&k<1){ctx.save();ctx.globalAlpha*=1-k;ring(editor?editX(c.x):c.x,editor?editY(c.y):c.y,8+28*eo(k),C.gold,4);ctx.restore()}}}
+ ctx.save();
+ if(editor){ctx.beginPath();ctx.rect(SX,SY,SW,SH-PPT_BAR);ctx.clip()}
+ ctx.translate(p.x,p.y);ctx.shadowColor='rgba(0,0,0,.3)';ctx.shadowBlur=6;ctx.shadowOffsetY=3;ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(0,27);ctx.lineTo(7,21);ctx.lineTo(12,32);ctx.lineTo(17,30);ctx.lineTo(12,19);ctx.lineTo(21,19);ctx.closePath();
+ ctx.fillStyle=p.down?'#e8f0ff':'#ffffff';ctx.fill();ctx.shadowColor='transparent';ctx.lineWidth=2;ctx.strokeStyle='#1b2430';ctx.stroke();ctx.restore();return{x:p.x,y:p.y,w:22,h:editor?Math.min(33,SY1-PPT_BAR-p.y):33}}
 // ---------- header: chapter trail (left) and lesson name (right) ----------
 function drawHeader(tt){
  const s=L.doc_title||'',px=fitPx(s,30,820,700);tx(s,1860,58,px,C.inkD,'right',700);const w=TWm(s,px,700);reg('label','lesson',1860-w,40,w,38);
@@ -619,8 +757,12 @@ function drawHeader(tt){
 let PTR=null;
 function renderScene(tt){
  BOXES=[];TBX=[];ctx.setTransform(1,0,0,1,0,0);ctx.globalAlpha=1;ctx.clearRect(0,0,W,H);ctx.drawImage(bakePaper(),0,0);
- drawHeader(tt);drawBoard(tt);drawTray(tt);drawDesk(tt);drawScreen(tt);drawLandings(tt);
- for(const f of flights(tt))drawCard(f.kind,f.x,f.y);
+ const movingCards=flights(tt);
+ FLYING=movingCards;
+ drawHeader(tt);drawBoard(tt);drawTray(tt);drawDesk(tt);drawScreen(tt);
+ FLYING=[];
+ drawLandings(tt);
+ for(const f of movingCards)drawCard(f.kind,f.x,f.y,1,true);
  drawKeycaps(tt);drawAisha(tt);
  const dim=PH(tt)==='show'?K(T.show,.6,tt)*(1-K(T.esc,.5,tt)):0;if(dim>0){ctx.save();ctx.fillStyle=`rgba(28,22,14,${.42*dim})`;ctx.beginPath();ctx.rect(0,0,W,H);ctx.roundRect(SX-20,SY-20,SW+40,SH+48,20);ctx.fill('evenodd');ctx.restore()}
  PTR=drawPointer(tt)||null;
