@@ -36218,17 +36218,104 @@ void main() {
       noise(o, d, { dur: 0.04, gain: 0.16, type: "lowpass", f: 1100, seed: 71 + v7 });
     }
   };
-  // ccc-012: SFX at 75 % of the voice loudness (K 261121, lowered from 90 %). The effects bus now runs through a soft saturator
-  // (y = SFX_CEIL * tanh(SFX_DRIVE * x / SFX_CEIL), so the bus never exceeds SFX_CEIL even where effects overlap),
-  // then the bus gain, which follows the voice language (SFX_LANG). Effect recipes and event times are unchanged.
+  // Calibrate each isolated effect against the selected narration.
+  // Apply the original sound shaping to each buffer before setting its gain.
   var SFX_DRIVE = 3, SFX_CEIL = Math.pow(10, -1 / 20);
   var SFX_CURVE = (() => { const n = 8193, c = new Float32Array(n); for (let i = 0; i < n; i++) c[i] = SFX_CEIL * Math.tanh(SFX_DRIVE * (2 * i / (n - 1) - 1) / SFX_CEIL); return c; })();
-  var SFX_LANG = { ru: 0.862, en: 0.832, zh: 0.881 };
-  var SFXG = () => SFX_LANG[typeof lang === "string" ? lang : "ru"] ?? SFX_LANG.ru;
+  var SFX_LANG = {
+    ru: {
+      "clunk:0": 0.76736149,
+      "confetti:0": 0.33496544,
+      "count:0": 0.74989421, "count:1": 0.74131024, "count:2": 0.74131024, "count:3": 0.73282453, "count:4": 0.72443596, "count:5": 0.71614341, "count:6": 0.699842,
+      "countdown:0": 0.47863009, "countdown:1": 0.47863009, "countdown:2": 0.46238102,
+      "ding:0": 0.34276779,
+      "flip:0": 1.53108746, "flip:1": 1.42889396, "flip:2": 1.47910839,
+      "hop:0": 0.78523563,
+      "land:0": 0.68391165, "land:1": 0.67608298,
+      "pluck:0": 0.56885293, "pluck:1": 0.56234133, "pluck:2": 0.56234133, "pluck:3": 0.54954087, "pluck:4": 0.5370318, "pluck:5": 0.51286138, "pluck:6": 0.49545019,
+      "pop:0": 0.84139514,
+      "query:0": 0.49545019,
+      "stamp:0": 0.57543994,
+      "step:0": 1.53992653, "step:1": 1.59404288, "step:2": 1.53992653, "step:3": 1.57579602,
+      "tick:0": 2.4266101, "tick:1": 2.60015956, "tick:2": 2.4266101, "tick:3": 2.72270131, "tick:4": 2.6915348,
+      "whoosh:0": 1.28824955,
+    },
+    en: {
+      "clunk:0": 0.74131024,
+      "confetti:0": 0.32359366,
+      "count:0": 0.72443596, "count:1": 0.71614341, "count:2": 0.71614341, "count:3": 0.70794578, "count:4": 0.699842, "count:5": 0.69183097, "count:6": 0.67608298,
+      "countdown:0": 0.46238102, "countdown:1": 0.46238102, "countdown:2": 0.44668359,
+      "ding:0": 0.33113112,
+      "flip:0": 1.47910839, "flip:1": 1.38038426, "flip:2": 1.42889396,
+      "hop:0": 0.75857758,
+      "land:0": 0.66069345, "land:1": 0.65313055,
+      "pluck:0": 0.54954087, "pluck:1": 0.54325033, "pluck:2": 0.54325033, "pluck:3": 0.53088444, "pluck:4": 0.51880004, "pluck:5": 0.49545019, "pluck:6": 0.47863009,
+      "pop:0": 0.81283052,
+      "query:0": 0.47863009,
+      "stamp:0": 0.55590426,
+      "step:0": 1.48764738, "step:1": 1.53992653, "step:2": 1.48764738, "step:3": 1.52229913,
+      "tick:0": 2.34422882, "tick:1": 2.51188643, "tick:2": 2.34422882, "tick:3": 2.63026799, "tick:4": 2.60015956,
+      "whoosh:0": 1.24451461,
+    },
+    zh: {
+      "clunk:0": 0.78523563,
+      "confetti:0": 0.34276779,
+      "count:0": 0.76736149, "count:1": 0.75857758, "count:2": 0.75857758, "count:3": 0.74989421, "count:4": 0.74131024, "count:5": 0.73282453, "count:6": 0.71614341,
+      "countdown:0": 0.48977882, "countdown:1": 0.48977882, "countdown:2": 0.47315126,
+      "ding:0": 0.35075187,
+      "flip:0": 1.56675107, "flip:1": 1.46217717, "flip:2": 1.51356125,
+      "hop:0": 0.80352612,
+      "land:0": 0.699842, "land:1": 0.69183097,
+      "pluck:0": 0.58210322, "pluck:1": 0.57543994, "pluck:2": 0.57543994, "pluck:3": 0.56234133, "pluck:4": 0.54954087, "pluck:5": 0.52480746, "pluck:6": 0.50699071,
+      "pop:0": 0.86099375,
+      "query:0": 0.50699071,
+      "stamp:0": 0.58884366,
+      "step:0": 1.57579602, "step:1": 1.63117291, "step:2": 1.57579602, "step:3": 1.61250103,
+      "tick:0": 2.48313311, "tick:1": 2.66072506, "tick:2": 2.48313311, "tick:3": 2.78612117, "tick:4": 2.7542287,
+      "whoosh:0": 1.31825674,
+    },
+  };
+  var SFXG = () => 1;
+  // The shared limiter only catches summed peaks above the isolated-event range.
+  var SFX_BUS_LIMIT = Float32Array.from({length: 8193}, (_, i) => {
+    const x = 2 * i / 8192 - 1, a = Math.abs(x);
+    return a <= 0.88 ? x : Math.sign(x) * (0.88 + 0.12 * Math.tanh((a - 0.88) / 0.12));
+  });
+  function connectSfxBus(context, gain) {
+    const limit = context.createWaveShaper();
+    limit.curve = SFX_BUS_LIMIT;
+    gain.connect(limit).connect(context.destination);
+  }
+
   var LEN = { pluck: 0.55, count: 0.16, land: 0.2, ding: 0.75, pop: 0.12, whoosh: 0.6, clunk: 0.16, tick: 0.05, query: 0.32, hop: 0.22, stamp: 0.25, flip: 0.16, countdown: 0.34, confetti: 0.9, step: 0.09 };
   function makeSound(events) {
     const EVENTS = events.filter((e) => RECIPES[e.id]);
-    let SBUF = null, ctx = null, gain = null, lastT = null, sat = null;
+    const PEAK_REFERENCE = {
+      "step:0": 1.31825674, "step:1": 1.33352143, "step:2": 1.30316678, "step:3": 1.33352143,
+      "tick:0": 2.01836636, "tick:1": 2.18776162, "tick:2": 2.04173794, "tick:3": 2.26464431, "tick:4": 2.21309471,
+      "flip:0": 1.44543977, "flip:1": 1.34896288, "flip:2": 1.36458314,
+    };
+    // Smooth prominent peaks before loudness matching, including the footfalls.
+    function shapePeaks(key, buffer) {
+      const kind = key.split(":")[0];
+      const limits = {step: [0.22, 0.54], tick: [0.42, 0.66], flip: [0.46, 0.70]}[kind];
+      if (!limits) return buffer;
+      const reference = PEAK_REFERENCE[key];
+      const [knee, ceiling] = limits;
+      const width = ceiling - knee;
+      for (let c = 0; c < buffer.numberOfChannels; c++) {
+        const frames = buffer.getChannelData(c);
+        for (let i = 0; i < frames.length; i++) {
+          const x = frames[i] * reference;
+          const level = Math.abs(x);
+          if (level > knee) {
+            frames[i] = Math.sign(x) * (knee + width * Math.tanh((level - knee) / width)) / reference;
+          }
+        }
+      }
+      return buffer;
+    }
+    let SBUF = null, ctx = null, gain = null, lastT = null;
     const ready = (async () => {
       if (!window.OfflineAudioContext) return false;
       const out = {};
@@ -36237,7 +36324,14 @@ void main() {
         if (out[key]) continue;
         const o = new OfflineAudioContext(2, Math.ceil(LEN[e.id] * ASR), ASR);
         RECIPES[e.id](o, o.destination, e.v);
-        out[key] = await o.startRendering();
+        const dry = await o.startRendering();
+        const wet = new OfflineAudioContext(2, dry.length, ASR);
+        const source = wet.createBufferSource(), shape = wet.createWaveShaper();
+        source.buffer = dry;
+        shape.curve = SFX_CURVE;
+        source.connect(shape).connect(wet.destination);
+        source.start();
+        out[key] = shapePeaks(key, await wet.startRendering());
       }
       SBUF = out;
       return true;
@@ -36245,16 +36339,31 @@ void main() {
       console.warn("sound synth failed", error?.message);
       return false;
     });
+    function sbuf(e) {
+      return SBUF[e.id + ":" + e.v];
+    }
+    window.audioReady = ready;
+    window.sbuf = sbuf;
+    window.SFXG = SFXG;
+    window.SFX_PER_EVENT = true;
+    window.sfxEventGain = (e) => {
+      const gains = SFX_LANG[lang] ?? SFX_LANG.ru;
+      return gains[e.id + ":" + e.v];
+    };
+    function connectEvent(o, output, event) {
+      const source = o.createBufferSource(), level = o.createGain();
+      source.buffer = sbuf(event);
+      level.gain.value = window.sfxEventGain(event);
+      source.connect(level).connect(output);
+      return source;
+    }
     function kick() {
       if (!window.AudioContext) return;
       if (!ctx) {
         ctx = new AudioContext({ latencyHint: "interactive" });
         gain = ctx.createGain();
         gain.gain.value = SFXG();
-        gain.connect(ctx.destination);
-        sat = ctx.createWaveShaper();
-        sat.curve = SFX_CURVE;
-        sat.connect(gain);
+        connectSfxBus(ctx, gain);
       }
       if (ctx.state !== "running") ctx.resume().catch(() => {
       });
@@ -36267,10 +36376,7 @@ void main() {
       if (dt2 <= 0 || dt2 > 0.35) return;
       for (const e of EVENTS) {
         if (e.t > prev && e.t <= t) {
-          const s = ctx.createBufferSource();
-          s.buffer = SBUF[e.id + ":" + e.v];
-          s.connect(sat);
-          s.start();
+          connectEvent(ctx, gain, e).start();
         }
       }
     }
@@ -36283,15 +36389,8 @@ void main() {
       const T = Math.max(...EVENTS.map((e) => e.t + LEN[e.id])) + 0.5;
       const o = new OfflineAudioContext(2, Math.ceil(T * ASR), ASR), gn = o.createGain();
       gn.gain.value = g;
-      gn.connect(o.destination);
-      let into = gn;
-      if (typeof SFX_CURVE !== "undefined") { into = o.createWaveShaper(); into.curve = SFX_CURVE; into.connect(gn); }
-      for (const e of EVENTS) {
-        const b = o.createBufferSource();
-        b.buffer = SBUF[e.id + ":" + e.v];
-        b.connect(into);
-        b.start(e.t);
-      }
+      connectSfxBus(o, gn);
+      for (const e of EVENTS) connectEvent(o, gn, e).start(e.t);
       const r = await o.startRendering(), n = r.length, buf = new ArrayBuffer(44 + n * 8), dv = new DataView(buf);
       const w4 = (p, x) => dv.setUint32(p, x, true), w2 = (p, x) => dv.setUint16(p, x, true), ws = (p, x) => [...x].forEach((c, i) => dv.setUint8(p + i, c.charCodeAt(0)));
       ws(0, "RIFF"); w4(4, 36 + n * 8); ws(8, "WAVE"); ws(12, "fmt "); w4(16, 16); w2(20, 3); w2(22, 2); w4(24, ASR); w4(28, ASR * 8); w2(32, 8); w2(34, 32); ws(36, "data"); w4(40, n * 8);
