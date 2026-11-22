@@ -1028,7 +1028,7 @@ function renderHome(){
 }
 
 let tick=null, pendingS=0, resumeAfter=false, editingComment=null, followupDraft=null;
-function curT(){try{const w=$("lesson").contentWindow,s=w.__state&&w.__state();if(s&&isFinite(s.t))return s.t;
+function curT(){try{const w=$("lesson").contentWindow,s=w.__state&&w.__state();if(s&&isFinite(s.t))return s.t;if(s&&isFinite(s.time))return s.time;
   const a=w.document.querySelector("audio,video");if(a&&isFinite(a.currentTime))return a.currentTime}catch(e){}return 0}
 function playing(){try{const w=$("lesson").contentWindow,s=w.__state&&w.__state();
   if(s&&typeof s.playing==="boolean")return s.playing;
