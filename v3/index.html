@@ -20,7 +20,13 @@ button{border:0;border-radius:12px;cursor:pointer;background:#eef1f5;color:var(-
 .preload-badge{position:absolute;top:5px;right:5px;padding:2px 6px;border-radius:6px;background:var(--panel);color:var(--mute);font-size:11px;line-height:1.2;pointer-events:none}
 .preload-badge.new-version,#pNewVersion{background:#fff0bd;color:#664600}
 #pNewVersion{border-radius:6px;padding:2px 6px;white-space:nowrap;font-size:12px}
-#lessonRetry{position:absolute;inset:0;margin:auto;width:max-content;height:max-content;padding:8px 14px}
+#lessonLoading{position:absolute;inset:0;z-index:1;display:grid;place-content:center;justify-items:center;gap:8px;padding:12px;background:#0e1116;color:#fff;text-align:center;overflow:auto}
+#lessonLoading[hidden]{display:none}
+#lessonSpinner{width:24px;height:24px;border:3px solid #ffffff50;border-top-color:#fff;border-radius:50%;animation:lessonSpin .8s linear infinite}
+@keyframes lessonSpin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){#lessonSpinner{animation:none}}
+#lessonSlow{font-size:13px}
+#lessonRetry{min-height:44px;padding:8px 14px}
 .card:not(:has(.th)):has(.preload-badge.new-version:not([hidden])){padding-top:24px}
 .preload-badge.dot{width:8px;height:8px;padding:0;border-radius:50%;top:8px;right:8px;box-shadow:0 0 0 1.5px #fff}
 .preload-badge.dot.loading{background:#f08a24;animation:c51blink 1.6s ease-in-out infinite}
@@ -271,6 +277,44 @@ button:focus-visible{outline:3px solid var(--gold2);outline-offset:2px}
 #roleError:not(:empty){margin:12px 0 0;color:var(--r)}
 .history-badge.conflict{background:#fce2e1;color:#982a26}
 .history-badge.merged{background:#e3e8ef;color:#384352}
+#rot{position:fixed;inset:0;width:100%;height:100%;max-width:none;max-height:none;margin:0;border:0;
+  padding:24px;background:var(--bg);color:var(--ink);text-align:center}
+#rot[open]{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px}
+#rot .lng{position:absolute;top:max(12px,env(safe-area-inset-top));right:max(12px,env(safe-area-inset-right))}
+#rot .phone{position:relative;display:grid;place-items:center;width:clamp(96px,35vw,220px);aspect-ratio:1}
+#rot .ring{position:absolute;inset:0;border:5px dashed var(--acc);border-radius:50%;animation:rotSpin 2.4s linear infinite}
+#rot .ic{font-size:clamp(56px,18vw,140px);line-height:1;animation:rotTilt 2.2s ease-in-out infinite}
+#rotFeishu{margin:0;max-width:32em}
+#rotMsg{margin:0;font-size:clamp(22px,4.2vw,34px);font-weight:800;line-height:1.35;max-width:18em}
+#rotTry,#rotOk{min-height:44px;padding:8px 16px;background:var(--acc);color:#fff;font-weight:700}
+#c51Rotate{display:none;align-items:center;justify-content:center;gap:8px;align-self:center;
+  flex:none;min-width:72px;min-height:72px;padding:8px 16px;font-size:18px;font-weight:800;
+  color:#2a1a00;background:var(--gold2)}
+#c51Rotate .rotate-back{display:none}
+@media (pointer:coarse) and (orientation:portrait){
+  #c51Rotate{display:inline-flex;margin:6px 0}
+}
+#player.c51-css-landscape,#player.c51-native-landscape{animation:none;overflow:hidden;background:#000}
+:is(.c51-css-landscape,.c51-native-landscape) :is(#bar,#pFix,#side,#dock){display:none}
+:is(.c51-css-landscape,.c51-native-landscape) #pbody{
+  position:absolute;flex-direction:column;overflow:hidden;background:#000}
+.c51-css-landscape #pbody{
+  top:0;left:100%;width:100vh;height:100vw;width:100dvh;height:100dvw;
+  transform-origin:top left;transform:rotate(90deg);
+  padding:env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left) env(safe-area-inset-top);
+  --rotate-top:env(safe-area-inset-right);--rotate-right:env(safe-area-inset-bottom)}
+.c51-native-landscape #pbody{
+  inset:0;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  --rotate-top:env(safe-area-inset-top);--rotate-right:env(safe-area-inset-right)}
+:is(.c51-css-landscape,.c51-native-landscape) #stage{flex:1;width:100%;height:100%}
+:is(.c51-css-landscape,.c51-native-landscape) #lesson{position:absolute;inset:0;width:100%;height:100%}
+:is(.c51-css-landscape,.c51-native-landscape) #c51Rotate{
+  display:inline-flex;position:absolute;z-index:2;top:calc(8px + var(--rotate-top));
+  right:calc(8px + var(--rotate-right));margin:0;background:#171c24;color:#fff}
+:is(.c51-css-landscape,.c51-native-landscape) #c51Rotate .rotate-go{display:none}
+:is(.c51-css-landscape,.c51-native-landscape) #c51Rotate .rotate-back{display:inline}
+@keyframes rotSpin{to{transform:rotate(360deg)}}
+@keyframes rotTilt{0%,18%,100%{transform:rotate(0deg)}45%,68%{transform:rotate(90deg)}}
 </style>
 </head>
 <body>
@@ -283,7 +327,19 @@ button:focus-visible{outline:3px solid var(--gold2);outline-offset:2px}
   <div id="bar"><button id="bTop" type="button" data-i="top">← 返回课程列表</button><span class="ttl" id="pTtl"></span><span id="pNewVersion" data-i="newVersion" aria-live="polite" hidden></span><div class="lng"></div><span class="sec" id="pSec">00:00</span></div>
   <div id="pFix" class="lesson-state" role="status" hidden></div>
   <div id="pbody">
-    <div id="stage"><iframe id="lesson" title="lesson" allow="fullscreen" allowfullscreen></iframe><button id="lessonRetry" type="button" data-i="retryLesson" hidden></button><div id="ph" data-i="making">制作中</div></div>
+    <div id="stage"><iframe id="lesson" title="lesson" allow="fullscreen" allowfullscreen></iframe><div id="lessonLoading" hidden>
+      <span id="lessonSpinner" aria-hidden="true"></span>
+      <span id="lessonLoadStatus" role="status"><span id="lessonLoadText"></span> <span id="lessonLoadPercent" aria-hidden="true" hidden></span></span>
+      <span id="lessonSlow" role="status" data-i="lessonSlow" hidden></span>
+      <button id="lessonRetry" type="button" data-i="retryLesson" hidden></button>
+    </div><div id="ph" data-i="making">制作中</div></div>
+    <button id="c51Rotate" type="button">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <rect x="3" y="2" width="9" height="15" rx="2"/><path d="M6.5 14h2m7-10a6 6 0 0 1 5 6m-3-2 3 3 2-3M14 15h6a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2"/>
+      </svg>
+      <span class="rotate-go" data-i="rotateLandscape"></span>
+      <span class="rotate-back" data-i="rotatePortrait"></span>
+    </button>
     <div id="side">
       <section id="history" aria-labelledby="historyTitle" hidden>
         <div class="sh" id="historyTitle" data-i="history"></div>
@@ -325,6 +381,15 @@ button:focus-visible{outline:3px solid var(--gold2);outline-offset:2px}
   <button id="roleRetry" type="button" data-i="roleRetry" hidden></button>
 </dialog>
 
+<dialog id="rot" aria-labelledby="rotMsg">
+  <div class="lng"></div>
+  <div class="phone" aria-hidden="true"><div class="ring"></div><div class="ic">📱</div></div>
+  <p id="rotMsg" data-i="rotatePhone"></p>
+  <p id="rotFeishu" data-i="rotateFeishu"></p>
+  <button id="rotTry" type="button" data-i="rotateLandscape"></button>
+  <button id="rotOk" type="button" data-i="rotateOk" autofocus></button>
+</dialog>
+
 <div id="toast" role="status"></div>
 <script>
 const PAGE_ID="c51-feedback-v3";
@@ -334,16 +399,22 @@ let reviewerRole=null, reviewerAdmin=false, roleSaving=false, roleError="";
 const KEY="c51tl:"+PAGE_ID;
 let FEISHU_NAME="", DATA=null, SHA={}, accountKey="";
 const draftKey=()=>accountKey?KEY+":"+accountKey:KEY;
+function readDraft(key){
+  try{return JSON.parse(localStorage.getItem(key)||"null")}catch{return null}
+}
 function loadDraft(){
-  try{
-    const draft=JSON.parse(localStorage.getItem(draftKey())||"null");
-    if(draft?.c)return draft;
-  }catch{}
-  return {name:"",c:{},cur:null};
+  const draft=readDraft(draftKey());
+  return draft?.c?draft:{name:"",c:{},cur:null};
 }
 let st=AUTH_SITE?{name:"",c:{},cur:null}:loadDraft();
-const save=()=>{try{if(!AUTH_SITE||accountKey)localStorage.setItem(draftKey(),JSON.stringify(st))}catch{}};
-let lessonStatus={}, statusReady=false, statusRequest=0;
+const save=()=>{
+  if(AUTH_SITE&&!accountKey)return;
+  const key=draftKey();
+  const saved=AUTH_SITE&&readDraft(key);
+  const draft=saved?.v?{...st,name:saved.name,v:saved.v}:st;
+  try{localStorage.setItem(key,JSON.stringify(draft))}catch{}
+};
+let lessonStatus={}, statusReady=false, statusRequest=0, manifestReady=false;
 const mine=l=>Object.hasOwn(lessonStatus,lid(l))?lessonStatus[lid(l)]?.mine:statusReady?"unreviewed":null;
 const fixing=l=>Object.hasOwn(lessonStatus,lid(l))?lessonStatus[lid(l)]?.fixing:null;
 const CARD_STATES={pass:["g","stG"],fail:["r","stR"],recheck:["make","recheck"],unreviewed:["y","stY"]};
@@ -353,16 +424,16 @@ const fmt=s=>{s=Math.max(0,Math.floor(+s||0));return String(Math.floor(s/60)).pa
 const lid=l=>{const f=l.file||"";const n=f.split("/").pop()||"";return n.replace(/\.html$/,"")};
 const made=l=>l.status!=="制作中"&&!!l.file;
 const shaOf=l=>SHA[lid(l)]||"";
-let viewing, openingLesson = false;
+let viewing, lessonSlowTimer, lessonReadyTimer, lessonOverlayTimer;
 const viewedSha=l=>viewing?.id===lid(l)?viewing.sha:"";
 const comments=(l,sha=shaOf(l))=>(st.c[lid(l)]||[]).filter(x=>x.sha&&x.sha===sha).sort((a,b)=>a.s-b.s);
 /* J 261120 982:整页界面四语(中 / 英 / 俄 / 哈)切换;课件自己的语言按钮不归这里管 */
 const LANGS=[["zh","中"],["en","EN"],["ru","Рус"],["kk","Қаз"]];
 const UI={
- zh:{roleTitle:"选择你的身份",switchRole:"切换身份",role_kk_ru:"我是俄语和哈语的教师或教研",role_kk:"我是哈语老师或教研",role_ru:"我是俄语老师或教研",role_zh:"我是中文教研",role_none:"我不是老师或教研",roleLoadError:"暂时无法读取登录身份，请重试。",roleSaveError:"暂时无法保存身份，请重试。",roleRetry:"重试",merged:"已合并",conflict:"反馈冲突",conflictWith:name=>"您的反馈和 "+name+" 的修改意见有冲突，请直接联系该用户",fixedIn:v=>"已在 "+v+" 修改",newVersion:"有新版",retryLesson:"下载失败，重试",preload:"后台预加载",preloadCached:"已缓存 ✓",preloadDownloading:"正在下载…",preloadPercent:n=>"正在下载 "+n+"%",preloadQueued:"排队中",preloadFailed:"下载失败",preloadLow:"可用空间不足 2 GB，后台预加载已暂停",history:"以往评论",fixed:"已改",nochange:"不改",wip:"处理中",unreplied:"未回复",oldVersion:"旧版",beijing:"北京时间",title:"看课评审",who:"填名字",top:"← 返回课程列表",making:"制作中",cmts:"本课评论",cmtsHint:"点时间跳到那一秒",note:"暂停并评论",pass:"通过",cmtSub:"课件已暂停。写一句就行,可以写多条。",cmtPh:"哪里不对?",cancel:"取消",save:"保存",nmTtl:"先填你的名字",nmSub:"只在第一次提交前问一次,存在这台设备上,之后不再问。",nmPh:"你的名字",ok:"确定",stG:"通过",stR:"不通过",stY:"没判",stM:"制作中",empty:"还没有评论",del:"删除",lesson:n=>"第 "+n+" 课",nc:n=>"意见 "+n+" 条",docT:(g,r,a)=>"看课评审 · 通过 "+g+" · 不通过 "+r+" / "+a,noSha:"这节课的校验还没载入,稍后再试",sent:"已保存",offline:"待重发",edit:"编辑",passBlocked:"还有待处理的评论"},
- en:{roleTitle:"Choose your role",switchRole:"Switch role",role_kk_ru:"I teach or develop curricula for both Russian and Kazakh",role_kk:"I teach or develop curricula for Kazakh",role_ru:"I teach or develop curricula for Russian",role_zh:"I develop Chinese-language curricula",role_none:"I am neither a teacher nor a curriculum specialist",roleLoadError:"Could not load your account. Try again.",roleSaveError:"Could not save your role. Try again.",roleRetry:"Try again",merged:"Merged",conflict:"Conflicting feedback",conflictWith:name=>"Your feedback conflicts with "+name+"’s suggested changes. Please contact them directly.",fixedIn:v=>"Fixed in "+v,newVersion:"New version available",retryLesson:"Download failed. Retry",preload:"Background preload",preloadCached:"Cached ✓",preloadDownloading:"Downloading…",preloadPercent:n=>"Downloading "+n+"%",preloadQueued:"Queued",preloadFailed:"Download failed",preloadLow:"Background preload paused because less than 2 GB is available",history:"Previous comments",fixed:"Fixed",nochange:"No change",wip:"In progress",unreplied:"Awaiting reply",oldVersion:"Older version",beijing:"Beijing time",title:"Lesson review",who:"Enter name",top:"← Back to lesson list",making:"In production",cmts:"Comments on this lesson",cmtsHint:"Tap a time to jump there",note:"Pause and comment",pass:"Pass",cmtSub:"The lesson is paused. One sentence is enough; you can add several.",cmtPh:"What is wrong?",cancel:"Cancel",save:"Save",nmTtl:"Enter your name first",nmSub:"Asked only once before your first submission and saved on this device.",nmPh:"Your name",ok:"OK",stG:"Passed",stR:"Failed",stY:"Not rated",stM:"In production",empty:"No comments yet",del:"Delete",lesson:n=>"Lesson "+n,nc:n=>n+(n===1?" comment":" comments"),docT:(g,r,a)=>"Lesson review · passed "+g+" · failed "+r+" / "+a,noSha:"This lesson's checksum has not loaded yet. Try again shortly.",sent:"Saved",offline:"Waiting to retry",edit:"Edit",passBlocked:"There are unresolved comments"},
- ru:{roleTitle:"Выберите свою роль",switchRole:"Сменить роль",role_kk_ru:"Я учитель или методист по русскому и казахскому языкам",role_kk:"Я учитель или методист по казахскому языку",role_ru:"Я учитель или методист по русскому языку",role_zh:"Я методист по китайскому языку",role_none:"Я не учитель и не методист",roleLoadError:"Не удалось загрузить данные вашей учётной записи. Попробуйте ещё раз.",roleSaveError:"Не удалось сохранить роль. Попробуйте ещё раз.",roleRetry:"Повторить",merged:"Объединено",conflict:"Противоречивые замечания",conflictWith:name=>"Ваше замечание противоречит правкам, которые предложил пользователь "+name+". Пожалуйста, свяжитесь с этим пользователем напрямую.",fixedIn:v=>"Исправлено в версии "+v,newVersion:"Доступна новая версия",retryLesson:"Ошибка загрузки. Повторить",preload:"Фоновая загрузка",preloadCached:"В кэше ✓",preloadDownloading:"Загрузка…",preloadPercent:n=>"Загрузка "+n+"%",preloadQueued:"В очереди",preloadFailed:"Ошибка загрузки",preloadLow:"Фоновая загрузка приостановлена, доступно менее 2 ГБ",history:"Предыдущие комментарии",fixed:"Исправлено",nochange:"Без изменений",wip:"В работе",unreplied:"Без ответа",oldVersion:"Старая версия",beijing:"Пекинское время",title:"Отзыв об уроках",who:"Введите имя",top:"← К списку уроков",making:"В работе",cmts:"Комментарии к уроку",cmtsHint:"Нажмите на время, чтобы перейти",note:"Приостановить и прокомментировать",pass:"Принято",cmtSub:"Урок на паузе. Достаточно одной фразы, можно написать несколько.",cmtPh:"Что не так?",cancel:"Отмена",save:"Сохранить",nmTtl:"Сначала введите своё имя",nmSub:"Спросим один раз перед первой отправкой, имя сохранится на этом устройстве.",nmPh:"Ваше имя",ok:"Готово",stG:"Принято",stR:"Не принято",stY:"Не оценено",stM:"В работе",empty:"Пока нет комментариев",del:"Удалить",lesson:n=>"Урок "+n,nc:n=>"замечаний: "+n,docT:(g,r,a)=>"Отзыв об уроках · принято "+g+" · не принято "+r+" / "+a,noSha:"Проверка урока ещё не загрузилась, попробуйте чуть позже",sent:"Сохранено",offline:"Ожидает повторной отправки",edit:"Изменить",passBlocked:"Есть незакрытые замечания"},
- kk:{roleTitle:"Рөліңізді таңдаңыз",switchRole:"Рөлді ауыстыру",role_kk_ru:"Мен орыс және қазақ тілдерінің мұғалімімін немесе әдіскерімін",role_kk:"Мен қазақ тілінің мұғалімімін немесе әдіскерімін",role_ru:"Мен орыс тілінің мұғалімімін немесе әдіскерімін",role_zh:"Мен қытай тілінің әдіскерімін",role_none:"Мен мұғалім де, әдіскер де емеспін",roleLoadError:"Аккаунт деректері жүктелмеді. Қайталап көріңіз.",roleSaveError:"Рөліңіз сақталмады. Қайталап көріңіз.",roleRetry:"Қайталау",merged:"Біріктірілді",conflict:"Қайшы пікірлер",conflictWith:name=>"Сіздің пікіріңіз "+name+" ұсынған түзетулермен қайшы келеді. Сол пайдаланушымен тікелей байланысыңыз.",fixedIn:v=>v+" нұсқасында түзетілді",newVersion:"Жаңа нұсқа бар",retryLesson:"Жүктеу сәтсіз. Қайталау",preload:"Фондық жүктеу",preloadCached:"Кэште ✓",preloadDownloading:"Жүктелуде…",preloadPercent:n=>"Жүктелуде "+n+"%",preloadQueued:"Кезекте",preloadFailed:"Жүктеу сәтсіз аяқталды",preloadLow:"Бос орын 2 ГБ-тан аз, фондық жүктеу тоқтатылды",history:"Бұрынғы пікірлер",fixed:"Түзетілді",nochange:"Өзгеріссіз",wip:"Орындалуда",unreplied:"Жауап жоқ",oldVersion:"Бұрынғы нұсқа",beijing:"Бейжің уақыты",title:"Сабақтарды бағалау",who:"Атыңызды жазыңыз",top:"← Сабақтар тізіміне",making:"Дайындалуда",cmts:"Сабаққа пікірлер",cmtsHint:"Уақытты бассаңыз, сол секундқа өтеді",note:"Кідіртіп, пікір жазу",pass:"Өтті",cmtSub:"Сабақ кідіртілді. Бір сөйлем жеткілікті, бірнешеуін жазуға болады.",cmtPh:"Не дұрыс емес?",cancel:"Болдырмау",save:"Сақтау",nmTtl:"Алдымен атыңызды жазыңыз",nmSub:"Алғашқы жіберу алдында бір рет қана сұралады, осы құрылғыда сақталады.",nmPh:"Атыңыз",ok:"Дайын",stG:"Өтті",stR:"Өтпеді",stY:"Бағаланбаған",stM:"Дайындалуда",empty:"Әзірге пікір жоқ",del:"Өшіру",lesson:n=>n+"-сабақ",nc:n=>"пікір: "+n,docT:(g,r,a)=>"Сабақтарды бағалау · өтті "+g+" · өтпеді "+r+" / "+a,noSha:"Сабақ тексерісі әлі жүктелмеді, сәлден кейін қайталаңыз",sent:"Сақталды",offline:"Қайта жіберуді күтуде",edit:"Өңдеу",passBlocked:"Жабылмаған пікірлер бар"}
+ zh:{rotatePhone:"请把手机横过来，或点下方的「横屏看」",rotateFeishu:"在飞书里打开的，手机转过来不会自动横屏，点「横屏看」即可",rotateLandscape:"横屏看",rotatePortrait:"竖屏看",rotateOk:"知道了",roleTitle:"选择你的身份",switchRole:"切换身份",role_kk_ru:"我是俄语和哈语的教师或教研",role_kk:"我是哈语老师或教研",role_ru:"我是俄语老师或教研",role_zh:"我是中文教研",role_none:"我不是老师或教研",roleLoadError:"暂时无法读取登录身份，请重试。",roleSaveError:"暂时无法保存身份，请重试。",roleRetry:"重试",merged:"已合并",conflict:"反馈冲突",conflictWith:name=>"您的反馈和 "+name+" 的修改意见有冲突，请直接联系该用户",fixedIn:v=>"已在 "+v+" 修改",newVersion:"有新版",retryLesson:"下载失败，重试",lessonLoading:"正在加载课件",lessonSlow:"网络较慢，请稍候",preload:"后台预加载",preloadCached:"已缓存 ✓",preloadDownloading:"正在下载…",preloadPercent:n=>"正在下载 "+n+"%",preloadQueued:"排队中",preloadFailed:"下载失败",preloadLow:"可用空间不足 2 GB，后台预加载已暂停",history:"以往评论",fixed:"已改",nochange:"不改",wip:"处理中",unreplied:"未回复",oldVersion:"旧版",beijing:"北京时间",title:"看课评审",who:"填名字",top:"← 返回课程列表",making:"制作中",cmts:"本课评论",cmtsHint:"点时间跳到那一秒",note:"暂停并评论",pass:"通过",cmtSub:"课件已暂停。写一句就行,可以写多条。",cmtPh:"哪里不对?",cancel:"取消",save:"保存",nmTtl:"先填你的名字",nmSub:"只在第一次提交前问一次,存在这台设备上,之后不再问。",nmPh:"你的名字",ok:"确定",stG:"通过",stR:"不通过",stY:"没判",stM:"制作中",empty:"还没有评论",del:"删除",lesson:n=>"第 "+n+" 课",nc:n=>"意见 "+n+" 条",docT:(g,r,a)=>"看课评审 · 通过 "+g+" · 不通过 "+r+" / "+a,noSha:"这节课的校验还没载入,稍后再试",sent:"已保存",offline:"待重发",edit:"编辑",passBlocked:"还有待处理的评论"},
+ en:{rotatePhone:"Turn your phone sideways or tap “Watch in landscape” below.",rotateFeishu:"In Feishu, turning your phone won’t switch the view automatically. Tap “Watch in landscape”.",rotateLandscape:"Watch in landscape",rotatePortrait:"Watch in portrait",rotateOk:"Got it",roleTitle:"Choose your role",switchRole:"Switch role",role_kk_ru:"I teach or develop curricula for both Russian and Kazakh",role_kk:"I teach or develop curricula for Kazakh",role_ru:"I teach or develop curricula for Russian",role_zh:"I develop Chinese-language curricula",role_none:"I am neither a teacher nor a curriculum specialist",roleLoadError:"Could not load your account. Try again.",roleSaveError:"Could not save your role. Try again.",roleRetry:"Try again",merged:"Merged",conflict:"Conflicting feedback",conflictWith:name=>"Your feedback conflicts with "+name+"’s suggested changes. Please contact them directly.",fixedIn:v=>"Fixed in "+v,newVersion:"New version available",retryLesson:"Download failed. Retry",lessonLoading:"Loading lesson",lessonSlow:"The connection is slow. Please wait.",preload:"Background preload",preloadCached:"Cached ✓",preloadDownloading:"Downloading…",preloadPercent:n=>"Downloading "+n+"%",preloadQueued:"Queued",preloadFailed:"Download failed",preloadLow:"Background preload paused because less than 2 GB is available",history:"Previous comments",fixed:"Fixed",nochange:"No change",wip:"In progress",unreplied:"Awaiting reply",oldVersion:"Older version",beijing:"Beijing time",title:"Lesson review",who:"Enter name",top:"← Back to lesson list",making:"In production",cmts:"Comments on this lesson",cmtsHint:"Tap a time to jump there",note:"Pause and comment",pass:"Pass",cmtSub:"The lesson is paused. One sentence is enough; you can add several.",cmtPh:"What is wrong?",cancel:"Cancel",save:"Save",nmTtl:"Enter your name first",nmSub:"Asked only once before your first submission and saved on this device.",nmPh:"Your name",ok:"OK",stG:"Passed",stR:"Failed",stY:"Not rated",stM:"In production",empty:"No comments yet",del:"Delete",lesson:n=>"Lesson "+n,nc:n=>n+(n===1?" comment":" comments"),docT:(g,r,a)=>"Lesson review · passed "+g+" · failed "+r+" / "+a,noSha:"This lesson's checksum has not loaded yet. Try again shortly.",sent:"Saved",offline:"Waiting to retry",edit:"Edit",passBlocked:"There are unresolved comments"},
+ ru:{rotatePhone:"Поверните телефон горизонтально или нажмите «Смотреть горизонтально» ниже.",rotateFeishu:"В Feishu поворот телефона не меняет ориентацию автоматически. Нажмите «Смотреть горизонтально».",rotateLandscape:"Смотреть горизонтально",rotatePortrait:"Смотреть вертикально",rotateOk:"Понятно",roleTitle:"Выберите свою роль",switchRole:"Сменить роль",role_kk_ru:"Я учитель или методист по русскому и казахскому языкам",role_kk:"Я учитель или методист по казахскому языку",role_ru:"Я учитель или методист по русскому языку",role_zh:"Я методист по китайскому языку",role_none:"Я не учитель и не методист",roleLoadError:"Не удалось загрузить данные вашей учётной записи. Попробуйте ещё раз.",roleSaveError:"Не удалось сохранить роль. Попробуйте ещё раз.",roleRetry:"Повторить",merged:"Объединено",conflict:"Противоречивые замечания",conflictWith:name=>"Ваше замечание противоречит правкам, которые предложил пользователь "+name+". Пожалуйста, свяжитесь с этим пользователем напрямую.",fixedIn:v=>"Исправлено в версии "+v,newVersion:"Доступна новая версия",retryLesson:"Ошибка загрузки. Повторить",lessonLoading:"Загрузка урока",lessonSlow:"Медленное соединение. Пожалуйста, подождите.",preload:"Фоновая загрузка",preloadCached:"В кэше ✓",preloadDownloading:"Загрузка…",preloadPercent:n=>"Загрузка "+n+"%",preloadQueued:"В очереди",preloadFailed:"Ошибка загрузки",preloadLow:"Фоновая загрузка приостановлена, доступно менее 2 ГБ",history:"Предыдущие комментарии",fixed:"Исправлено",nochange:"Без изменений",wip:"В работе",unreplied:"Без ответа",oldVersion:"Старая версия",beijing:"Пекинское время",title:"Отзыв об уроках",who:"Введите имя",top:"← К списку уроков",making:"В работе",cmts:"Комментарии к уроку",cmtsHint:"Нажмите на время, чтобы перейти",note:"Приостановить и прокомментировать",pass:"Принято",cmtSub:"Урок на паузе. Достаточно одной фразы, можно написать несколько.",cmtPh:"Что не так?",cancel:"Отмена",save:"Сохранить",nmTtl:"Сначала введите своё имя",nmSub:"Спросим один раз перед первой отправкой, имя сохранится на этом устройстве.",nmPh:"Ваше имя",ok:"Готово",stG:"Принято",stR:"Не принято",stY:"Не оценено",stM:"В работе",empty:"Пока нет комментариев",del:"Удалить",lesson:n=>"Урок "+n,nc:n=>"замечаний: "+n,docT:(g,r,a)=>"Отзыв об уроках · принято "+g+" · не принято "+r+" / "+a,noSha:"Проверка урока ещё не загрузилась, попробуйте чуть позже",sent:"Сохранено",offline:"Ожидает повторной отправки",edit:"Изменить",passBlocked:"Есть незакрытые замечания"},
+ kk:{rotatePhone:"Телефонды көлденең бұрыңыз немесе төмендегі «Көлденең көру» түймесін басыңыз.",rotateFeishu:"Feishu ішінде телефонды бұрғанда экран автоматты түрде ауыспайды. «Көлденең көру» түймесін басыңыз.",rotateLandscape:"Көлденең көру",rotatePortrait:"Тігінен көру",rotateOk:"Түсінікті",roleTitle:"Рөліңізді таңдаңыз",switchRole:"Рөлді ауыстыру",role_kk_ru:"Мен орыс және қазақ тілдерінің мұғалімімін немесе әдіскерімін",role_kk:"Мен қазақ тілінің мұғалімімін немесе әдіскерімін",role_ru:"Мен орыс тілінің мұғалімімін немесе әдіскерімін",role_zh:"Мен қытай тілінің әдіскерімін",role_none:"Мен мұғалім де, әдіскер де емеспін",roleLoadError:"Аккаунт деректері жүктелмеді. Қайталап көріңіз.",roleSaveError:"Рөліңіз сақталмады. Қайталап көріңіз.",roleRetry:"Қайталау",merged:"Біріктірілді",conflict:"Қайшы пікірлер",conflictWith:name=>"Сіздің пікіріңіз "+name+" ұсынған түзетулермен қайшы келеді. Сол пайдаланушымен тікелей байланысыңыз.",fixedIn:v=>v+" нұсқасында түзетілді",newVersion:"Жаңа нұсқа бар",retryLesson:"Жүктеу сәтсіз. Қайталау",lessonLoading:"Сабақ жүктелуде",lessonSlow:"Интернет баяу. Күте тұрыңыз.",preload:"Фондық жүктеу",preloadCached:"Кэште ✓",preloadDownloading:"Жүктелуде…",preloadPercent:n=>"Жүктелуде "+n+"%",preloadQueued:"Кезекте",preloadFailed:"Жүктеу сәтсіз аяқталды",preloadLow:"Бос орын 2 ГБ-тан аз, фондық жүктеу тоқтатылды",history:"Бұрынғы пікірлер",fixed:"Түзетілді",nochange:"Өзгеріссіз",wip:"Орындалуда",unreplied:"Жауап жоқ",oldVersion:"Бұрынғы нұсқа",beijing:"Бейжің уақыты",title:"Сабақтарды бағалау",who:"Атыңызды жазыңыз",top:"← Сабақтар тізіміне",making:"Дайындалуда",cmts:"Сабаққа пікірлер",cmtsHint:"Уақытты бассаңыз, сол секундқа өтеді",note:"Кідіртіп, пікір жазу",pass:"Өтті",cmtSub:"Сабақ кідіртілді. Бір сөйлем жеткілікті, бірнешеуін жазуға болады.",cmtPh:"Не дұрыс емес?",cancel:"Болдырмау",save:"Сақтау",nmTtl:"Алдымен атыңызды жазыңыз",nmSub:"Алғашқы жіберу алдында бір рет қана сұралады, осы құрылғыда сақталады.",nmPh:"Атыңыз",ok:"Дайын",stG:"Өтті",stR:"Өтпеді",stY:"Бағаланбаған",stM:"Дайындалуда",empty:"Әзірге пікір жоқ",del:"Өшіру",lesson:n=>n+"-сабақ",nc:n=>"пікір: "+n,docT:(g,r,a)=>"Сабақтарды бағалау · өтті "+g+" · өтпеді "+r+" / "+a,noSha:"Сабақ тексерісі әлі жүктелмеді, сәлден кейін қайталаңыз",sent:"Сақталды",offline:"Қайта жіберуді күтуде",edit:"Өңдеу",passBlocked:"Жабылмаған пікірлер бар"}
 };
 /* 分组名 / 风格 / 课名:按中文原值查表,查不到显示中文原值(新加的课先显示中文,在这里补一行即可) */
 const TR={
@@ -403,24 +474,48 @@ const REVIEW_UI={
     queued:"排队下一批",queuedBy:b=>"批次 "+b+" 结束后转待处理",wip:"本批修复中",
     batchLabel:b=>"批次 "+b,mergedInto:(sub,idx)=>"合并至 #"+sub+":"+idx,
     openCount:n=>n+" 条意见还没修",fixedCount:n=>n+" 条已修，等你复查",
+    followupButton:"不满意，追问",
+    followup:"追问",
+    followupHint:"写一句说明哪里还需要改。",
+    followupSend:"发送",
+    followupError:"追问提交失败，请重试。",
+    followupStale:"这条回复已更新。请关闭后查看最新历史。",
     tooLarge:"评论太长，请缩短后再提交",
     docT:(g,r,c,a)=>"看课评审 · 通过 "+g+" · 不通过 "+r+" · 待复查 "+c+" / "+a},
   en:{recheck:"Ready for recheck",stY:"Not reviewed",fixing:"Fixes in progress · New feedback goes to the next batch",
     pending:"Pending",queued:"Queued for the next batch",queuedBy:b=>"Pending once batch "+b+" closes",
     wip:"Being fixed in this batch",batchLabel:b=>"Batch "+b,mergedInto:(sub,idx)=>"Merged into #"+sub+":"+idx,
     openCount:n=>n+(n===1?" comment still needs a fix":" comments still need fixes"),fixedCount:n=>n+(n===1?" fixed comment awaits your recheck":" fixed comments await your recheck"),
+    followupButton:"Still an issue? Follow up",
+    followup:"Follow-up",
+    followupHint:"Write one sentence about what still needs fixing.",
+    followupSend:"Send",
+    followupError:"Could not send your follow-up. Try again.",
+    followupStale:"This reply has changed. Close this box to see the latest history.",
     tooLarge:"Shorten your comments and try again",
     docT:(g,r,c,a)=>"Lesson review · Passed "+g+" · Failed "+r+" · Ready for recheck "+c+" / "+a},
   ru:{recheck:"На повторной проверке",stY:"Не оценено",fixing:"Идёт исправление · Новые замечания войдут в следующий пакет",
     pending:"Ожидает обработки",queued:"В очереди на следующий пакет",queuedBy:b=>"Ожидает завершения пакета "+b,
     wip:"Исправляется в текущем пакете",batchLabel:b=>"Пакет "+b,mergedInto:(sub,idx)=>"Объединено с #"+sub+":"+idx,
     openCount:n=>"Ещё не исправлено замечаний: "+n,fixedCount:n=>"Исправлено замечаний для вашей повторной проверки: "+n,
+    followupButton:"Не устраивает? Уточнить",
+    followup:"Уточнение",
+    followupHint:"Одним предложением опишите, что ещё нужно исправить.",
+    followupSend:"Отправить",
+    followupError:"Не удалось отправить уточнение. Попробуйте снова.",
+    followupStale:"Ответ изменился. Закройте окно и посмотрите историю.",
     tooLarge:"Сократите комментарии и попробуйте снова",
     docT:(g,r,c,a)=>"Оценка уроков · Принято "+g+" · Не принято "+r+" · На повторной проверке "+c+" / "+a},
   kk:{recheck:"Қайта тексеруге дайын",stY:"Бағаланбаған",fixing:"Түзетіліп жатыр · Жаңа пікірлер келесі топтамаға қосылады",
     pending:"Өңдеуді күтуде",queued:"Келесі топтама кезегінде",queuedBy:b=>b+" топтамасы аяқталғанын күтуде",
     wip:"Осы топтамада түзетіліп жатыр",batchLabel:b=>"Топтама "+b,mergedInto:(sub,idx)=>"#"+sub+":"+idx+" пікірімен біріктірілді",
     openCount:n=>n+" пікір әлі түзетілмеді",fixedCount:n=>n+" пікір түзетілді, қайта тексеруіңізді күтіп тұр",
+    followupButton:"Жауап қанағаттандырмады ма? Нақтылау",
+    followup:"Нақтылау",
+    followupHint:"Тағы нені түзету керегін бір сөйлеммен жазыңыз.",
+    followupSend:"Жіберу",
+    followupError:"Нақтылау жіберілмеді. Қайталап көріңіз.",
+    followupStale:"Жауап өзгерді. Соңғы тарихты көру үшін терезені жабыңыз.",
     tooLarge:"Пікірлерді қысқартып, қайта жіберіңіз",
     docT:(g,r,c,a)=>"Сабақтарды бағалау · Өтті "+g+" · Өтпеді "+r+" · Қайта тексеруге дайын "+c+" / "+a}
 };
@@ -439,6 +534,7 @@ function applyLang(){
   });
   paintRoleError();
   paintPreloadSwitch();
+  paintLessonLoading();
   if(!DATA)document.title=T("title");
 }
 function setLang(k){if(!UI[k])return;LANG=k;try{localStorage.setItem("c51tl:lang",k)}catch(e){}applyLang();
@@ -466,6 +562,7 @@ function preloadURL(file, sha) {
 }
 
 function paintPreload(entry) {
+  if (viewing?.key === entry.key) paintLessonLoading();
   if (!entry.badge) return;
   // K 261121:缓存状态不写字,下载中 = 慢闪橙点,已缓存 = 嫩绿点;「有新版」仍用文字。
   let label = "", dot = "", tip = "";
@@ -561,7 +658,7 @@ async function downloadLesson(entry) {
   const aborter = new AbortController();
   preloadActive = { entry, aborter };
   entry.state = "downloading";
-  entry.percent = 0;
+  entry.percent = null;
   paintPreload(entry);
   try {
     const result = await workerCall("preload", entry, {
@@ -593,14 +690,60 @@ async function downloadLesson(entry) {
   }
 }
 
+function paintLessonLoading() {
+  const loading = viewing && !viewing.ready;
+  const entry = loading ? preloadLessons.get(curLesson().file) : null;
+  const cachedGrace = loading && viewing.deferOverlay && !viewing.failed &&
+    viewing.percent === undefined && entry?.key === viewing.key && entry?.state === "cached";
+  $("lessonLoading").hidden = !loading || cachedGrace;
+  $("lesson").inert = Boolean(loading);
+  $("lessonSlow").hidden = !loading || !viewing.slow;
+  $("lessonRetry").hidden = !loading || !(viewing.failed || viewing.slow);
+  $("lessonRetry").disabled = Boolean(viewing?.retrying);
+  if (!loading) return;
+  const backgroundPercent = viewing.key === entry?.key && entry?.state === "downloading" ? entry.percent : null;
+  const percent = viewing.percent === undefined ? backgroundPercent : viewing.percent;
+  const label = T("lessonLoading");
+  if ($("lessonLoadText").textContent !== label) $("lessonLoadText").textContent = label;
+  const percentLabel = $("lessonLoadPercent");
+  percentLabel.hidden = viewing.failed || !Number.isFinite(percent);
+  percentLabel.textContent = percentLabel.hidden ? "" : percent + "%";
+}
+
+function startLessonLoading(lesson) {
+  clearTimeout(lessonSlowTimer);
+  clearTimeout(lessonReadyTimer);
+  clearTimeout(lessonOverlayTimer);
+  const entry = preloadLessons.get(lesson.file);
+  const attempt = { id: lid(lesson), sha: "", key: entry?.key, ready: false, pending: true };
+  viewing = attempt;
+  $("pNewVersion").hidden = true;
+  // A verified cache hit can still spend time parsing the large lesson document.
+  if (entry?.state === "cached") {
+    attempt.deferOverlay = true;
+    lessonOverlayTimer = setTimeout(() => {
+      if (viewing !== attempt || attempt.ready) return;
+      attempt.deferOverlay = false;
+      paintLessonLoading();
+    }, 3000);
+  }
+  lessonSlowTimer = setTimeout(() => {
+    if (viewing !== attempt || attempt.ready) return;
+    attempt.slow = true;
+    paintLessonLoading();
+  }, 20000);
+  paintLessonLoading();
+}
+
 function setLessonFrame(lesson) {
+  if (!viewing?.pending) startLessonLoading(lesson);
   const frame = $("lesson");
   const entry = preloadLessons.get(lesson.file);
-  viewing = { id: lid(lesson), sha: entry?.sha || "", key: entry?.key, ready: false };
-  $("lessonRetry").hidden = Boolean(entry);
-  $("pNewVersion").hidden = true;
+  Object.assign(viewing, { sha: entry?.sha || "", key: entry?.key, pending: false });
   if (!entry) {
+    viewing.failed = true;
     frame.src = "about:blank";
+    paintLessonLoading();
     return;
   }
   if (preloadWorker) {
@@ -613,12 +756,13 @@ function setLessonFrame(lesson) {
       preloadOpening = { entry };
     }
   }
+  paintLessonLoading();
   frame.src = entry.key;
 }
 
 function lessonFrameLoaded() {
   const frame = $("lesson");
-  if (!viewing || frame.src !== viewing.key) return;
+  if (!viewing || viewing.pending || frame.src !== viewing.key) return;
   try {
     const href = frame.contentWindow.location.href;
     if (href === "about:blank") return;
@@ -627,15 +771,29 @@ function lessonFrameLoaded() {
   } catch {
     viewing.ready = false;
   }
-  const entry = preloadLessons.get(curLesson().file);
-  if (viewing.ready && entry?.key === viewing.key) {
-    entry.newVersion = false;
-    paintPreload(entry);
-  } else if (!viewing.ready) {
-    viewing.failed = true;
-    $("lessonRetry").hidden = false;
-  }
+  clearTimeout(lessonReadyTimer);
   if (preloadOpening) refreshOpenedLesson(preloadOpening);
+  if (viewing.ready) {
+    viewing.failed = false;
+    // Some lessons expose an explicit player-ready flag after the document loads.
+    let playerReady;
+    try { playerReady = frame.contentWindow.__state?.()?.ready; } catch {}
+    if (playerReady === false) {
+      viewing.ready = false;
+      lessonReadyTimer = setTimeout(lessonFrameLoaded, 250);
+      return;
+    }
+    clearTimeout(lessonSlowTimer);
+    clearTimeout(lessonOverlayTimer);
+    const entry = preloadLessons.get(curLesson().file);
+    if (entry?.key === viewing.key) {
+      entry.newVersion = false;
+      paintPreload(entry);
+    }
+  } else {
+    viewing.failed = true;
+  }
+  paintLessonLoading();
   paintReviewActions();
 }
 
@@ -756,7 +914,8 @@ function applyManifest(manifest, cached) {
     next.set(item.file, entry);
     shas[item.id] = item.sha;
   }
-  changed ||= next.size !== preloadLessons.size;
+  changed ||= !manifestReady || next.size !== preloadLessons.size;
+  manifestReady = true;
   if (prioritize || (preloadActive && next.get(preloadActive.entry.file) !== preloadActive.entry)) {
     stopPreload();
     preloadStart = Date.now();
@@ -768,7 +927,7 @@ function applyManifest(manifest, cached) {
     loadReviewStatus();
     renderHome();
     updatePreloadOrder();
-    if (viewing) {
+    if (viewing && !viewing.pending) {
       const latest = preloadLessons.get(curLesson().file);
       $("pNewVersion").hidden = !latest || latest.key === viewing.key;
     }
@@ -784,6 +943,12 @@ $("preloadToggle").onchange = event => {
   schedulePreload();
 };
 $("lesson").addEventListener("load", lessonFrameLoaded);
+navigator.serviceWorker?.addEventListener("message", ({ data, source }) => {
+  if (source !== preloadWorker || data?.type !== "lesson-progress" ||
+      !viewing || viewing.pending || viewing.ready || viewing.failed || data.key !== viewing.key) return;
+  viewing.percent = data.percent;
+  paintLessonLoading();
+});
 window.addEventListener("pagehide", stopPreload);
 window.addEventListener("pageshow", event => {
   if (event.persisted && DATA) refreshManifest();
@@ -854,7 +1019,7 @@ function renderHome(){
   document.title=AUTH_SITE&&reviewerRole===null?T("title"):T("docT")(ng,nr,nc,ready.length);
 }
 
-let tick=null, pendingS=0, resumeAfter=false, editingComment=null;
+let tick=null, pendingS=0, resumeAfter=false, editingComment=null, followupDraft=null;
 function curT(){try{const w=$("lesson").contentWindow,s=w.__state&&w.__state();if(s&&isFinite(s.t))return s.t;
   const a=w.document.querySelector("audio,video");if(a&&isFinite(a.currentTime))return a.currentTime}catch(e){}return 0}
 function playing(){try{const w=$("lesson").contentWindow,s=w.__state&&w.__state();
@@ -869,29 +1034,132 @@ function seek(s){try{const w=$("lesson").contentWindow;if(w.__setTime)w.__setTim
 
 function curLesson(){return DATA.lessons.find(l=>lid(l)===st.cur)}
 let homeY=0;
+const rotatePrompt=$("rot");
+const rotationPlayer=$("player");
+const phonePortrait=matchMedia("(pointer: coarse) and (orientation: portrait)");
+let rotationOptOut=false;
+let rotationDismissed=false;
+let rotationLock=null;
+
+function syncRotation(){
+  const active=rotationPlayer.classList.contains("on")&&!rotationOptOut;
+  const useCss=active&&phonePortrait.matches;
+  const native=active&&!useCss&&rotationLock?.locked&&document.fullscreenElement===rotationPlayer;
+  rotationPlayer.classList.toggle("c51-native-landscape",Boolean(native));
+  rotationPlayer.classList.toggle("c51-css-landscape",useCss);
+  // A failed transform restores the review layout and leaves the existing dialog as a fallback.
+  const cssWorked=useCss&&getComputedStyle($("pbody")).transform!=="none";
+  if(useCss&&!cssWorked)rotationPlayer.classList.remove("c51-css-landscape");
+  const show=useCss&&!cssWorked&&!rotationDismissed&&!rotationLock;
+  if(show&&!rotatePrompt.open)rotatePrompt.showModal();
+  if(!show&&rotatePrompt.open)rotatePrompt.close();
+}
+
+function endNativeRotation(request){
+  request.cancelled=true;
+  if(document.fullscreenElement!==rotationPlayer)return;
+  screen.orientation?.unlock?.();
+  document.exitFullscreen?.().catch(()=>{});
+}
+async function lockLandscape(request){
+  try{
+    await rotationPlayer.requestFullscreen();
+    if(request.cancelled||document.fullscreenElement!==rotationPlayer)return;
+    await screen.orientation.lock("landscape");
+    // Some hosts resolve lock() without resizing the viewport. Keep CSS active until it actually turns.
+    if(phonePortrait.matches&&!request.cancelled)await new Promise(resolve=>setTimeout(resolve,250));
+    request.locked=!request.cancelled&&!phonePortrait.matches&&document.fullscreenElement===rotationPlayer;
+  }catch{
+    // WebViews can reject either fullscreen or orientation lock. CSS stays available.
+  }finally{
+    if(!request.locked){
+      endNativeRotation(request);
+      rotationLock=null;
+    }
+    syncRotation();
+  }
+}
+function startLandscape(){
+  if(!phonePortrait.matches)return;
+  rotationOptOut=false;
+  if(!rotationLock&&!document.fullscreenElement&&document.fullscreenEnabled&&screen.orientation?.lock){
+    rotationLock={cancelled:false,locked:false};
+    void lockLandscape(rotationLock);
+  }
+  syncRotation();
+}
+function stopNativeRotation(){
+  if(!rotationLock)return;
+  endNativeRotation(rotationLock);
+  if(rotationLock.locked)rotationLock=null;
+}
+function showPortrait(){
+  rotationOptOut=true;
+  stopNativeRotation();
+  syncRotation();
+}
+phonePortrait.addEventListener("change",syncRotation);
+document.addEventListener("fullscreenchange",()=>{
+  if(rotationLock?.locked&&document.fullscreenElement!==rotationPlayer){
+    rotationLock=null;
+    rotationOptOut=true;
+  }
+  syncRotation();
+});
+$("c51Rotate").onclick=()=>{
+  if(rotationPlayer.matches(".c51-css-landscape,.c51-native-landscape"))showPortrait();
+  else startLandscape();
+};
+function dismissRotationPrompt(){
+  rotationDismissed=true;
+  syncRotation();
+}
+$("rotTry").onclick=()=>{
+  dismissRotationPrompt();
+  startLandscape();
+};
+$("rotOk").onclick=dismissRotationPrompt;
+rotatePrompt.addEventListener("cancel",event=>{
+  event.preventDefault();
+  dismissRotationPrompt();
+});
+
 async function openLesson(l){
-  if(openingLesson||viewing)return;
-  openingLesson=true;
+  if(viewing)return;
   homeY=window.scrollY||document.documentElement.scrollTop||0;
-  await preloadInit;
-  await refreshManifest();
-  openingLesson=false;
+  if(st.cur!==lid(l)){
+    rotationOptOut=false;
+    rotationDismissed=false;
+  }
   st.cur=lid(l);save();
   $("player").classList.add("on");
   $("home").style.display="none";
   document.querySelector(".top").style.display="none";
   setTtl(l);
+  startLessonLoading(l);
+  const attempt = viewing;
+  if(!rotationOptOut)startLandscape();
+  paintReviewActions();renderList();
+  clearInterval(tick);tick=setInterval(()=>$("pSec").textContent=fmt(curT()),500);
+  await preloadInit;
+  await refreshManifest();
+  if(viewing !== attempt)return;
   loadReviewStatus();
   setLessonFrame(l);
-  paintReviewActions();renderList();
+  renderList();
   loadHistory(l);
-  clearInterval(tick);tick=setInterval(()=>$("pSec").textContent=fmt(curT()),500);
 }
 async function closeLesson(){
   viewing=null;
+  clearTimeout(lessonSlowTimer);
+  clearTimeout(lessonReadyTimer);
+  clearTimeout(lessonOverlayTimer);
+  paintLessonLoading();
   historyView=null;
   clearInterval(tick);
   $("player").classList.remove("on");
+  stopNativeRotation();
+  syncRotation();
   if (preloadOpening) refreshOpenedLesson(preloadOpening);
   preloadOpening = null;
   $("lesson").src="about:blank";
@@ -964,15 +1232,66 @@ function openComment(it=null){
   if(!AUTH_SITE){location.assign("https://review.ooii.top/auth/login");return}
   if(!accountKey)return;
   editingComment=it;
+  configureCommentForm(false);
   resumeAfter=pause();pendingS=it?.s??curT();
   $("cmtAt").textContent="⏸ "+fmt(pendingS)+" · "+lbl(l);
   $("txt").value=it?.c??"";
   $("cmtOv").classList.add("on");
   setTimeout(()=>$("txt").focus(),50);
 }
-function closeComment(){$("cmtOv").classList.remove("on");if(resumeAfter)resume();resumeAfter=false}
+function configureCommentForm(followup){
+  const hint=$("cmtOv").querySelector("p");
+  hint.dataset.i=followup?"followupHint":"cmtSub";
+  hint.textContent=T(hint.dataset.i);
+  $("cSave").dataset.i=followup?"followupSend":"save";
+  $("cSave").textContent=T($("cSave").dataset.i);
+  $("cSave").disabled=false;
+  if(followup)$("txt").maxLength=2000;
+  else $("txt").removeAttribute("maxlength");
+}
+function openFollowup(l,reply){
+  const sha=viewedSha(l);
+  if(!viewing?.ready||!sha){toast(T("noSha"));return}
+  followupDraft={lesson:lid(l),reply_id:reply.id,sha,account:accountKey};
+  resumeAfter=pause();
+  configureCommentForm(true);
+  $("cmtAt").textContent=T("followup");
+  $("txt").value="";
+  $("cmtOv").classList.add("on");
+  $("txt").focus();
+}
+function closeComment(){
+  followupDraft=null;
+  $("cmtOv").classList.remove("on");
+  if(resumeAfter)resume();
+  resumeAfter=false;
+}
+async function saveFollowup(draft,text){
+  const {account,...target}=draft;
+  const saveButton=$("cSave");
+  saveButton.disabled=true;
+  try{
+    const res=await fetch("/followup",{method:"POST",headers:{"Content-Type":"application/json","X-C51-Account":account},
+      body:JSON.stringify({...target,text}),signal:AbortSignal.timeout(8000)});
+    if(account!==accountKey)return;
+    if(res.status===409){
+      if(followupDraft===draft)toast(T("followupStale"));
+      if(viewing)await loadHistory(curLesson());
+      return;
+    }
+    if(!res.ok||!(await res.json()).ok)throw new Error("Could not send follow-up");
+    if(followupDraft===draft){resumeAfter=false;closeComment()}
+    await Promise.all([loadReviewStatus(),loadSummary(),viewing&&loadHistory(curLesson())]);
+    toast(T("sent"));
+  }catch{
+    if(followupDraft===draft)toast(T("followupError"));
+  }finally{
+    if(followupDraft===draft)saveButton.disabled=false;
+  }
+}
 function saveComment(){
   const text=$("txt").value.trim();if(!text){$("txt").focus();return}
+  if(followupDraft){if(!$("cSave").disabled)saveFollowup(followupDraft,text);return}
   const l=curLesson();if(!l)return;
   const it=editingComment;
   const cid=it?.id??crypto.randomUUID();
@@ -990,19 +1309,23 @@ function confirmName(){
   const n=$("nameIn").value.trim();if(!n){$("nameIn").focus();return}
   st.name=n;save();$("nameOv").classList.remove("on");renderHome();
 }
+function reviewRecord(lesson,sha,verdict,comments){
+  return {v:1,page:PAGE_ID,lesson,sha,verdict,comments,
+    ts:new Date().toISOString(),ua:navigator.userAgent.slice(0,120),
+    request_id:crypto.randomUUID(),account_key:accountKey};
+}
 function submitChange(l,sha,verdict,payload,action,id){
   if(!accountKey)return false;
   if(!sha){toast(T("noSha"));return false}
   if(JSON.stringify(payload).length>20000){toast(T("tooLarge"));return false}
-  const rec={v:1,page:PAGE_ID,lesson:lid(l),sha,verdict,comments:payload,
-    ts:new Date().toISOString(),ua:navigator.userAgent.slice(0,120),
-    request_id:crypto.randomUUID(),account_key:accountKey};
+  const rec=reviewRecord(lid(l),sha,verdict,payload);
   if(action)Object.assign(rec,{comment_action:action,comment_id:id});
   try{queueSet([...queueGet(),rec])}catch{toast(T("roleSaveError"));return false}
   paintReviewActions();renderList();renderHistory(l);
   flushQueue().then(ok=>{if(!ok)toast(T("offline"))});
   return true;
 }
+const RESOLVED_STATES=["fixed","nochange","merged","conflict"];
 const HISTORY_STATES=["pending","queued","fixed","nochange","wip","merged","conflict"];
 let summary={}, summaryRequest=0, historyView=null;
 
@@ -1022,12 +1345,14 @@ async function loadReviewStatus(){
   }));
   if(request!==statusRequest||parts.some(part=>!part))return;
   const next=Object.assign(Object.create(null),...parts);
-  if(statusReady&&JSON.stringify(next)===JSON.stringify(lessonStatus)){
+  const unchanged=statusReady&&JSON.stringify(next)===JSON.stringify(lessonStatus);
+  statusReady=true;
+  lessonStatus=next;
+  queueLegacyPasses();
+  if(unchanged){
     if(viewing)paintReviewActions();
     return;
   }
-  statusReady=true;
-  lessonStatus=next;
   const focused=document.activeElement?.dataset.lid;
   renderHome();
   if(focused)document.querySelector('[data-lid="'+CSS.escape(focused)+'"]')?.focus({preventScroll:true});
@@ -1052,9 +1377,9 @@ async function getReviewData(path){
 function renderCommentCounts(card,id){
   const header=card.querySelector(".hd");
   header.querySelectorAll(".unreplied, .fixed-count").forEach(badge=>badge.remove());
-  const {open, fixed}=summary[id]??{};
+  const {open, fixed, reopened}=summary[id]??{};
   const counts=[["unreplied","openCount",open]];
-  if(card.dataset.reviewState==="recheck")counts.push(["fixed-count","fixedCount",fixed]);
+  if(card.dataset.reviewState==="recheck"||reopened>0)counts.push(["fixed-count","fixedCount",fixed]);
   for(const [className,label,count] of counts){
     if(!Number.isSafeInteger(count)||count<=0)continue;
     const badge=document.createElement("span");
@@ -1084,7 +1409,7 @@ async function loadHistory(l){
   const view={id,items:previous?.items??[]};
   historyView=view;
   if(!previous)renderHistory(l);
-  const data=await getReviewData("/thread?lesson="+encodeURIComponent(id));
+  const data=await getReviewData("/history?lesson="+encodeURIComponent(id));
   if(historyView!==view||!Array.isArray(data?.items)||
       JSON.stringify(data.items)===JSON.stringify(view.items))return;
   view.items=data.items;
@@ -1099,13 +1424,32 @@ function reviewDate(value){
     ?date.toLocaleDateString("sv-SE",{timeZone:"Asia/Shanghai"}):"";
 }
 
-function appendHistoryEntry(group,text,seconds,replies,effective){
-  const reply=lastReply(replies);
+function replyDetails(reply){
+  if(reply?.status==="conflict")return [T("conflictWith")(reviewText(reply.with)),reviewText(reply.text)];
+  const batch=reviewText(reply?.batch), version=reviewText(reply?.version);
+  if(reply?.status==="queued")return [batch?T("queuedBy")(batch):T("fixing")];
+  if(reply?.status==="wip")return [batch?T("batchLabel")(batch):version,reviewText(reply.text)];
+  if(reply?.status==="merged")return [
+    reply.target_sub_id!=null?T("mergedInto")(reply.target_sub_id,reply.target_idx):"",reviewText(reply.text)];
+  return [reviewText(reply?.text),reply?.status==="fixed"&&version?T("fixedIn")(version):version];
+}
+function appendHistoryReply(entry,reply,effective){
   const status=HISTORY_STATES.includes(reply?.status)?reply.status:"pending";
+  const row=document.createElement("div");
+  row.className="history-reply";
+  row.innerHTML='<span class="history-badge cmt-state"></span> <span class="history-answer"></span>';
+  const badge=row.firstElementChild;
+  badge.classList.add(status);
+  badge.textContent=T(status);
+  row.lastElementChild.textContent=[...replyDetails(reply),...(effective?[T(effective.status),...replyDetails(effective)]:[])].filter(Boolean).join(" · ");
+  entry.appendChild(row);
+}
+function appendHistoryEntry(group,text,seconds,replies,effective,comment=null){
+  const latest=lastReply(replies);
   const entry=document.createElement("div");
   const timed=Number.isFinite(seconds)&&seconds>=0;
   entry.className="history-entry"+(timed?"":" general");
-  entry.innerHTML='<div class="history-line"><span class="history-text"></span></div><div class="history-reply"><span class="history-badge cmt-state"></span> <span class="history-answer"></span></div>';
+  entry.innerHTML='<div class="history-line"><span class="history-text"></span></div>';
   if(timed){
     const time=document.createElement("button");
     time.type="button";
@@ -1115,20 +1459,24 @@ function appendHistoryEntry(group,text,seconds,replies,effective){
     entry.firstElementChild.prepend(time);
   }
   entry.querySelector(".history-text").textContent=text;
-  const badge=entry.querySelector(".history-badge");
-  badge.classList.add(status);
-  badge.textContent=T(status);
-  const answer=entry.querySelector(".history-answer");
-  const details=current=>{
-    if(current?.status==="conflict")return [T("conflictWith")(reviewText(current.with)),reviewText(current.text)];
-    const batch=reviewText(current?.batch), version=reviewText(current?.version);
-    if(current?.status==="queued")return [batch?T("queuedBy")(batch):T("fixing")];
-    if(current?.status==="wip")return [batch?T("batchLabel")(batch):version,reviewText(current.text)];
-    if(current?.status==="merged")return [
-      current.target_sub_id!=null?T("mergedInto")(current.target_sub_id,current.target_idx):"",reviewText(current.text)];
-    return [reviewText(current?.text),current?.status==="fixed"&&version?T("fixedIn")(version):version];
-  };
-  answer.textContent=[...details(reply),...(effective?[T(effective.status),...details(effective)]:[])].filter(Boolean).join(" · ");
+  const followups=new Map((comment?.followups??[]).map(followup=>[followup.reply_id,followup]));
+  const status=comment?.status??latest?.status??"pending";
+  const currentReply=latest?.status===status?latest:{status,batch:comment?.batch};
+  const timeline=comment?(replies??[]):[];
+  for(const reply of timeline){
+    if(reply!==currentReply&&reply.by==="system"&&!RESOLVED_STATES.includes(reply.status))continue;
+    appendHistoryReply(entry,reply,reply===currentReply?effective:null);
+    const followup=followups.get(reply.id);
+    if(followup){
+      const row=document.createElement("div");
+      row.className="history-reply history-followup";
+      const date=new Date(followup.at).toLocaleString(LANG,{timeZone:"Asia/Shanghai"});
+      row.title=T("beijing");
+      row.textContent=[T("followup"),followup.author,date,followup.sha].join(" · ")+"\n"+followup.text;
+      entry.appendChild(row);
+    }
+  }
+  if(!comment||currentReply!==latest)appendHistoryReply(entry,currentReply,effective);
   group.appendChild(entry);
   return entry;
 }
@@ -1164,7 +1512,16 @@ function renderHistory(l){
     group.appendChild(meta);
     if(showNote)appendHistoryEntry(group,note===generated?note.split("\n")[0]:note,null,item.note_replies,item.note_effective_reply);
     for(const comment of visible){
-      const entry=appendHistoryEntry(group,comment.c,comment.s,comment.replies,comment.effective_reply);
+      const entry=appendHistoryEntry(group,comment.c,comment.s,comment.replies,comment.effective_reply,comment);
+      const reply=lastReply(comment.replies);
+      if(item.own&&reply?.id&&RESOLVED_STATES.includes(comment.status)){
+        const button=document.createElement("button");
+        button.type="button";
+        button.className="comment-edit history-followup-button";
+        button.textContent=T("followupButton");
+        entry.lastElementChild.append(" ",button);
+        button.onclick=()=>openFollowup(l,reply);
+      }
       if(item.own&&comment.id&&/^(?:[a-f0-9]{8}|[a-f0-9]{64})$/.test(itemSha)){
         const it={...comment,sha:itemSha};
         addCommentActions(entry.querySelector(".history-line"),it,()=>removeComment(it));
@@ -1180,22 +1537,86 @@ function queueGet(){
   try{return accountKey?JSON.parse(localStorage.getItem(queueKey())||"[]"):[]}catch{return []}
 }
 function queueSet(q){localStorage.setItem(queueKey(),JSON.stringify(q))}
-let queueFlush;
+function legacyDraft(key){
+  const draft=readDraft(key);
+  return draft?.v&&(draft.name==null||draft.name===""||draft.name===FEISHU_NAME)?draft:null;
+}
+
+// Prefer the account draft and exact lesson IDs when old keys overlap.
+function queueLegacyPasses(){
+  if(!accountKey||!FEISHU_NAME||!statusReady||!manifestReady)return;
+  const sources=[draftKey(),KEY].map(key=>[key,legacyDraft(key)]).filter(([,draft])=>draft);
+  if(!sources.length)return;
+  const lessons=new Map(DATA.lessons.filter(l=>lid(l)).map(l=>[lid(l),l]));
+  const queue=queueGet();
+  const pending=new Set(queue.map(record=>record.lesson));
+  const candidates=[];
+  for(const [key,draft] of sources){
+    for(const [id,record] of Object.entries(draft.v)){
+      if(record?.v!=="g"||record.migrated||typeof record.sha!=="string"||
+          !/^(?:[a-f0-9]{8}|[a-f0-9]{64})$/.test(record.sha))continue;
+      const lesson=lessons.get(id)??lessons.get(id+"-c");
+      if(!lesson||mine(lesson)!=="unreviewed")continue;
+      candidates.push({key,id,lesson:lid(lesson),sha:record.sha});
+    }
+  }
+  candidates.sort((a,b)=>Number(a.id!==a.lesson)-Number(b.id!==b.lesson));
+  const added=[];
+  for(const {key,id,lesson,sha} of candidates){
+    if(pending.has(lesson))continue;
+    pending.add(lesson);
+    added.push({...reviewRecord(lesson,sha,"g",[]),only_unreviewed:true,legacy:{key,id}});
+  }
+  if(!added.length)return;
+  try{queueSet([...queue,...added])}catch{return}
+  flushQueue();
+}
+
+function pendingLegacyDraft(record){
+  const {key,id}=record.legacy;
+  const draft=legacyDraft(key);
+  const old=draft?.v?.[id];
+  return old?.v==="g"&&old.sha===record.sha&&!old.migrated?draft:null;
+}
+
+function markLegacyPass(record){
+  const draft=pendingLegacyDraft(record);
+  if(!draft)return false;
+  const {key,id}=record.legacy;
+  draft.v[id].migrated=true;
+  localStorage.setItem(key,JSON.stringify(draft));
+  return true;
+}
+
+const legacyPassNotice={
+  zh:n=>"已补回 "+n+" 条以前的通过",
+  en:n=>"Restored "+n+" previous "+(n===1?"approval":"approvals"),
+  ru:n=>"Восстановлено прежних одобрений: "+n,
+  kk:n=>"Қалпына келтірілген бұрынғы мақұлдаулар: "+n
+};
+let queueFlush, legacyPassesRestored=0;
 function flushQueue(){
   if(!accountKey||reviewerRole===null)return Promise.resolve(false);
   if(queueFlush)return queueFlush;
   const account=accountKey;
   queueFlush=(async ()=>{
-    let sent=false, blocked=false;
+    let sent=false, manualSent=false, blocked=false;
     try{
       while(accountKey===account){
         const [record]=queueGet();
         if(!record)break;
+        const {legacy,...payload}=record;
+        if(legacy&&!pendingLegacyDraft(record)){
+          queueSet(queueGet().filter(item=>item.request_id!==record.request_id));
+          continue;
+        }
         const res=await fetch("/submit",{method:"POST",headers:{"Content-Type":"application/json"},
-          body:JSON.stringify(record),signal:AbortSignal.timeout(8000)});
+          body:JSON.stringify(payload),signal:AbortSignal.timeout(8000)});
         if(!res.ok)return false;
         const result=await res.json();
         if(!result.ok||accountKey!==account)return false;
+        if(legacy&&!result.skipped&&!result.blocked&&markLegacyPass(record))legacyPassesRestored++;
+        manualSent ||= !legacy;
         blocked ||= result.blocked===true;
         queueSet(queueGet().filter(item=>item.request_id!==record.request_id));
         sent=true;
@@ -1206,7 +1627,11 @@ function flushQueue(){
       if(sent&&accountKey===account){
         await Promise.all([loadReviewStatus(),loadSummary(),viewing&&loadHistory(curLesson())]);
         if(viewing){renderList();renderHistory(curLesson())}
-        if(!queueGet().length)toast(T(blocked?"passBlocked":"sent"));
+        const remaining=queueGet();
+        if(legacyPassesRestored&&!remaining.some(item=>item.legacy)){
+          toast(legacyPassNotice[LANG](legacyPassesRestored));
+          legacyPassesRestored=0;
+        }else if(manualSent&&!remaining.length)toast(T(blocked?"passBlocked":"sent"));
       }
     }
   })().then(ok=>{
@@ -1222,10 +1647,14 @@ setInterval(()=>{if(queueGet().length)flushQueue()},30000);
 window.addEventListener("online",()=>{flushQueue();refreshReview()});
 
 $("lessonRetry").onclick=async ()=>{
-  const failed = viewing;
+  const attempt = viewing;
+  if (!attempt || attempt.ready || attempt.retrying) return;
+  attempt.retrying = true;
+  paintLessonLoading();
   await refreshManifest();
-  if (viewing === failed) {
+  if (viewing === attempt && !attempt.ready) {
     const lesson = curLesson();
+    startLessonLoading(lesson);
     setLessonFrame(lesson);
     paintReviewActions();
     renderList();
@@ -1239,7 +1668,7 @@ $("bPass").onclick=()=>{
 };
 $("bTop").onclick=closeLesson;
 /* J 261120 980.4:课里要有明显的回列表按钮;Esc 同效(评论框开着时 Esc 先关评论框) */
-document.addEventListener("keydown",e=>{if(e.key!=="Escape"||$("roleDialog").open)return;if($("cmtOv").classList.contains("on")||$("nameOv").classList.contains("on"))return;if($("player").classList.contains("on"))closeLesson()});
+document.addEventListener("keydown",e=>{if(e.key!=="Escape"||$("roleDialog").open||rotatePrompt.open)return;if($("cmtOv").classList.contains("on")||$("nameOv").classList.contains("on"))return;if($("player").classList.contains("on"))closeLesson()});
 $("cCancel").onclick=closeComment;
 $("cSave").onclick=saveComment;
 $("txt").addEventListener("keydown",e=>{if(e.key==="Enter"&&(e.metaKey||e.ctrlKey))$("cSave").click()});
@@ -1291,11 +1720,13 @@ async function loadReviewer(){
     if(!profile.ok||!profile.name||!profile.account_key)throw new Error("Invalid reviewer profile");
     if(accountKey!==profile.account_key){
       accountKey=profile.account_key;
+      legacyPassesRestored=0;
       lessonStatus={};statusReady=false;summary={};historyView=null;
       ++statusRequest;++summaryRequest;
       st=loadDraft();
     }
-    FEISHU_NAME=profile.name;reviewerAvatar=profile.avatar;st.name=profile.name;save();
+    FEISHU_NAME=profile.name;reviewerAvatar=profile.avatar;
+    st.name=profile.name;save();
     reviewerRole=["kk_ru","kk","ru","zh","none"].includes(profile.role)?profile.role:null;
     reviewerAdmin=profile.is_admin===true;
     paintReviewer();

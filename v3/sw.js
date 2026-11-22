@@ -277,7 +277,15 @@ self.addEventListener("fetch", event => {
     const response = await fetch(request, { cache: "no-store" });
     // Preserve the login redirect so an expired session can be renewed.
     if (response.type === "opaqueredirect") return { response };
-    const verified = await verifyLesson(key, response);
+    // An iframe navigation may omit the initiating client ID.
+    const client = event.clientId && await self.clients.get(event.clientId).catch(() => null);
+    const reviewers = client?.url === request.referrer ? [client] :
+      (await self.clients.matchAll({ type: "window" }).catch(() => []))
+        .filter(candidate => candidate.url === request.referrer);
+    const progress = reviewers.length === 1
+      ? percent => reviewers[0].postMessage({ type: "lesson-progress", key, percent })
+      : undefined;
+    const verified = await verifyLesson(key, response, { progress });
     if (!verified || (versions && !versions.has(key))) return { response: unavailableLesson() };
     const stored = storeLesson(key, verified.clone(), { manual: true }).catch(() => false);
     trackForeground(key, stored);
