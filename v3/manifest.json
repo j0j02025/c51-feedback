@@ -338,7 +338,7 @@
    "subject": "俄语",
    "title": "基数词与序数词的拼写（第二课）｜瀑布(重构版)",
    "file": "lessons/ru-lang-67-rb.html",
-   "sha": "885002bd9e741a98b55c2225c4b77607b53b0b9b07d27c88501b07f8824f6ed9"
+   "sha": "a92f89d07e91e345059eddf8b2242f6ac2854f0d93f58e273f123818cea04acf"
   },
   {
    "id": "kk-lang-68-rb",
@@ -355,6 +355,14 @@
    "title": "单位面积产量（新知）(重构版 · 哈俄合一)",
    "file": "lessons/math-82-rb.html",
    "sha": "2f9eeb33d8766f466d583a257a5d6bd833102b697bdb5e1957dc1268b21aaf4a"
+  },
+  {
+   "id": "kk-lang-67-rb",
+   "no": 67,
+   "subject": "哈语",
+   "title": "名词（第一课）(重构版)",
+   "file": "lessons/kk-lang-67-rb.html",
+   "sha": "83a37076ff48470277ea7e0eacfb281725a4b050c9a33dd040a7d61732578caa"
   }
  ]
 }
