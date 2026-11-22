@@ -793,6 +793,7 @@ function lessonFrameLoaded() {
     }
     clearTimeout(lessonSlowTimer);
     clearTimeout(lessonOverlayTimer);
+    hideLessonBgm(frame);
     const entry = preloadLessons.get(curLesson().file);
     if (entry?.key === viewing.key) {
       entry.newVersion = false;
@@ -950,6 +951,39 @@ $("preloadToggle").onchange = event => {
   paintPreloadSwitch();
   schedulePreload();
 };
+
+// J 1042: BGM removed from every lesson. Hide the music control from the shell
+// and force it off. Lessons themselves are not edited.
+function hideLessonBgm(frame) {
+  let doc, win;
+  try { doc = frame.contentDocument; win = frame.contentWindow; } catch { return; }
+  if (!doc || !doc.documentElement) return;
+  const paint = () => {
+    if (!doc.head || doc.getElementById("c51-hide-bgm")) return;
+    const style = doc.createElement("style");
+    style.id = "c51-hide-bgm";
+    style.textContent = '[data-cv-ctl="bgm"],#bgmToggle,#bgmBtn,#music{display:none!important}';
+    doc.head.appendChild(style);
+  };
+  paint();
+  // Lessons rebuild the control bar on language switch. Re-hide without touching lessons.
+  if (!doc.documentElement.dataset.c51BgmWatch) {
+    doc.documentElement.dataset.c51BgmWatch = "1";
+    new MutationObserver(paint).observe(doc.documentElement, { childList: true, subtree: true });
+  }
+  try { if (typeof win.setBgm === "function") win.setBgm(false); } catch {}
+  try {
+    const btn = doc.querySelector('[data-cv-ctl="bgm"]');
+    if (btn && btn.getAttribute("aria-pressed") === "true") btn.click();
+  } catch {}
+  try {
+    for (const audio of doc.querySelectorAll("audio#bgm")) {
+      audio.muted = true;
+      if (!audio.paused) audio.pause();
+    }
+  } catch {}
+}
+
 $("lesson").addEventListener("load", lessonFrameLoaded);
 navigator.serviceWorker?.addEventListener("message", ({ data, source }) => {
   if (source !== preloadWorker || data?.type !== "lesson-progress" ||
@@ -1119,8 +1153,9 @@ function showPortrait(){
   stopNativeRotation();
   syncRotation();
 }
-phonePortrait.addEventListener("change",syncRotation);
+phonePortrait.addEventListener("change",()=>{ hideLessonBgm($("lesson")); syncRotation(); });
 document.addEventListener("fullscreenchange",()=>{
+  hideLessonBgm($("lesson"));
   if(rotationLock?.locked&&document.fullscreenElement!==rotationPlayer){
     rotationLock=null;
     rotationOptOut=true;
