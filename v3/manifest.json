@@ -363,6 +363,30 @@
    "title": "名词（第一课）(重构版)",
    "file": "lessons/kk-lang-67-rb.html",
    "sha": "f0bc3648052366454041a71bad9bd26d58011e4df7cfb64b11a9b5780164ee70"
+  },
+  {
+   "id": "ru-math-82-bi-c",
+   "no": 82,
+   "subject": "俄语数学",
+   "title": "单位面积产量（新知）（俄哈合一）",
+   "file": "lessons/ru-math-82-bi-c.html",
+   "sha": "304affae0c7eb5747b04c76136398698963f7cf90bce52a20ccdda4d2756334e"
+  },
+  {
+   "id": "kk-lang-68-rb2",
+   "no": 68,
+   "subject": "哈语",
+   "title": "名词（第二课）(重构版)",
+   "file": "lessons/kk-lang-68-rb2.html",
+   "sha": "56d9501395a63625a57adf0c7079a00fda80d031dadbe2fe08364530d6fa45ab"
+  },
+  {
+   "id": "kk-math-82-bi-c",
+   "no": 82,
+   "subject": "哈语数学",
+   "title": "单位面积产量（新知）（俄哈合一）",
+   "file": "lessons/kk-math-82-bi-c.html",
+   "sha": "9036d02820a084ae99b16dfa92cee104d7044bb7cab6ce84708632168a998040"
   }
  ]
 }
