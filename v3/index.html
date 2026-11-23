@@ -562,7 +562,7 @@ let preloadWorker, preloadTimer, preloadActive, preloadOpening, preloadInit, man
 let preloadOrder = [], preloadStart = 0, preloadLow = false;
 const manifestInterval = 30000;
 const connection = navigator.connection;
-let preloadOn = !(matchMedia("(max-width: 759px)").matches || connection?.saveData || /^(2g|3g|slow-2g)$/.test(connection?.effectiveType || ""));
+let preloadOn = !(connection?.saveData || /^(2g|3g|slow-2g)$/.test(connection?.effectiveType || ""));
 function postponePreload(){ preloadStart=Date.now()+10000; if(preloadTimer){clearTimeout(preloadTimer);preloadTimer=null;} schedulePreload(); }
 for(const type of ["pointerdown","keydown","touchstart","scroll"]) addEventListener(type,postponePreload,{passive:true});
 
