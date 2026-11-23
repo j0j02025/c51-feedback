@@ -762,6 +762,9 @@ function evidence(s,slot) {
   }
   if(s.live.grey){
     foldedTag(...s.move.jaw,'gray');
+  }else if(!s.grey.pocket&&s.grey.p[0]===1290&&s.grey.p[1]===700){
+    // ccc-kl67ptr (J, zh 0:02): the face-down grey card is not drawn at rest on its start point (timing.py GREY, 1290,700),
+    // where it sat as a stray grey box over card 2's bottom-left border from 0:00 to kk 20. It shows from the grip on.
   }else if(!s.grey.pocket){
     const p=s.grey.p;
     // A separate trial shelf preserves both the existing C1 tag and its way label.
@@ -904,14 +907,10 @@ function focusAndGirl(t,s,cue) {
       rounded(areaX-3,155,584,550,15);g.stroke();g.restore();
     }
     if(!a.held&&/tap|touch|park|wait|idle|hover|point|hesitate|count/.test(a.label)){
-      // ccc-030 t3098 #1: the pulsing focus ring only takes radii whose stroke clears every text ink box
-      // (+2 px half stroke +3 px gap). Over a word it frames the word from outside or sits in the gap; if no radius clears, no ring.
-      const r=focusRadius(x,y,(Math.sin(t*9)+1)/2);
-      if(r){
-        if(captureBounds)ellipseLog.push([x,y,r,r,4,color,2,'focus']);
-        g.save();g.strokeStyle=color;g.lineWidth=4;g.setLineDash([7,5]);g.lineDashOffset=-t*34;
-        g.beginPath();g.arc(x,y,r,0,Math.PI*2);g.stroke();g.restore();
-      }
+      // ccc-kl67ptr (J, zh 0:02): the dashed ring round the tip read as part of a "V in a dashed circle"; it is replaced by
+      // a soft solid glow under the new pointer head, same segments and same 9 rad/s pulse, so the holds keep their motion.
+      const r=22+8*Math.sin(t*9);
+      g.save();g.globalAlpha=.2;g.fillStyle=color;g.beginPath();g.arc(x,y,r,0,Math.PI*2);g.fill();g.restore();
     }
   }
   const pose=poseAt(t,s,cue,x,y);
@@ -929,20 +928,17 @@ function focusAndGirl(t,s,cue) {
   line([butt,grip],'#395753',14);
   line([grip,[x,y]],'#f6ffefbd',8);
   line([grip,[x,y]],'#5e80779c',2);
+  // ccc-kl67ptr (J, zh 0:02): a solid pointer head replaces the felt clamp jaws (an upright "V" that ignored the rod's
+  // direction). Its point is the rod tip (x,y), it lies along the rod, in the rod's grip teal with a cream rim. Its barbs
+  // keep the jaws' motion: half-width = the old jaw opening (pulsing 7-15 px, 8 while holding, 5 while the lid opens);
+  // the head also breathes +-7 % with the glow's 9 rad/s pulse.
   const pinch=a.held||s.opening?8:11+Math.sin(t*12)*4;
-  // Mirror a single felt cheek about its pivot. The two tips follow the original jaw opening.
   const jawHalf=s.opening?5:pinch;
-  const jawHeight=s.opening?10:20;
-  g.save();g.translate(x,y+8);
-  for(const side of [-1,1]){
-    g.save();g.scale(side,1);
-    const arm=assets['skin-clamp'];
-    const length=Math.hypot(jawHalf,jawHeight);
-    const width=length*arm.naturalWidth/arm.naturalHeight;
-    g.rotate(-Math.atan2(jawHalf,jawHeight)+.08);
-    surface(propMaterials.clamp,-.70*width,-.94*length,width,length);
-    g.restore();
-  }
+  const breathe=1+.07*Math.sin(t*9);
+  g.save();g.translate(x,y);g.rotate(Math.atan2(uy,ux));g.scale(breathe,breathe);
+  g.beginPath();g.moveTo(0,0);g.lineTo(-28,-jawHalf);g.quadraticCurveTo(-21,0,-28,jawHalf);g.closePath();
+  g.lineJoin='round';g.lineWidth=5;g.strokeStyle='#f6ffef';g.stroke();
+  g.fillStyle='#395753';g.fill();
   g.restore();
   const fr=POSE_FIST[pose][2]*ACTOR_K+1;
   g.save();g.beginPath();g.arc(fist[0],fist[1],fr,0,2*Math.PI);g.clip();
@@ -1027,11 +1023,18 @@ const d=(((j-L)%N)+N)%N;for(let c=0;c<out.length;c++)out[c][s]=this.x[Math.min(c
 return true}}
 registerProcessor('cv-tp-limiter',CvLimiter);`;
 const CV_LIMITER_OPTS={ceiling:-1.6,lookahead:3,release:80};
+// ccc-kl67ptr speech-GR trim (JCC rule 08:44 UTC 2026-11-23; CCC ruling A1 10:31 UTC): a fixed gain on voice + SFX before the
+// master limiter, per view, the smallest 0.5 dB step with <= 1 % of 50 ms speech blocks (RMS > -40 dBFS) whose max limiter
+// gain reduction is > 1 dB, at rates 1 / 0.8 / 0.6 (48 kHz, review-kl67ptr/speech_gr.py). Only while the voice runs through
+// the limiter; SFX alone stay untrimmed.
+const SPEECH_TRIM_DB={kk:-3,en:-2.5,zh:-3.5};
 let masterIn, limiterNode=null, voiceNode=null, limiterLoad=null;
+function applyTrim(){if(masterIn)masterIn.gain.value=voiceNode?Math.pow(10,(SPEECH_TRIM_DB[lang]??0)/20):1}
 function routeVoice(){
   // once per element (createMediaElementSource is permanent): only with a running context and a loaded limiter
   if(voiceNode||!limiterNode||soundContext.state!=='running')return;
   try{voiceNode=soundContext.createMediaElementSource(clock);voiceNode.connect(masterIn)}catch(e){console.warn('voice stays direct',e)}
+  applyTrim();
 }
 async function initSfx(){
   if(!soundContext){
@@ -1051,6 +1054,7 @@ async function initSfx(){
   routeVoice();
 }
 window.__cvMaster=()=>({context:soundContext?.state??null,limiter:!!limiterNode,voiceRouted:!!voiceNode,opts:CV_LIMITER_OPTS,
+  trimDb:SPEECH_TRIM_DB[lang]??0,trimGain:masterIn?.gain.value??null,
   nodes:soundContext?{ctx:soundContext,masterIn,limiterNode}:null});
 function stopSfx(){
   for(const node of sfxNodes)node.stop();
@@ -1258,6 +1262,7 @@ async function languageSwitch(target) {
   clock.pause();
   stopSfx();
   lang=target;
+  applyTrim();
   EVENTS=effects[lang];
   const fresh=timelines[lang][cue.i];
   const t=cue.hold?fresh.start+fresh.duration+cue.local-old[cue.i].duration:CAPTIONS[target][caption][0];
