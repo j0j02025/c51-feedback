@@ -104,8 +104,8 @@ function refreshManifest() {
       const keys = await cache.keys();
       await Promise.all(keys.filter(key => !current.has(key.url)).map(key => cache.delete(key)));
       return keys.filter(key => current.has(key.url)).map(key => key.url);
-    }).catch(() => []);
-    return { manifest, keys };
+    }).catch(() => null);
+    return { manifest, keys: keys || [], offlineSupported: keys !== null };
   })().finally(() => { manifestRequest = null; });
   return manifestRequest;
 }
@@ -133,43 +133,43 @@ function yieldBandwidth() {
   activeDownload?.abort();
 }
 
-async function fetchThumb(file, sha, { signal } = {}) {
+function coverCacheName(url, sha) {
+  return "c51-thumb:" + sha + ":" + url.pathname.split("/").pop();
+}
+
+async function readCover(url, sha) {
+  const own = coverCacheName(url, sha);
+  await thumbWrites.get(own);
+  return (await caches.open(own)).match("cover");
+}
+
+async function saveCover(url, sha, response) {
+  if (!response.ok || response.redirected) return;
+  const blob = await response.blob();
+  const digest = await crypto.subtle.digest("SHA-256", await blob.arrayBuffer());
+  if (hex(new Uint8Array(digest)) !== sha) return;
+  const own = coverCacheName(url, sha);
+  const writing = writeCache(async () => {
+    const store = await caches.open(own);
+    await store.put("cover", new Response(blob));
+  });
+  thumbWrites.set(own, writing);
+  try { await writing; }
+  finally { if (thumbWrites.get(own) === writing) thumbWrites.delete(own); }
+  return blob;
+}
+
+async function fetchThumb(file, sha) {
   const url = thumbURL(file);
   if (!url || !/^[a-f0-9]{64}$/.test(sha)) throw new Error("Unknown thumbnail");
   const key = cacheKey(url, sha);
-  // One cache per cover. Chrome drops earlier entries when several are written into
-  // the same cache in a burst, so each cover gets a cache of its own.
-  const own = "c51-thumb:" + sha + ":" + url.pathname.split("/").pop();
-  try {
-    await thumbWrites.get(own);
-    const hit = await (await caches.open(own)).match("cover");
-    if (hit) return { cached: true, blob: await hit.blob() };
-  } catch {}
-  if (await lowStorage()) return { lowStorage: true };
-  const aborter = new AbortController();
-  const stop = () => aborter.abort();
-  signal?.addEventListener("abort", stop, { once: true });
-  // Covers are small and run four at a time; they do not take the lesson lock.
-  try {
-    // An <img> sends a no-cors request, so only an opaque response can answer it.
-    const response = await fetch(key, {
-      cache: "force-cache", mode: "same-origin", redirect: "error", signal: aborter.signal
-    });
-    const copy = response.clone();
-    const bytes = await response.arrayBuffer();
-    if (aborter.signal.aborted || !bytes.byteLength) return { cached: false };
-    const digest = await crypto.subtle.digest("SHA-256", bytes);
-    if (hex(new Uint8Array(digest)) !== sha) return { cached: false };
-    const own = "c51-thumb:" + sha + ":" + url.pathname.split("/").pop();
-    const writing = writeCache(() => caches.open(own).then(store => store.put("cover", new Response(bytes, {
-      headers: { "Content-Type": response.headers.get("Content-Type") || "image/jpeg" }
-    }))));
-    thumbWrites.set(own, writing);
-    await writing;
-    return { cached: true, blob: new Blob([bytes]) };
-  } finally {
-    signal?.removeEventListener("abort", stop);
-  }
+  const hit = await readCover(url, sha);
+  if (hit) return { cached: true, blob: await hit.blob() };
+  const response = await fetch(key, {
+    cache: "force-cache", mode: "same-origin", redirect: "error"
+  });
+  const blob = await saveCover(url, sha, response);
+  return { cached: Boolean(blob), blob };
 }
 
 // Media referenced by a stub or a lesson, stored under its own fingerprint so an
@@ -309,12 +309,13 @@ self.addEventListener("message", event => {
       }
       // t3180: covers are cached by fingerprint too, so a reload costs 0 requests.
       if (type === "thumb") {
-        const existing = thumbCache.get(sha);
+        const key = file + "?" + sha;
+        const existing = thumbCache.get(key);
         if (existing) { port.postMessage(await existing); return; }
         const download = fetchThumb(file, sha).catch(() => ({ cached: false }));
-        thumbCache.set(sha, download);
+        thumbCache.set(key, download);
         try { port.postMessage(await download); }
-        finally { if (thumbCache.get(sha) === download) thumbCache.delete(sha); }
+        finally { if (thumbCache.get(key) === download) thumbCache.delete(key); }
         return;
       }
       // The reviewer opened a lesson: drop the background transfer immediately.
@@ -397,24 +398,20 @@ self.addEventListener("fetch", event => {
   const request = event.request;
   if (request.method !== "GET") return;
 
-  // Covers first, and synchronously: respondWith must run before any await.
-  const thumb = thumbURL(request.url);
-  const thumbSha = thumb?.searchParams.get(shaParam);
-  if (thumb && /^[a-f0-9]{64}$/.test(thumbSha) && isReviewPage(request.referrer)) {
-    const key = cacheKey(thumb, thumbSha);
-    event.respondWith((async () => {
-      const cache = await caches.open(cacheName);
-      const hit = await cache.match(key);
-      if (hit) return hit.clone();
-      const response = await fetch(event.request);
-      if (response.ok && !response.redirected) {
-        event.waitUntil(mutateCache(async store => { await store.put(key, response.clone()); }).catch(() => {}));
-      }
-      return response;
-    })());
+  // Read the saved cover when possible. Send the original request to the
+  // network on a miss or storage failure and save the response separately.
+  const cover = thumbURL(request.url);
+  if (cover) {
+    const sha = cover.searchParams.get(shaParam);
+    if (!/^[a-f0-9]{64}$/.test(sha) || !isReviewPage(request.referrer)) return;
+    const cached = readCover(cover, sha).catch(() => undefined);
+    const fresh = cached.then(hit => hit ? undefined : fetch(request, { cache: "force-cache" }));
+    event.respondWith(cached.then(hit => hit || fresh));
+    event.waitUntil(fresh.then(response => {
+      if (response?.ok && !response.redirected) return saveCover(cover, sha, response.clone());
+    }).catch(() => {}));
     return;
   }
-
 
   if (new URL(request.url).pathname.endsWith("/sw-probe")) {
     const served = (async () => {
@@ -432,7 +429,8 @@ self.addEventListener("fetch", event => {
   if (request.destination !== "iframe" && /^[a-f0-9]{64}$/.test(assetSha) &&
       new URL(request.url).origin === scope.origin && isReviewPage(request.referrer)) {
     const key = cacheKey(new URL(request.url), assetSha);
-    event.respondWith((async () => (await (await caches.open(cacheName)).match(key)) || fetch(request))());
+    const cached = (async () => (await caches.open(cacheName)).match(key))().catch(() => undefined);
+    event.respondWith(cached.then(hit => hit || fetch(request)));
     return;
   }
 
