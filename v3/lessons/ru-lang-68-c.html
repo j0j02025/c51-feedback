@@ -537,7 +537,7 @@ add(vs(27)+.05,'ding');add(vs(28)+.1,'ding');add(vs(28),'arrow');add(W(29,'ко�
 // ccc-023 (K 261121): per-event SFX gain so every event's 400 ms momentary peak sits at -4 dB vs the voice.
 // Table {lang:{id@scene-second:gain}} (per language: en/zh speak at other speeds, so the same events cluster differently);
 // build.py fills it from src/sfx-gain.json (fitted by proof/sfx_fit.py). The shell picks the current language's gain (EG). Missing = 1.
-const SFX_GAIN={"ru":{"pop@0.000":0.5957,"sweep@0.050":0.5942,"pop@0.160":0.5957,"pop@0.320":0.5957,"pop@0.480":0.714,"pop@0.640":0.714,"pulse@1.273":1.6484,"pulse@3.182":1.0,"ding@3.382":1.0,"arrow@7.563":0.8306,"pop@12.646":0.7142,"pop@13.309":0.7144,"pop@13.824":0.7144,"pop@18.155":0.7142,"pop@18.335":0.7142,"pop@18.515":0.7142,"pop@18.695":0.7142,"ding@22.716":1.0116,"sweep@24.560":0.912,"hopSoft@24.767":0.912,"hopSoft@25.080":1.1687,"hopSoft@25.392":1.1591,"hopSoft@25.705":1.1237,"pop@25.966":0.7145,"hopSoft@26.017":1.173,"pop@26.246":0.7145,"pop@26.526":0.7145,"pop@26.806":0.7145,"pop@27.086":0.7145,"pop@28.040":0.714,"pop@28.540":0.714,"pop@29.040":0.714,"query@32.260":0.9784,"ding@34.240":0.9098,"hopSoft@34.455":0.912,"hopSoft@34.767":1.1591,"hopSoft@35.080":1.1222,"block@36.100":0.58,"query@38.960":0.9784,"ding@41.220":1.0116,"block@43.960":0.58,"query@46.620":0.9784,"ding@48.600":1.0116,"block@50.980":0.58,"pulse@53.720":1.6308,"arrow@60.631":0.8323,"sweep@67.546":1.0116,"sweep@70.120":1.0116,"hopSoft@72.580":1.1759,"hopSoft@72.892":1.1689,"hopSoft@73.205":1.159,"hopSoft@73.517":1.123,"hopSoft@73.830":1.1759,"hopSoft@74.142":1.1689,"hopSoft@74.455":1.159,"pop@74.634":0.7144,"hopSoft@74.767":1.123,"hopSoft@75.080":1.1759,"hopSoft@76.955":1.169,"hopSoft@77.267":1.1589,"pop@77.422":0.7141,"hopSoft@77.580":1.1222,"hopSoft@77.892":1.1764,"hopSoft@78.205":1.169,"hopSoft@78.517":1.1589,"hopSoft@78.830":1.1222,"hopSoft@79.142":1.1764,"hopSoft@79.455":1.169,"hopSoft@79.767":1.1589,"hopSoft@80.080":1.1222,"hopSoft@80.392":1.1764,"query@81.340":0.9784,"arrow@82.240":0.8295,"ding@85.160":1.0116,"pop@88.618":0.714,"pop@89.933":0.7143,"pop@93.160":0.714,"block@96.680":0.5809,"query@102.252":0.9796,"sweep@103.437":1.0116,"arrow@105.060":0.8295,"sweep@109.980":1.0116,"hopSoft@112.267":1.1689,"hopSoft@112.580":1.1589,"hopSoft@112.892":1.1233,"pulse@113.345":1.7651,"pop@113.445":0.7143,"beep@119.800":0.8156,"beep@120.800":0.8156,"beep@121.800":0.8148,"ding@122.850":1.0116,"arrow@125.820":0.7079,"ding@125.920":0.7079,"pop@131.463":0.7141,"sweep@138.261":1.0116,"pop@142.502":0.7145,"pop@143.688":0.7143,"hopSoft@144.143":1.1764,"hopSoft@144.455":1.169,"pop@144.677":0.7144,"hopSoft@144.768":1.159,"hopSoft@145.080":1.1222,"hopSoft@145.393":1.1764,"hopSoft@145.705":1.169,"hopSoft@146.018":1.1589,"hopSoft@146.330":1.1222,"hopSoft@146.643":1.1764,"hopSoft@146.955":1.169,"hopSoft@147.268":1.1589,"hopSoft@147.580":1.1222,"hopSoft@147.893":1.1764,"hopSoft@148.205":1.169,"hopSoft@148.518":1.1589,"pop@148.698":0.7143,"pop@150.600":0.714,"caught@151.800":0.9016,"block@152.868":0.5803},"en":{"pop@0.000":0.5495,"sweep@0.050":0.5495,"pop@0.160":0.5495,"pop@0.320":0.5495,"pop@0.480":0.7413,"pop@0.640":0.7413,"pulse@1.273":3.4106,"pulse@3.182":0.912,"ding@3.382":0.912,"arrow@7.563":0.912,"pop@12.646":1.1749,"pop@13.309":0.8318,"pop@13.824":0.8318,"pop@18.155":0.8318,"pop@18.335":0.8318,"pop@18.515":0.8318,"pop@18.695":0.8318,"ding@22.716":0.9333,"sweep@24.560":0.8414,"hopSoft@24.767":0.8414,"hopSoft@25.080":1.9498,"hopSoft@25.392":1.9498,"hopSoft@25.705":1.6218,"pop@25.966":0.861,"hopSoft@26.017":0.861,"pop@26.246":0.861,"pop@26.526":0.8318,"pop@26.806":0.8318,"pop@27.086":1.1885,"pop@28.040":1.1749,"pop@28.540":1.1749,"pop@29.040":1.1749,"query@32.260":0.9333,"ding@34.240":0.9333,"hopSoft@34.455":1.8197,"hopSoft@34.767":1.9498,"hopSoft@35.080":1.9055,"block@36.100":1.1457,"query@38.960":0.9333,"ding@41.220":0.9333,"block@43.960":1.1441,"query@46.620":0.9333,"ding@48.600":0.9333,"block@50.980":1.1452,"pulse@53.720":3.3595,"arrow@60.631":0.912,"sweep@67.546":0.9333,"sweep@70.120":0.9333,"hopSoft@72.580":1.122,"hopSoft@72.892":1.122,"hopSoft@73.205":1.122,"hopSoft@73.517":1.3183,"hopSoft@73.830":0.8128,"hopSoft@74.142":0.8128,"hopSoft@74.455":0.8128,"pop@74.634":0.8128,"hopSoft@74.767":0.8128,"hopSoft@75.080":0.8128,"hopSoft@76.955":1.0593,"hopSoft@77.267":1.0,"pop@77.422":1.0,"hopSoft@77.580":1.0,"hopSoft@77.892":1.3646,"hopSoft@78.205":1.3804,"hopSoft@78.517":1.3646,"hopSoft@78.830":1.3646,"hopSoft@79.142":1.4125,"hopSoft@79.455":1.3804,"hopSoft@79.767":1.3804,"hopSoft@80.080":1.5136,"hopSoft@80.392":1.5136,"query@81.340":0.9333,"arrow@82.240":0.912,"ding@85.160":0.9333,"pop@88.618":1.1749,"pop@89.933":1.1749,"pop@93.160":1.1749,"block@96.680":1.1448,"query@102.252":0.9333,"sweep@103.437":0.9333,"arrow@105.060":0.912,"sweep@109.980":0.9333,"hopSoft@112.267":1.3804,"hopSoft@112.580":1.3804,"hopSoft@112.892":1.122,"pulse@113.345":1.122,"pop@113.445":1.122,"beep@119.800":0.955,"beep@120.800":0.955,"beep@121.800":0.8511,"ding@122.850":0.9333,"arrow@125.820":0.6531,"ding@125.920":0.6531,"pop@131.463":1.1885,"sweep@138.261":0.9333,"pop@142.502":1.1749,"pop@143.688":1.1749,"hopSoft@144.143":1.9498,"hopSoft@144.455":0.9016,"pop@144.677":0.9016,"hopSoft@144.768":0.9016,"hopSoft@145.080":1.9055,"hopSoft@145.393":1.5668,"hopSoft@145.705":1.5668,"hopSoft@146.018":1.6032,"hopSoft@146.330":1.9055,"hopSoft@146.643":1.4289,"hopSoft@146.955":1.4289,"hopSoft@147.268":1.8197,"hopSoft@147.580":1.9055,"hopSoft@147.893":1.6596,"hopSoft@148.205":1.0116,"hopSoft@148.518":1.0116,"pop@148.698":1.0116,"pop@150.600":1.1749,"caught@151.800":0.8414,"block@152.868":1.1441},"zh":{"pop@0.000":0.628,"sweep@0.050":0.6246,"pop@0.160":0.628,"pop@0.320":0.628,"pop@0.480":0.6907,"pop@0.640":0.6911,"pulse@1.273":1.6073,"pulse@3.182":1.0421,"ding@3.382":1.0285,"arrow@7.563":0.8099,"pop@12.646":0.691,"pop@13.309":0.6911,"pop@13.824":0.6909,"pop@18.155":0.691,"pop@18.335":0.691,"pop@18.515":0.6909,"pop@18.695":0.6908,"ding@22.716":1.0285,"sweep@24.560":0.9999,"hopSoft@24.767":1.1371,"hopSoft@25.080":1.1307,"hopSoft@25.392":1.1211,"hopSoft@25.705":1.0859,"pop@25.966":0.691,"hopSoft@26.017":1.1382,"pop@26.246":0.6908,"pop@26.526":0.6911,"pop@26.806":0.6908,"pop@27.086":0.6911,"pop@28.040":0.6907,"pop@28.540":0.6907,"pop@29.040":0.6907,"query@32.260":0.9465,"ding@34.240":1.0276,"hopSoft@34.455":1.1307,"hopSoft@34.767":1.1212,"hopSoft@35.080":1.0871,"block@36.100":0.5611,"query@38.960":0.9465,"ding@41.220":1.0276,"block@43.960":0.5611,"query@46.620":0.9465,"ding@48.600":1.0276,"block@50.980":0.5611,"pulse@53.720":1.5776,"arrow@60.631":0.8068,"sweep@67.546":0.9998,"sweep@70.120":0.9999,"hopSoft@72.580":1.1378,"hopSoft@72.892":1.1306,"hopSoft@73.205":1.1212,"hopSoft@73.517":1.0864,"hopSoft@73.830":1.1379,"hopSoft@74.142":1.1308,"hopSoft@74.455":1.1211,"pop@74.634":0.6911,"hopSoft@74.767":1.0866,"hopSoft@75.080":1.1377,"hopSoft@76.955":1.1308,"hopSoft@77.267":1.1212,"pop@77.422":0.6909,"hopSoft@77.580":1.0871,"hopSoft@77.892":1.1378,"hopSoft@78.205":1.1308,"hopSoft@78.517":1.1211,"hopSoft@78.830":1.0863,"hopSoft@79.142":1.1376,"hopSoft@79.455":1.1306,"hopSoft@79.767":1.1211,"hopSoft@80.080":1.0858,"hopSoft@80.392":1.138,"query@81.340":0.9465,"arrow@82.240":0.8056,"ding@85.160":1.0276,"pop@88.618":0.6909,"pop@89.933":0.6908,"pop@93.160":0.6908,"block@96.680":0.5615,"query@102.252":0.9479,"sweep@103.437":0.9996,"arrow@105.060":0.8024,"sweep@109.980":1.0,"hopSoft@112.267":1.1307,"hopSoft@112.580":1.1211,"hopSoft@112.892":1.0862,"pulse@113.345":1.5849,"pop@113.445":0.6908,"beep@119.800":0.789,"beep@120.800":0.789,"beep@121.800":0.7882,"ding@122.850":1.0276,"arrow@125.820":0.7463,"ding@125.920":0.7463,"pop@131.463":0.691,"sweep@138.261":0.9995,"pop@142.502":0.6907,"pop@143.688":0.6909,"hopSoft@144.143":1.1377,"hopSoft@144.455":1.1306,"pop@144.677":0.6911,"hopSoft@144.768":1.1212,"hopSoft@145.080":1.0872,"hopSoft@145.393":1.1377,"hopSoft@145.705":1.1306,"hopSoft@146.018":1.1212,"hopSoft@146.330":1.0871,"hopSoft@146.643":1.1377,"hopSoft@146.955":1.1306,"hopSoft@147.268":1.1212,"hopSoft@147.580":1.0871,"hopSoft@147.893":1.1377,"hopSoft@148.205":1.1306,"hopSoft@148.518":1.1212,"pop@148.698":0.6907,"pop@150.600":0.6907,"caught@151.800":0.5619,"block@152.868":0.5619}};
+const SFX_GAIN={"ru":{"pop@0.000":0.1832,"sweep@0.050":0.18274,"pop@0.160":0.1832,"pop@0.320":0.1832,"pop@0.480":0.21958,"pop@0.640":0.21958,"pulse@1.273":0.8825,"pulse@3.182":0.51575,"ding@3.382":0.51575,"arrow@7.563":0.40299,"pop@12.646":0.3608,"pop@13.309":0.3609,"pop@13.824":0.3609,"pop@18.155":0.20898,"pop@18.335":0.20898,"pop@18.515":0.20898,"pop@18.695":0.20898,"ding@22.716":0.6333,"sweep@24.560":0.45728,"hopSoft@24.767":0.28007,"hopSoft@25.080":0.42353,"hopSoft@25.392":0.42005,"hopSoft@25.705":0.37517,"pop@25.966":0.26165,"hopSoft@26.017":0.11777,"pop@26.246":0.26165,"pop@26.526":0.22968,"pop@26.806":0.25283,"pop@27.086":0.25283,"pop@28.040":0.36069,"pop@28.540":0.36069,"pop@29.040":0.36069,"query@32.260":0.49891,"ding@34.240":0.53535,"hopSoft@34.455":0.27588,"hopSoft@34.767":0.35089,"hopSoft@35.080":0.48768,"block@36.100":0.48733,"query@38.960":0.49891,"ding@41.220":0.63133,"block@43.960":0.48733,"query@46.620":0.49891,"ding@48.600":0.63133,"block@50.980":0.48733,"pulse@53.720":0.88034,"arrow@60.631":0.40297,"sweep@67.546":0.54383,"sweep@70.120":0.54383,"hopSoft@72.580":0.42641,"hopSoft@72.892":0.42387,"hopSoft@73.205":0.4251,"hopSoft@73.517":0.41748,"hopSoft@73.830":0.42641,"hopSoft@74.142":0.42387,"hopSoft@74.455":0.22799,"pop@74.634":0.30202,"hopSoft@74.767":0.22091,"hopSoft@75.080":0.53066,"hopSoft@76.955":0.54189,"hopSoft@77.267":0.22799,"pop@77.422":0.30192,"hopSoft@77.580":0.22076,"hopSoft@77.892":0.42619,"hopSoft@78.205":0.42351,"hopSoft@78.517":0.42466,"hopSoft@78.830":0.41678,"hopSoft@79.142":0.42619,"hopSoft@79.455":0.42351,"hopSoft@79.767":0.42466,"hopSoft@80.080":0.41421,"hopSoft@80.392":0.43422,"query@81.340":0.49891,"arrow@82.240":0.40287,"ding@85.160":0.63133,"pop@88.618":0.36069,"pop@89.933":0.36086,"pop@93.160":0.36069,"block@96.680":0.48758,"query@102.252":0.49952,"sweep@103.437":0.54383,"arrow@105.060":0.40287,"sweep@109.980":0.54383,"hopSoft@112.267":0.42739,"hopSoft@112.580":0.42373,"hopSoft@112.892":0.41072,"pulse@113.345":0.63019,"pop@113.445":0.25503,"beep@119.800":0.46177,"beep@120.800":0.46177,"beep@121.800":0.40823,"ding@122.850":0.63133,"arrow@125.820":0.33957,"ding@125.920":0.33957,"pop@131.463":0.36076,"sweep@138.261":0.54383,"pop@142.502":0.36058,"pop@143.688":0.36086,"hopSoft@144.143":0.52606,"hopSoft@144.455":0.21632,"pop@144.677":0.3021,"hopSoft@144.768":0.21446,"hopSoft@145.080":0.3969,"hopSoft@145.393":0.40585,"hopSoft@145.705":0.40329,"hopSoft@146.018":0.40439,"hopSoft@146.330":0.3969,"hopSoft@146.643":0.40585,"hopSoft@146.955":0.40329,"hopSoft@147.268":0.40439,"hopSoft@147.580":0.3969,"hopSoft@147.893":0.40585,"hopSoft@148.205":0.40329,"hopSoft@148.518":0.33189,"pop@148.698":0.30202,"pop@150.600":0.36069,"caught@151.800":0.64116,"block@152.868":0.48759},"en":{"pop@0.000":0.18917,"sweep@0.050":0.15443,"pop@0.160":0.17816,"pop@0.320":0.15443,"pop@0.480":0.20832,"pop@0.640":0.20832,"pulse@1.273":0.8188,"pulse@3.182":0.47528,"ding@3.382":0.47528,"arrow@7.563":0.37178,"pop@12.646":0.33292,"pop@13.309":0.23522,"pop@13.824":0.23522,"pop@18.155":0.19338,"pop@18.335":0.19338,"pop@18.515":0.19338,"pop@18.695":0.19338,"ding@22.716":0.58307,"sweep@24.560":0.43556,"hopSoft@24.767":0.26631,"hopSoft@25.080":0.49268,"hopSoft@25.392":0.49268,"hopSoft@25.705":0.35913,"pop@25.966":0.24332,"hopSoft@26.017":0.09035,"pop@26.246":0.24332,"pop@26.526":0.21621,"pop@26.806":0.18971,"pop@27.086":0.27109,"pop@28.040":0.33259,"pop@28.540":0.33259,"pop@29.040":0.33259,"query@32.260":0.46086,"ding@34.240":0.58396,"hopSoft@34.455":0.5236,"hopSoft@34.767":0.55595,"hopSoft@35.080":0.55355,"block@36.100":0.44996,"query@38.960":0.46039,"ding@41.220":0.58428,"block@43.960":0.44933,"query@46.620":0.46039,"ding@48.600":0.58488,"block@50.980":0.45022,"pulse@53.720":0.81747,"arrow@60.631":0.37178,"sweep@67.546":0.50173,"sweep@70.120":0.50173,"hopSoft@72.580":0.29023,"hopSoft@72.892":0.29023,"hopSoft@73.205":0.29023,"hopSoft@73.517":0.341,"hopSoft@73.830":0.21023,"hopSoft@74.142":0.18619,"hopSoft@74.455":0.16864,"pop@74.634":0.27853,"hopSoft@74.767":0.16864,"hopSoft@75.080":0.19043,"hopSoft@76.955":0.47252,"hopSoft@77.267":0.2163,"pop@77.422":0.27872,"hopSoft@77.580":0.2163,"hopSoft@77.892":0.36946,"hopSoft@78.205":0.37373,"hopSoft@78.517":0.36982,"hopSoft@78.830":0.36565,"hopSoft@79.142":0.37575,"hopSoft@79.455":0.36721,"hopSoft@79.767":0.36608,"hopSoft@80.080":0.37134,"hopSoft@80.392":0.37134,"query@81.340":0.46039,"arrow@82.240":0.37178,"ding@85.160":0.58428,"pop@88.618":0.33292,"pop@89.933":0.33292,"pop@93.160":0.33292,"block@96.680":0.45007,"query@102.252":0.46038,"sweep@103.437":0.50173,"arrow@105.060":0.37178,"sweep@109.980":0.50173,"hopSoft@112.267":0.37668,"hopSoft@112.580":0.37668,"hopSoft@112.892":0.01184,"pulse@113.345":0.47665,"pop@113.445":0.2787,"beep@119.800":0.42692,"beep@120.800":0.42692,"beep@121.800":0.37773,"ding@122.850":0.58428,"arrow@125.820":0.31359,"ding@125.920":0.31359,"pop@131.463":0.33296,"sweep@138.261":0.50173,"pop@142.502":0.33259,"pop@143.688":0.33259,"hopSoft@144.143":0.51757,"hopSoft@144.455":0.21643,"pop@144.677":0.27869,"hopSoft@144.768":0.24047,"hopSoft@145.080":0.44173,"hopSoft@145.393":0.34053,"hopSoft@145.705":0.44972,"hopSoft@146.018":0.37144,"hopSoft@146.330":0.41416,"hopSoft@146.643":0.35605,"hopSoft@146.955":0.39532,"hopSoft@147.268":0.39551,"hopSoft@147.580":0.41416,"hopSoft@147.893":0.36072,"hopSoft@148.205":0.42732,"hopSoft@148.518":0.26783,"pop@148.698":0.27872,"pop@150.600":0.33292,"caught@151.800":0.33079,"block@152.868":0.4498},"zh":{"pop@0.000":0.20382,"sweep@0.050":0.20273,"pop@0.160":0.20382,"pop@0.320":0.20382,"pop@0.480":0.22417,"pop@0.640":0.22431,"pulse@1.273":0.92619,"pulse@3.182":0.54364,"ding@3.382":0.53654,"arrow@7.563":0.42207,"pop@12.646":0.37769,"pop@13.309":0.37774,"pop@13.824":0.37802,"pop@18.155":0.21809,"pop@18.335":0.21809,"pop@18.515":0.21806,"pop@18.695":0.21803,"ding@22.716":0.66214,"sweep@24.560":0.47837,"hopSoft@24.767":0.34894,"hopSoft@25.080":0.62899,"hopSoft@25.392":0.63145,"hopSoft@25.705":0.62834,"pop@25.966":0.31625,"hopSoft@26.017":0.34778,"pop@26.246":0.29918,"pop@26.526":0.37774,"pop@26.806":0.37757,"pop@27.086":0.37774,"pop@28.040":0.37752,"pop@28.540":0.37752,"pop@29.040":0.37752,"query@32.260":0.52218,"ding@34.240":0.57164,"hopSoft@34.455":0.62899,"hopSoft@34.767":0.63152,"hopSoft@35.080":0.62838,"block@36.100":0.51008,"query@38.960":0.52218,"ding@41.220":0.66089,"block@43.960":0.51008,"query@46.620":0.52218,"ding@48.600":0.66089,"block@50.980":0.51008,"pulse@53.720":0.92139,"arrow@60.631":0.4222,"sweep@67.546":0.5696,"sweep@70.120":0.56965,"hopSoft@72.580":0.42675,"hopSoft@72.892":0.42406,"hopSoft@73.205":0.42492,"hopSoft@73.517":0.41776,"hopSoft@73.830":0.43124,"hopSoft@74.142":0.40633,"hopSoft@74.455":0.27288,"pop@74.634":0.31611,"hopSoft@74.767":0.21628,"hopSoft@75.080":0.34019,"hopSoft@76.955":0.56803,"hopSoft@77.267":0.23874,"pop@77.422":0.31635,"hopSoft@77.580":0.23149,"hopSoft@77.892":0.44666,"hopSoft@78.205":0.44393,"hopSoft@78.517":0.44516,"hopSoft@78.830":0.43766,"hopSoft@79.142":0.44658,"hopSoft@79.455":0.44383,"hopSoft@79.767":0.44561,"hopSoft@80.080":0.43429,"hopSoft@80.392":0.45516,"query@81.340":0.52218,"arrow@82.240":0.42201,"ding@85.160":0.66089,"pop@88.618":0.37802,"pop@89.933":0.37797,"pop@93.160":0.37757,"block@96.680":0.51097,"query@102.252":0.52295,"sweep@103.437":0.56948,"arrow@105.060":0.42208,"sweep@109.980":0.56912,"hopSoft@112.267":0.44731,"hopSoft@112.580":0.4435,"hopSoft@112.892":0.42969,"pulse@113.345":0.63155,"pop@113.445":0.27526,"beep@119.800":0.48382,"beep@120.800":0.48382,"beep@121.800":0.42725,"ding@122.850":0.66089,"arrow@125.820":0.35614,"ding@125.920":0.35614,"pop@131.463":0.37769,"sweep@138.261":0.56942,"pop@142.502":0.37752,"pop@143.688":0.37802,"hopSoft@144.143":0.5496,"hopSoft@144.455":0.22562,"pop@144.677":0.31619,"hopSoft@144.768":0.22376,"hopSoft@145.080":0.41496,"hopSoft@145.393":0.42355,"hopSoft@145.705":0.42091,"hopSoft@146.018":0.42219,"hopSoft@146.330":0.41492,"hopSoft@146.643":0.42355,"hopSoft@146.955":0.42091,"hopSoft@147.268":0.42219,"hopSoft@147.580":0.41492,"hopSoft@147.893":0.42355,"hopSoft@148.205":0.42091,"hopSoft@148.518":0.34742,"pop@148.698":0.31606,"pop@150.600":0.37752,"caught@151.800":0.51028,"block@152.868":0.51028}};
 window.SCENE_EVENTS=EV.concat(stepEvents()).filter(e=>e.t>=0&&e.t<AUDIO_DUR).sort((p,q)=>p.t-q.t).map(e=>{const k=e.id+'@'+e.t.toFixed(3);e.g={};for(const lg in SFX_GAIN)e.g[lg]=SFX_GAIN[lg][k]??1;return e});
 })();
 
@@ -545,9 +545,9 @@ window.SCENE_EVENTS=EV.concat(stepEvents()).filter(e=>e.t>=0&&e.t<AUDIO_DUR).sor
 // 每种音效解释什么:hopSoft / padHeavy = 小兔、小羊在走;pop = 画板出下一样东西;sweep = 原文里一个词变色;query = 提问;block = 倒数一秒;ding = 答对;caught = 揭晓答案后小兔开心一跳。
 const SFXCFG=Object.assign({step_fast:'hoofLight',step_slow:'padHeavy',caught:'caught'},TH.sfx||{});
 const ASR=44100,prng=seed=>{let x=seed>>>0||1;return()=>{x^=x<<13;x>>>=0;x^=x>>>17;x^=x<<5;x>>>=0;return x/4294967296}};
-function tone(o,dest,{type='sine',f0,f1,at=0,dur=.2,gain=.5,a=.003,lp,hp,q=.7}){
+function tone(o,dest,{type='sine',f0,f1,at=0,dur=.2,gain=.5,a=.003,hold=0,lp,hp,q=.7}){
  const s=o.createOscillator(),g=o.createGain();s.type=type;s.frequency.setValueAtTime(f0,at);if(f1)s.frequency.exponentialRampToValueAtTime(f1,at+dur);
- g.gain.setValueAtTime(0,at);g.gain.linearRampToValueAtTime(gain,at+a);g.gain.exponentialRampToValueAtTime(.0001,at+dur);
+ g.gain.setValueAtTime(0,at);g.gain.linearRampToValueAtTime(gain,at+a);if(hold>0)g.gain.setValueAtTime(gain,at+a+hold);g.gain.exponentialRampToValueAtTime(.0001,at+dur);
  let n=s;if(lp){const f=o.createBiquadFilter();f.type='lowpass';f.frequency.value=lp;f.Q.value=q;n.connect(f);n=f}if(hp){const f=o.createBiquadFilter();f.type='highpass';f.frequency.value=hp;n.connect(f);n=f}
  n.connect(g);g.connect(dest);s.start(at);s.stop(at+dur+.02);
 }
@@ -557,32 +557,118 @@ function burst(o,dest,{at=0,dur=.05,gain=.5,type='bandpass',f=1500,f1,q=1,a=.001
  g.gain.setValueAtTime(0,at);g.gain.linearRampToValueAtTime(gain,at+a);g.gain.exponentialRampToValueAtTime(.0001,at+dur);s.connect(fl);fl.connect(g);g.connect(dest);s.start(at);s.stop(at+dur+.02);
 }
 const RECIPES={
- beep(o,d,v){const f=v>=2?1318.5:880;tone(o,d,{f0:f,dur:.2,gain:.7,a:.003});tone(o,d,{f0:f*2,dur:.12,gain:.18,a:.003})},
+ beep(o,d,v){const f=v>=2?1318.5:880;tone(o,d,{f0:f,dur:.2,gain:.7,a:.003,hold:.02});tone(o,d,{f0:f*2,dur:.12,gain:.18,a:.003,hold:.01})},
  hoofLight(o,d,v){const k=[1,.93,1.08,.97][v%4];tone(o,d,{f0:1250*k,f1:800*k,dur:.05,gain:.55});tone(o,d,{f0:640*k,f1:430*k,dur:.075,gain:.5});burst(o,d,{dur:.022,gain:.42,type:'highpass',f:2200,seed:11+v})},
  padHeavy(o,d,v){const k=[1,.9,1.06,.95][v%4];tone(o,d,{f0:135*k,f1:62*k,dur:.17,gain:1,a:.008});burst(o,d,{dur:.12,gain:.3,type:'lowpass',f:900,a:.01,seed:21+v})},
- hopSoft(o,d,v){const k=[1,1.05,.96,1.02][v%4];tone(o,d,{f0:300*k,f1:170*k,dur:.08,gain:.7,a:.004});burst(o,d,{dur:.04,gain:.2,type:'lowpass',f:1400,seed:51+v})},
- pulse(o,d,v){const k=[1,1.04,.97,1.02][v%4];tone(o,d,{type:'sawtooth',f0:420*k,f1:980*k,dur:.08,gain:.5,a:.003,lp:3200});burst(o,d,{dur:.05,gain:.2,type:'highpass',f:3000,seed:61+v})},
+ hopSoft(o,d,v){const k=[1,1.05,.96,1.02][v%4];tone(o,d,{f0:300*k,f1:170*k,dur:.095,gain:.7,a:.004,hold:.03});burst(o,d,{dur:.04,gain:.2,type:'lowpass',f:1400,seed:51+v})},
+ pulse(o,d,v){const k=[1,1.04,.97,1.02][v%4];tone(o,d,{type:'sawtooth',f0:420*k,f1:980*k,dur:.11,gain:.5,a:.003,hold:.06,lp:3200});burst(o,d,{dur:.05,gain:.2,type:'highpass',f:3000,seed:61+v})},
  thrum(o,d,v){const k=[1,.96,1.04,.98][v%4];tone(o,d,{type:'sawtooth',f0:88*k,f1:62*k,dur:.17,gain:.9,a:.008,lp:520});burst(o,d,{dur:.1,gain:.16,type:'lowpass',f:700,a:.01,seed:71+v})},
- pop(o,d){tone(o,d,{f0:520,f1:1040,dur:.09,gain:.8,a:.002})},
- arrow(o,d){tone(o,d,{type:'triangle',f0:320,f1:760,dur:.3,gain:.72,a:.006});burst(o,d,{dur:.28,gain:.22,f:700,f1:1800,a:.02,seed:31})},
- sweep(o,d){tone(o,d,{type:'triangle',f0:330,f1:880,dur:.42,gain:.65,a:.006});tone(o,d,{f0:660,f1:1760,dur:.42,gain:.2,a:.006})},
- query(o,d){tone(o,d,{f0:659,dur:.11,gain:.65});tone(o,d,{f0:880,at:.1,dur:.17,gain:.7})},
- ding(o,d){for(const[f,g,dur]of[[1047,.5,.6],[1568,.38,.5],[2093,.16,.36]])tone(o,d,{f0:f,dur,gain:g,a:.002})},
- block(o,d){tone(o,d,{f0:880,f1:520,dur:.07,gain:.55});tone(o,d,{f0:220,f1:120,dur:.13,gain:.8,a:.003})},
+ pop(o,d){tone(o,d,{f0:520,f1:1040,dur:.105,gain:.8,a:.002,hold:.03})},
+ arrow(o,d){tone(o,d,{type:'triangle',f0:320,f1:760,dur:.3,gain:.72,a:.006,hold:.04});burst(o,d,{dur:.28,gain:.22,f:700,f1:1800,a:.02,seed:31})},
+ sweep(o,d){tone(o,d,{type:'triangle',f0:330,f1:880,dur:.42,gain:.65,a:.006,hold:.02});tone(o,d,{f0:660,f1:1760,dur:.42,gain:.2,a:.006,hold:.02})},
+ query(o,d){tone(o,d,{f0:659,dur:.11,gain:.65,hold:.01});tone(o,d,{f0:880,at:.1,dur:.17,gain:.7,hold:.01})},
+ ding(o,d){for(const[f,g,dur]of[[1047,.5,.6],[1568,.38,.5],[2093,.16,.36]])tone(o,d,{f0:f,dur,gain:g,a:.002,hold:.01})},
+ block(o,d){tone(o,d,{f0:880,f1:520,dur:.12,gain:.55,hold:.05});tone(o,d,{f0:220,f1:120,dur:.13,gain:.4,a:.003,hold:.025})},
  caught(o,d){tone(o,d,{f0:196,f1:110,dur:.16,gain:.85,a:.003});burst(o,d,{dur:.07,gain:.3,f:1200,seed:41});[0,.09,.2].forEach((at,i)=>{const f=[523.25,659.25,783.99][i];tone(o,d,{f0:f,at:.06+at,dur:.55,gain:.42,a:.003});tone(o,d,{type:'triangle',f0:f*2,at:.06+at,dur:.3,gain:.12,a:.002})})},
 };
-const LEN={beep:.24,hoofLight:.1,padHeavy:.22,hopSoft:.12,pulse:.1,thrum:.2,pop:.11,arrow:.34,sweep:.46,query:.3,ding:.65,block:.16,caught:1.05};
+const LEN={beep:.24,hoofLight:.1,padHeavy:.22,hopSoft:.135,pulse:.13,thrum:.2,pop:.125,arrow:.34,sweep:.46,query:.3,ding:.65,block:.21,caught:1.05};
 const SFX_TRIM={beep:.5,hoofLight:.376,padHeavy:.221,hopSoft:.4,pulse:.35,thrum:.32,pop:.569,arrow:.55,sweep:.473,query:.462,ding:.309,block:.422,caught:.3};
 const VARIANTS=new Set(['beep','hoofLight','padHeavy','hopSoft','pulse','thrum']);
 async function renderSfx(id,v=0){const o=new OfflineAudioContext(2,Math.ceil(LEN[id]*ASR),ASR);RECIPES[id](o,o.destination,v);const r=await o.startRendering();for(let c=0;c<2;c++){const d=r.getChannelData(c);for(let i=0;i<d.length;i++)d[i]*=SFX_TRIM[id]}return r}
 function buildEvents(){return (typeof SCENE_EVENTS!=='undefined'?SCENE_EVENTS:[]).filter(e=>RECIPES[e.id]).map(e=>({t:+e.t.toFixed(4),id:e.id,v:e.v||0,g:e.g==null?1:e.g})).sort((x,y)=>x.t-y.t)}
 const EG=e=>{const g=e.g,l=document.documentElement.lang;return typeof g==='number'?g:g&&g[l]!=null?g[l]:1};  // ccc-023: per-event gain of the current language
+// ccc-031.3b: H20 (check.py) reads the per-event gain through sfxEventGain when SFX_PER_EVENT is set; the page plays the same value.
+const SFX_PER_EVENT=true;
+function sfxEventGain(e){return EG(e)}
+// ccc-031.3b: soft limiter on the SFX bus (bus gain -> limiter -> master), live and in __renderStems(false). WaveShaper, oversample
+// 'none': identity below -3 dBFS, tanh knee to 0.98 FS; a 1/SFX_LIM_K pre-gain maps inputs up to +/-SFX_LIM_K onto the curve.
+// It is a ceiling only: every single event peaks below -3 dBFS, so it changes no single event.
+const SFX_LIM_T=Math.pow(10,-3/20),SFX_LIM_C=0.98,SFX_LIM_K=8;
+const SFX_LIM_CURVE=(()=>{const n=16385,c=new Float32Array(n);for(let i=0;i<n;i++){const x=SFX_LIM_K*(2*i/(n-1)-1),a=Math.abs(x);c[i]=a<=SFX_LIM_T?x:Math.sign(x)*(SFX_LIM_T+(SFX_LIM_C-SFX_LIM_T)*Math.tanh((a-SFX_LIM_T)/(SFX_LIM_C-SFX_LIM_T)))}return c})();
+function connectSfxLimiter(ctx,src,dst){const pre=ctx.createGain(),ws=ctx.createWaveShaper(),post=ctx.createGain();pre.gain.value=1/SFX_LIM_K;post.gain.value=1;ws.curve=SFX_LIM_CURVE;ws.oversample='none';src.connect(pre);pre.connect(ws);ws.connect(post);post.connect(dst)}
+// ccc-031.3b master limiter (JCC rule: true peak <= -1 dBFS on the final voice + SFX mix, voice bytes untouched): the voice element
+// and the SFX bus sum into one lookahead true-peak limiter, ceiling -1.5 dBTP (0.5 dB margin). Code = ccc-022 build_limiter.py.
+const LIM_CEIL_DB=-1.5,LIM_LOOK=.005,LIM_REL=.08;
+const LIM_SRC=`
+const H = 8;
+class TPLimiter extends AudioWorkletProcessor {
+  constructor(o) {
+    super();
+    const p = o.processorOptions || {};
+    this.ceil = p.ceil; this.D = Math.max(1, Math.round(p.look * sampleRate)); this.W = this.D + 1;
+    this.rc = Math.exp(-1 / (p.rel * sampleRate));
+    this.F = [1, 2, 3].map(ph => {
+      const f = new Float64Array(2 * H); let s = 0;
+      for (let k = 0; k < 2 * H; k++) {
+        const d = k - H + 1 - ph / 4, x = Math.PI * d;
+        f[k] = (d === 0 ? 1 : Math.sin(x) / x) * .5 * (1 + Math.cos(Math.PI * d / H)); s += f[k];
+      }
+      for (let k = 0; k < 2 * H; k++) f[k] /= s;
+      return f;
+    });
+    this.S = 1024; this.M = this.S - 1;
+    this.b = [new Float64Array(this.S), new Float64Array(this.S)];
+    this.n = 0;
+    this.qi = new Float64Array(this.S); this.qv = new Float64Array(this.S); this.qh = 0; this.qt = 0;
+    this.box = new Float64Array(this.W).fill(1); this.bi = 0; this.sum = this.W; this.mr = 1;
+  }
+  peak(j) {
+    const M = this.M; let pk = 0;
+    for (let c = 0; c < 2; c++) {
+      const b = this.b[c];
+      pk = Math.max(pk, Math.abs(b[j & M]));
+      for (const f of this.F) {
+        let v = 0;
+        for (let k = 0; k < 2 * H; k++) v += f[k] * b[(j - H + 1 + k) & M];
+        pk = Math.max(pk, Math.abs(v));
+      }
+    }
+    return pk;
+  }
+  process(inputs, outputs) {
+    const inp = inputs[0] || [], out = outputs[0], N = out[0].length, M = this.M, D = this.D, W = this.W;
+    for (let i = 0; i < N; i++) {
+      const l = inp[0] ? inp[0][i] : 0, r = inp[1] ? inp[1][i] : l;
+      const n = this.n++;
+      this.b[0][n & M] = l; this.b[1][n & M] = r;
+      const j = n - H, pk = this.peak(j), g = pk > this.ceil ? this.ceil / pk : 1;
+      while (this.qt > this.qh && this.qv[(this.qt - 1) & M] >= g) this.qt--;
+      this.qi[this.qt & M] = j; this.qv[this.qt & M] = g; this.qt++;
+      while (this.qi[this.qh & M] <= j - W) this.qh++;
+      const m = this.qv[this.qh & M];
+      this.mr = m < this.mr ? m : m + (this.mr - m) * this.rc;
+      this.sum += this.mr - this.box[this.bi]; this.box[this.bi] = this.mr; this.bi = (this.bi + 1) % W;
+      const gain = this.sum / W, o = j - D;
+      out[0][i] = gain * this.b[0][o & M];
+      if (out[1]) out[1][i] = gain * this.b[1][o & M];
+    }
+    return true;
+  }
+}
+registerProcessor('tp-limiter', TPLimiter);
+`;
+let limURL=null;
+async function masterLimiter(c){
+ if(!c.audioWorklet||typeof AudioWorkletNode!=='function')return null;
+ // file:// pages have an opaque origin, so a blob: module fails there; a data: module loads (blob: kept as fallback).
+ if(!limURL)limURL='data:text/javascript;base64,'+btoa(LIM_SRC);
+ try{await c.audioWorklet.addModule(limURL)}catch(e){limURL=URL.createObjectURL(new Blob([LIM_SRC],{type:'text/javascript'}));await c.audioWorklet.addModule(limURL)}
+ return new AudioWorkletNode(c,'tp-limiter',{numberOfInputs:1,numberOfOutputs:1,outputChannelCount:[2],channelCount:2,channelCountMode:'explicit',channelInterpretation:'speakers',
+  processorOptions:{ceil:10**(LIM_CEIL_DB/20),look:LIM_LOOK,rel:LIM_REL}});
+}
+function hookVoice(){
+ const c=live.ctx;
+ if(!c||!live.lim||live.voice||c.state!=='running')return;
+ try{live.voice=c.createMediaElementSource(narration);live.voice.connect(live.bus)}catch(e){console.log('VOICE-ROUTE-FAIL',e&&e.message)}
+}
 const SFXG=()=>MIXG.sfx==null?.35:MIXG.sfx;
 let SBUF=null,EVENTS=[];
 const audioReady=(async()=>{if(!window.OfflineAudioContext)return false;try{EVENTS=buildEvents();const out={sfx:{}};for(const id of new Set(EVENTS.map(e=>e.id)))out.sfx[id]=await Promise.all((VARIANTS.has(id)?[0,1,2,3]:[0]).map(v=>renderSfx(id,v)));SBUF=out;return true}catch(e){console.log('AUDIO-SYNTH-FAIL',e&&e.message);return false}})();
 const sbuf=e=>{const a=SBUF.sfx[e.id];return a[e.v%a.length]};
 const live={ctx:null,master:null,sfx:null,next:0,offset:null,done:false};
-function audioKick(){if(!window.AudioContext)return;if(!live.ctx){const c=live.ctx=new AudioContext({latencyHint:'interactive'});live.master=c.createGain();live.master.gain.value=0;live.master.connect(c.destination);live.sfx=c.createGain();live.sfx.gain.value=SFXG();live.sfx.connect(live.master);syncAudioGates()}if(live.ctx.state!=='running')live.ctx.resume().catch(()=>{})}
+function audioKick(){if(!window.AudioContext)return;if(!live.ctx){const c=live.ctx=new AudioContext({latencyHint:'interactive'});live.master=c.createGain();live.master.gain.value=0;live.bus=c.createGain();live.master.connect(live.bus);live.bus.connect(c.destination);live.sfx=c.createGain();live.sfx.gain.value=SFXG();connectSfxLimiter(c,live.sfx,live.master);syncAudioGates();
+  masterLimiter(c).then(lim=>{if(!lim)return;live.bus.disconnect();live.bus.connect(lim);lim.connect(c.destination);live.lim=lim;hookVoice()}).catch(e=>console.log('LIMITER-FAIL',e&&e.message));
+  c.addEventListener('statechange',hookVoice)}if(live.ctx.state!=='running')live.ctx.resume().catch(()=>{})}
 const s2a=x=>typeof TMAP==='object'?TMAP.s2a(x):x;   // 事件表是画面秒;多语片(lang4.js)要换成当前语言的配音秒才排得准,单语片恒等
 function audioTick(tt){
  const c=live.ctx;if(!c||!SBUF||c.state!=='running')return;
@@ -592,12 +678,12 @@ function audioTick(tt){
  const off=c.currentTime-narration.currentTime;
  if(live.offset===null||Math.abs(off-live.offset)>.25){live.offset=off;live.next=EVENTS.findIndex(e=>e.t>=tt);if(live.next<0)live.next=EVENTS.length}else live.offset=live.offset*.92+off*.08;
  const now=c.currentTime-live.offset;
- while(live.next<EVENTS.length&&s2a(EVENTS[live.next].t)<now+.16){const e=EVENTS[live.next++],ea=s2a(e.t);if(ea<now-.03)continue;const s=c.createBufferSource();s.buffer=sbuf(e);const eg=c.createGain();eg.gain.value=EG(e);s.connect(eg);eg.connect(live.sfx);s.start(Math.max(c.currentTime,ea+live.offset))}
+ while(live.next<EVENTS.length&&s2a(EVENTS[live.next].t)<now+.16){const e=EVENTS[live.next++],ea=s2a(e.t);if(ea<now-.03)continue;const s=c.createBufferSource();s.buffer=sbuf(e);const eg=c.createGain();eg.gain.value=sfxEventGain(e);s.connect(eg);eg.connect(live.sfx);s.start(Math.max(c.currentTime,ea+live.offset))}
 }
 // 离线渲染:templates/mix_calibrate.py 用,和实时走同一批缓冲区、同一个事件表
 window.__renderStems=async(unity=true)=>{
  await audioReady;const len=Math.ceil((AUDIO_DUR+2)*ASR),enc=r=>{const a=r.getChannelData(0),b=r.getChannelData(1),f=new Float32Array(len>>1);for(let i=0;i<f.length;i++)f[i]=(a[2*i]+a[2*i+1]+b[2*i]+b[2*i+1])/4;let bin='';const u=new Uint8Array(f.buffer);for(let i=0;i<u.length;i+=32768)bin+=String.fromCharCode.apply(null,u.subarray(i,i+32768));return btoa(bin)}; // 只量响度:折成单声道、降一半采样,传得快
- const o1=new OfflineAudioContext(2,len,ASR),g1=o1.createGain();g1.gain.value=unity?1:SFXG();g1.connect(o1.destination);for(const e of EVENTS){const s=o1.createBufferSource();s.buffer=sbuf(e);const eg=o1.createGain();eg.gain.value=EG(e);s.connect(eg);eg.connect(g1);s.start(e.t)}
+ const o1=new OfflineAudioContext(2,len,ASR),g1=o1.createGain();g1.gain.value=unity?1:SFXG();if(unity)g1.connect(o1.destination);else connectSfxLimiter(o1,g1,o1.destination);for(const e of EVENTS){const s=o1.createBufferSource();s.buffer=sbuf(e);const eg=o1.createGain();eg.gain.value=sfxEventGain(e);s.connect(eg);eg.connect(g1);s.start(e.t)}
  return{sr:ASR/2,len:len>>1,sfx:enc(await o1.startRendering())};
 };
 
