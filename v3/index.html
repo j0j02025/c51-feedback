@@ -439,10 +439,10 @@ const comments=(l,sha=shaOf(l))=>(st.c[lid(l)]||[]).filter(x=>x.sha&&x.sha===sha
 /* J 261120 982:整页界面四语(中 / 英 / 俄 / 哈)切换;课件自己的语言按钮不归这里管 */
 const LANGS=[["zh","中"],["en","EN"],["ru","Рус"],["kk","Қаз"]];
 const UI={
- zh:{rotatePhone:"请把手机横过来，或点下方的「横屏看」",rotateFeishu:"在飞书里打开的，手机转过来不会自动横屏，点「横屏看」即可",rotateLandscape:"横屏看",rotatePortrait:"竖屏看",rotateOk:"知道了",roleTitle:"选择你的身份",switchRole:"切换身份",role_kk_ru:"我是俄语和哈语的教师或教研",role_kk:"我是哈语老师或教研",role_ru:"我是俄语老师或教研",role_zh:"我是中文教研",role_none:"我不是老师或教研",roleLoadError:"暂时无法读取登录身份，请重试。",roleSaveError:"暂时无法保存身份，请重试。",roleRetry:"重试",merged:"已合并",conflict:"反馈冲突",conflictWith:name=>"您的反馈和 "+name+" 的修改意见有冲突，请直接联系该用户",fixedIn:v=>"已在 "+v+" 修改",newVersion:"有新版",retryLesson:"下载失败，重试",lessonLoading:"正在加载课件",lessonSlow:"网络较慢，请稍候",preload:"后台预加载",preloadCached:"已缓存 ✓",preloadDownloading:"正在下载…",preloadPercent:n=>"正在下载 "+n+"%",preloadQueued:"排队中",preloadFailed:"下载失败",preloadLow:"可用空间不足 2 GB，后台预加载已暂停",history:"以往评论",fixed:"已改",nochange:"不改",wip:"处理中",unreplied:"未回复",oldVersion:"旧版",beijing:"北京时间",title:"看课评审",who:"填名字",top:"← 返回课程列表",making:"制作中",cmts:"本课评论",cmtsHint:"点时间跳到那一秒",note:"暂停并评论",pass:"通过",cmtSub:"课件已暂停。写一句就行,可以写多条。",cmtPh:"哪里不对?",cancel:"取消",save:"保存",nmTtl:"先填你的名字",nmSub:"只在第一次提交前问一次,存在这台设备上,之后不再问。",nmPh:"你的名字",ok:"确定",stG:"通过",stR:"不通过",stY:"没判",stM:"制作中",empty:"还没有评论",del:"删除",lesson:n=>"第 "+n+" 课",nc:n=>"意见 "+n+" 条",docT:(g,r,a)=>"看课评审 · 通过 "+g+" · 不通过 "+r+" / "+a,noSha:"这节课的校验还没载入,稍后再试",sent:"已保存",offline:"待重发",edit:"编辑",passBlocked:"还有待处理的评论"},
- en:{rotatePhone:"Turn your phone sideways or tap “Watch in landscape” below.",rotateFeishu:"In Feishu, turning your phone won’t switch the view automatically. Tap “Watch in landscape”.",rotateLandscape:"Watch in landscape",rotatePortrait:"Watch in portrait",rotateOk:"Got it",roleTitle:"Choose your role",switchRole:"Switch role",role_kk_ru:"I teach or develop curricula for both Russian and Kazakh",role_kk:"I teach or develop curricula for Kazakh",role_ru:"I teach or develop curricula for Russian",role_zh:"I develop Chinese-language curricula",role_none:"I am neither a teacher nor a curriculum specialist",roleLoadError:"Could not load your account. Try again.",roleSaveError:"Could not save your role. Try again.",roleRetry:"Try again",merged:"Merged",conflict:"Conflicting feedback",conflictWith:name=>"Your feedback conflicts with "+name+"’s suggested changes. Please contact them directly.",fixedIn:v=>"Fixed in "+v,newVersion:"New version available",retryLesson:"Download failed. Retry",lessonLoading:"Loading lesson",lessonSlow:"The connection is slow. Please wait.",preload:"Background preload",preloadCached:"Cached ✓",preloadDownloading:"Downloading…",preloadPercent:n=>"Downloading "+n+"%",preloadQueued:"Queued",preloadFailed:"Download failed",preloadLow:"Background preload paused because less than 2 GB is available",history:"Previous comments",fixed:"Fixed",nochange:"No change",wip:"In progress",unreplied:"Awaiting reply",oldVersion:"Older version",beijing:"Beijing time",title:"Lesson review",who:"Enter name",top:"← Back to lesson list",making:"In production",cmts:"Comments on this lesson",cmtsHint:"Tap a time to jump there",note:"Pause and comment",pass:"Pass",cmtSub:"The lesson is paused. One sentence is enough; you can add several.",cmtPh:"What is wrong?",cancel:"Cancel",save:"Save",nmTtl:"Enter your name first",nmSub:"Asked only once before your first submission and saved on this device.",nmPh:"Your name",ok:"OK",stG:"Passed",stR:"Failed",stY:"Not rated",stM:"In production",empty:"No comments yet",del:"Delete",lesson:n=>"Lesson "+n,nc:n=>n+(n===1?" comment":" comments"),docT:(g,r,a)=>"Lesson review · passed "+g+" · failed "+r+" / "+a,noSha:"This lesson's checksum has not loaded yet. Try again shortly.",sent:"Saved",offline:"Waiting to retry",edit:"Edit",passBlocked:"There are unresolved comments"},
- ru:{rotatePhone:"Поверните телефон горизонтально или нажмите «Смотреть горизонтально» ниже.",rotateFeishu:"В Feishu поворот телефона не меняет ориентацию автоматически. Нажмите «Смотреть горизонтально».",rotateLandscape:"Смотреть горизонтально",rotatePortrait:"Смотреть вертикально",rotateOk:"Понятно",roleTitle:"Выберите свою роль",switchRole:"Сменить роль",role_kk_ru:"Я учитель или методист по русскому и казахскому языкам",role_kk:"Я учитель или методист по казахскому языку",role_ru:"Я учитель или методист по русскому языку",role_zh:"Я методист по китайскому языку",role_none:"Я не учитель и не методист",roleLoadError:"Не удалось загрузить данные вашей учётной записи. Попробуйте ещё раз.",roleSaveError:"Не удалось сохранить роль. Попробуйте ещё раз.",roleRetry:"Повторить",merged:"Объединено",conflict:"Противоречивые замечания",conflictWith:name=>"Ваше замечание противоречит правкам, которые предложил пользователь "+name+". Пожалуйста, свяжитесь с этим пользователем напрямую.",fixedIn:v=>"Исправлено в версии "+v,newVersion:"Доступна новая версия",retryLesson:"Ошибка загрузки. Повторить",lessonLoading:"Загрузка урока",lessonSlow:"Медленное соединение. Пожалуйста, подождите.",preload:"Фоновая загрузка",preloadCached:"В кэше ✓",preloadDownloading:"Загрузка…",preloadPercent:n=>"Загрузка "+n+"%",preloadQueued:"В очереди",preloadFailed:"Ошибка загрузки",preloadLow:"Фоновая загрузка приостановлена, доступно менее 2 ГБ",history:"Предыдущие комментарии",fixed:"Исправлено",nochange:"Без изменений",wip:"В работе",unreplied:"Без ответа",oldVersion:"Старая версия",beijing:"Пекинское время",title:"Отзыв об уроках",who:"Введите имя",top:"← К списку уроков",making:"В работе",cmts:"Комментарии к уроку",cmtsHint:"Нажмите на время, чтобы перейти",note:"Приостановить и прокомментировать",pass:"Принято",cmtSub:"Урок на паузе. Достаточно одной фразы, можно написать несколько.",cmtPh:"Что не так?",cancel:"Отмена",save:"Сохранить",nmTtl:"Сначала введите своё имя",nmSub:"Спросим один раз перед первой отправкой, имя сохранится на этом устройстве.",nmPh:"Ваше имя",ok:"Готово",stG:"Принято",stR:"Не принято",stY:"Не оценено",stM:"В работе",empty:"Пока нет комментариев",del:"Удалить",lesson:n=>"Урок "+n,nc:n=>"замечаний: "+n,docT:(g,r,a)=>"Отзыв об уроках · принято "+g+" · не принято "+r+" / "+a,noSha:"Проверка урока ещё не загрузилась, попробуйте чуть позже",sent:"Сохранено",offline:"Ожидает повторной отправки",edit:"Изменить",passBlocked:"Есть незакрытые замечания"},
- kk:{rotatePhone:"Телефонды көлденең бұрыңыз немесе төмендегі «Көлденең көру» түймесін басыңыз.",rotateFeishu:"Feishu ішінде телефонды бұрғанда экран автоматты түрде ауыспайды. «Көлденең көру» түймесін басыңыз.",rotateLandscape:"Көлденең көру",rotatePortrait:"Тігінен көру",rotateOk:"Түсінікті",roleTitle:"Рөліңізді таңдаңыз",switchRole:"Рөлді ауыстыру",role_kk_ru:"Мен орыс және қазақ тілдерінің мұғалімімін немесе әдіскерімін",role_kk:"Мен қазақ тілінің мұғалімімін немесе әдіскерімін",role_ru:"Мен орыс тілінің мұғалімімін немесе әдіскерімін",role_zh:"Мен қытай тілінің әдіскерімін",role_none:"Мен мұғалім де, әдіскер де емеспін",roleLoadError:"Аккаунт деректері жүктелмеді. Қайталап көріңіз.",roleSaveError:"Рөліңіз сақталмады. Қайталап көріңіз.",roleRetry:"Қайталау",merged:"Біріктірілді",conflict:"Қайшы пікірлер",conflictWith:name=>"Сіздің пікіріңіз "+name+" ұсынған түзетулермен қайшы келеді. Сол пайдаланушымен тікелей байланысыңыз.",fixedIn:v=>v+" нұсқасында түзетілді",newVersion:"Жаңа нұсқа бар",retryLesson:"Жүктеу сәтсіз. Қайталау",lessonLoading:"Сабақ жүктелуде",lessonSlow:"Интернет баяу. Күте тұрыңыз.",preload:"Фондық жүктеу",preloadCached:"Кэште ✓",preloadDownloading:"Жүктелуде…",preloadPercent:n=>"Жүктелуде "+n+"%",preloadQueued:"Кезекте",preloadFailed:"Жүктеу сәтсіз аяқталды",preloadLow:"Бос орын 2 ГБ-тан аз, фондық жүктеу тоқтатылды",history:"Бұрынғы пікірлер",fixed:"Түзетілді",nochange:"Өзгеріссіз",wip:"Орындалуда",unreplied:"Жауап жоқ",oldVersion:"Бұрынғы нұсқа",beijing:"Бейжің уақыты",title:"Сабақтарды бағалау",who:"Атыңызды жазыңыз",top:"← Сабақтар тізіміне",making:"Дайындалуда",cmts:"Сабаққа пікірлер",cmtsHint:"Уақытты бассаңыз, сол секундқа өтеді",note:"Кідіртіп, пікір жазу",pass:"Өтті",cmtSub:"Сабақ кідіртілді. Бір сөйлем жеткілікті, бірнешеуін жазуға болады.",cmtPh:"Не дұрыс емес?",cancel:"Болдырмау",save:"Сақтау",nmTtl:"Алдымен атыңызды жазыңыз",nmSub:"Алғашқы жіберу алдында бір рет қана сұралады, осы құрылғыда сақталады.",nmPh:"Атыңыз",ok:"Дайын",stG:"Өтті",stR:"Өтпеді",stY:"Бағаланбаған",stM:"Дайындалуда",empty:"Әзірге пікір жоқ",del:"Өшіру",lesson:n=>n+"-сабақ",nc:n=>"пікір: "+n,docT:(g,r,a)=>"Сабақтарды бағалау · өтті "+g+" · өтпеді "+r+" / "+a,noSha:"Сабақ тексерісі әлі жүктелмеді, сәлден кейін қайталаңыз",sent:"Сақталды",offline:"Қайта жіберуді күтуде",edit:"Өңдеу",passBlocked:"Жабылмаған пікірлер бар"}
+ zh:{rotatePhone:"请把手机横过来，或点下方的「横屏看」",rotateFeishu:"在飞书里打开的，手机转过来不会自动横屏，点「横屏看」即可",rotateLandscape:"横屏看",rotatePortrait:"竖屏看",rotateOk:"知道了",roleTitle:"选择你的身份",switchRole:"切换身份",role_kk_ru:"我是俄语和哈语的教师或教研",role_kk:"我是哈语老师或教研",role_ru:"我是俄语老师或教研",role_zh:"我是中文教研",role_none:"我不是老师或教研",roleLoadError:"暂时无法读取登录身份，请重试。",roleSaveError:"暂时无法保存身份，请重试。",roleRetry:"重试",merged:"已合并",conflict:"反馈冲突",conflictWith:name=>"您的反馈和 "+name+" 的修改意见有冲突，请直接联系该用户",fixedIn:v=>"已在 "+v+" 修改",newVersion:"有新版",retryLesson:"下载失败，重试",lessonLoading:"正在加载课件",lessonSlow:"网络较慢，请稍候",preload:"后台预加载",preloadCached:"已存",preloadDownloading:"存储中",preloadPercent:n=>"存储中 "+n+"%",preloadQueued:"未存",preloadFailed:"下载失败",preloadLow:"可用空间不足 2 GB，后台预加载已暂停",history:"以往评论",fixed:"已改",nochange:"不改",wip:"处理中",unreplied:"未回复",oldVersion:"旧版",beijing:"北京时间",title:"看课评审",who:"填名字",top:"← 返回课程列表",making:"制作中",cmts:"本课评论",cmtsHint:"点时间跳到那一秒",note:"暂停并评论",pass:"通过",cmtSub:"课件已暂停。写一句就行,可以写多条。",cmtPh:"哪里不对?",cancel:"取消",save:"保存",nmTtl:"先填你的名字",nmSub:"只在第一次提交前问一次,存在这台设备上,之后不再问。",nmPh:"你的名字",ok:"确定",stG:"通过",stR:"不通过",stY:"没判",stM:"制作中",empty:"还没有评论",del:"删除",lesson:n=>"第 "+n+" 课",nc:n=>"意见 "+n+" 条",docT:(g,r,a)=>"看课评审 · 通过 "+g+" · 不通过 "+r+" / "+a,noSha:"这节课的校验还没载入,稍后再试",sent:"已保存",offline:"待重发",edit:"编辑",passBlocked:"还有待处理的评论"},
+ en:{rotatePhone:"Turn your phone sideways or tap “Watch in landscape” below.",rotateFeishu:"In Feishu, turning your phone won’t switch the view automatically. Tap “Watch in landscape”.",rotateLandscape:"Watch in landscape",rotatePortrait:"Watch in portrait",rotateOk:"Got it",roleTitle:"Choose your role",switchRole:"Switch role",role_kk_ru:"I teach or develop curricula for both Russian and Kazakh",role_kk:"I teach or develop curricula for Kazakh",role_ru:"I teach or develop curricula for Russian",role_zh:"I develop Chinese-language curricula",role_none:"I am neither a teacher nor a curriculum specialist",roleLoadError:"Could not load your account. Try again.",roleSaveError:"Could not save your role. Try again.",roleRetry:"Try again",merged:"Merged",conflict:"Conflicting feedback",conflictWith:name=>"Your feedback conflicts with "+name+"’s suggested changes. Please contact them directly.",fixedIn:v=>"Fixed in "+v,newVersion:"New version available",retryLesson:"Download failed. Retry",lessonLoading:"Loading lesson",lessonSlow:"The connection is slow. Please wait.",preload:"Background preload",preloadCached:"Saved",preloadDownloading:"Saving",preloadPercent:n=>"Saving "+n+"%",preloadQueued:"Not saved",preloadFailed:"Download failed",preloadLow:"Background preload paused because less than 2 GB is available",history:"Previous comments",fixed:"Fixed",nochange:"No change",wip:"In progress",unreplied:"Awaiting reply",oldVersion:"Older version",beijing:"Beijing time",title:"Lesson review",who:"Enter name",top:"← Back to lesson list",making:"In production",cmts:"Comments on this lesson",cmtsHint:"Tap a time to jump there",note:"Pause and comment",pass:"Pass",cmtSub:"The lesson is paused. One sentence is enough; you can add several.",cmtPh:"What is wrong?",cancel:"Cancel",save:"Save",nmTtl:"Enter your name first",nmSub:"Asked only once before your first submission and saved on this device.",nmPh:"Your name",ok:"OK",stG:"Passed",stR:"Failed",stY:"Not rated",stM:"In production",empty:"No comments yet",del:"Delete",lesson:n=>"Lesson "+n,nc:n=>n+(n===1?" comment":" comments"),docT:(g,r,a)=>"Lesson review · passed "+g+" · failed "+r+" / "+a,noSha:"This lesson's checksum has not loaded yet. Try again shortly.",sent:"Saved",offline:"Waiting to retry",edit:"Edit",passBlocked:"There are unresolved comments"},
+ ru:{rotatePhone:"Поверните телефон горизонтально или нажмите «Смотреть горизонтально» ниже.",rotateFeishu:"В Feishu поворот телефона не меняет ориентацию автоматически. Нажмите «Смотреть горизонтально».",rotateLandscape:"Смотреть горизонтально",rotatePortrait:"Смотреть вертикально",rotateOk:"Понятно",roleTitle:"Выберите свою роль",switchRole:"Сменить роль",role_kk_ru:"Я учитель или методист по русскому и казахскому языкам",role_kk:"Я учитель или методист по казахскому языку",role_ru:"Я учитель или методист по русскому языку",role_zh:"Я методист по китайскому языку",role_none:"Я не учитель и не методист",roleLoadError:"Не удалось загрузить данные вашей учётной записи. Попробуйте ещё раз.",roleSaveError:"Не удалось сохранить роль. Попробуйте ещё раз.",roleRetry:"Повторить",merged:"Объединено",conflict:"Противоречивые замечания",conflictWith:name=>"Ваше замечание противоречит правкам, которые предложил пользователь "+name+". Пожалуйста, свяжитесь с этим пользователем напрямую.",fixedIn:v=>"Исправлено в версии "+v,newVersion:"Доступна новая версия",retryLesson:"Ошибка загрузки. Повторить",lessonLoading:"Загрузка урока",lessonSlow:"Медленное соединение. Пожалуйста, подождите.",preload:"Фоновая загрузка",preloadCached:"Сохранено",preloadDownloading:"Сохранение",preloadPercent:n=>"Сохранение "+n+"%",preloadQueued:"Не сохранено",preloadFailed:"Ошибка загрузки",preloadLow:"Фоновая загрузка приостановлена, доступно менее 2 ГБ",history:"Предыдущие комментарии",fixed:"Исправлено",nochange:"Без изменений",wip:"В работе",unreplied:"Без ответа",oldVersion:"Старая версия",beijing:"Пекинское время",title:"Отзыв об уроках",who:"Введите имя",top:"← К списку уроков",making:"В работе",cmts:"Комментарии к уроку",cmtsHint:"Нажмите на время, чтобы перейти",note:"Приостановить и прокомментировать",pass:"Принято",cmtSub:"Урок на паузе. Достаточно одной фразы, можно написать несколько.",cmtPh:"Что не так?",cancel:"Отмена",save:"Сохранить",nmTtl:"Сначала введите своё имя",nmSub:"Спросим один раз перед первой отправкой, имя сохранится на этом устройстве.",nmPh:"Ваше имя",ok:"Готово",stG:"Принято",stR:"Не принято",stY:"Не оценено",stM:"В работе",empty:"Пока нет комментариев",del:"Удалить",lesson:n=>"Урок "+n,nc:n=>"замечаний: "+n,docT:(g,r,a)=>"Отзыв об уроках · принято "+g+" · не принято "+r+" / "+a,noSha:"Проверка урока ещё не загрузилась, попробуйте чуть позже",sent:"Сохранено",offline:"Ожидает повторной отправки",edit:"Изменить",passBlocked:"Есть незакрытые замечания"},
+ kk:{rotatePhone:"Телефонды көлденең бұрыңыз немесе төмендегі «Көлденең көру» түймесін басыңыз.",rotateFeishu:"Feishu ішінде телефонды бұрғанда экран автоматты түрде ауыспайды. «Көлденең көру» түймесін басыңыз.",rotateLandscape:"Көлденең көру",rotatePortrait:"Тігінен көру",rotateOk:"Түсінікті",roleTitle:"Рөліңізді таңдаңыз",switchRole:"Рөлді ауыстыру",role_kk_ru:"Мен орыс және қазақ тілдерінің мұғалімімін немесе әдіскерімін",role_kk:"Мен қазақ тілінің мұғалімімін немесе әдіскерімін",role_ru:"Мен орыс тілінің мұғалімімін немесе әдіскерімін",role_zh:"Мен қытай тілінің әдіскерімін",role_none:"Мен мұғалім де, әдіскер де емеспін",roleLoadError:"Аккаунт деректері жүктелмеді. Қайталап көріңіз.",roleSaveError:"Рөліңіз сақталмады. Қайталап көріңіз.",roleRetry:"Қайталау",merged:"Біріктірілді",conflict:"Қайшы пікірлер",conflictWith:name=>"Сіздің пікіріңіз "+name+" ұсынған түзетулермен қайшы келеді. Сол пайдаланушымен тікелей байланысыңыз.",fixedIn:v=>v+" нұсқасында түзетілді",newVersion:"Жаңа нұсқа бар",retryLesson:"Жүктеу сәтсіз. Қайталау",lessonLoading:"Сабақ жүктелуде",lessonSlow:"Интернет баяу. Күте тұрыңыз.",preload:"Фондық жүктеу",preloadCached:"Сақталды",preloadDownloading:"Сақталуда",preloadPercent:n=>"Сақталуда "+n+"%",preloadQueued:"Сақталмаған",preloadFailed:"Жүктеу сәтсіз аяқталды",preloadLow:"Бос орын 2 ГБ-тан аз, фондық жүктеу тоқтатылды",history:"Бұрынғы пікірлер",fixed:"Түзетілді",nochange:"Өзгеріссіз",wip:"Орындалуда",unreplied:"Жауап жоқ",oldVersion:"Бұрынғы нұсқа",beijing:"Бейжің уақыты",title:"Сабақтарды бағалау",who:"Атыңызды жазыңыз",top:"← Сабақтар тізіміне",making:"Дайындалуда",cmts:"Сабаққа пікірлер",cmtsHint:"Уақытты бассаңыз, сол секундқа өтеді",note:"Кідіртіп, пікір жазу",pass:"Өтті",cmtSub:"Сабақ кідіртілді. Бір сөйлем жеткілікті, бірнешеуін жазуға болады.",cmtPh:"Не дұрыс емес?",cancel:"Болдырмау",save:"Сақтау",nmTtl:"Алдымен атыңызды жазыңыз",nmSub:"Алғашқы жіберу алдында бір рет қана сұралады, осы құрылғыда сақталады.",nmPh:"Атыңыз",ok:"Дайын",stG:"Өтті",stR:"Өтпеді",stY:"Бағаланбаған",stM:"Дайындалуда",empty:"Әзірге пікір жоқ",del:"Өшіру",lesson:n=>n+"-сабақ",nc:n=>"пікір: "+n,docT:(g,r,a)=>"Сабақтарды бағалау · өтті "+g+" · өтпеді "+r+" / "+a,noSha:"Сабақ тексерісі әлі жүктелмеді, сәлден кейін қайталаңыз",sent:"Сақталды",offline:"Қайта жіберуді күтуде",edit:"Өңдеу",passBlocked:"Жабылмаған пікірлер бар"}
 };
 /* 分组名 / 风格 / 课名:按中文原值查表,查不到显示中文原值(新加的课先显示中文,在这里补一行即可) */
 const TR={
@@ -575,21 +575,22 @@ function preloadURL(file, sha) {
 function paintPreload(entry) {
   if (viewing?.key === entry.key) paintLessonLoading();
   if (!entry.badge) return;
-  // K 261121:缓存状态不写字,下载中 = 慢闪橙点,已缓存 = 嫩绿点;「有新版」仍用文字。
-  let label = "", dot = "", tip = "";
+  // t3180 (J 261123):每张卡写明「已存 / 存储中 n% / 未存」,不再只用色点。
+  let label = "", tip = "";
   if (entry.newVersion) label = T("newVersion") + (entry.state === "failed" ? " · " + T("preloadFailed") : "");
-  else if (entry.state === "cached") { dot = "done"; tip = T("preloadCached"); }
-  else if (preloadOn && !preloadLow && entry.state === "downloading") {
-    dot = "loading";
-    tip = entry.percent == null ? T("preloadDownloading") : T("preloadPercent")(entry.percent);
+  else if (entry.state === "cached") { label = T("preloadCached"); tip = label; }
+  else if (entry.state === "downloading") {
+    label = entry.percent == null ? T("preloadDownloading") : T("preloadPercent")(entry.percent);
+    tip = label;
+  } else {
+    label = T("preloadQueued"); tip = label;
   }
   entry.badge.classList.toggle("new-version", Boolean(entry.newVersion));
-  entry.badge.classList.toggle("dot", Boolean(dot));
-  entry.badge.classList.toggle("loading", dot === "loading");
-  entry.badge.classList.toggle("done", dot === "done");
+  entry.badge.classList.toggle("done", entry.state === "cached" && !entry.newVersion);
+  entry.badge.classList.toggle("loading", entry.state === "downloading");
   entry.badge.textContent = label;
   if (tip) entry.badge.setAttribute("aria-label", tip); else entry.badge.removeAttribute("aria-label");
-  entry.badge.hidden = !label && !dot;
+  entry.badge.hidden = !label;
 }
 
 function renderPreloadBadge(card) {
@@ -616,7 +617,7 @@ function stopPreload() {
   preloadActive?.aborter.abort();
 }
 
-function workerCall(type, entry, { signal, progress } = {}) {
+function workerCall(type, entry, { signal, progress, url } = {}) {
   return new Promise((resolve, reject) => {
     const channel = new MessageChannel();
     const cancel = () => channel.port1.postMessage("cancel");
@@ -641,7 +642,7 @@ function workerCall(type, entry, { signal, progress } = {}) {
     };
     signal?.addEventListener("abort", cancel, { once: true });
     try {
-      preloadWorker.postMessage({ type, file: entry?.file, sha: entry?.sha }, [channel.port2]);
+      preloadWorker.postMessage({ type, file: entry?.file, sha: entry?.sha, url, mode: entry?.mode }, [channel.port2]);
       if (signal?.aborted) cancel();
     } catch (error) {
       finish();
@@ -650,19 +651,46 @@ function workerCall(type, entry, { signal, progress } = {}) {
   });
 }
 
+// t3180: covers finish before any lesson is fetched. One lesson at a time, top to
+// bottom; the lesson the reviewer opened is pulled to the front and the transfer
+// already on the wire is aborted so it gives up the bandwidth.
+function coversSettled() {
+  return thumbQueue.length === 0 && thumbInflight === 0 && thumbsDone;
+}
 function schedulePreload() {
   if (!preloadWorker || !preloadOn || preloadLow || preloadTimer || preloadActive || preloadOpening) return;
+  if (!coversSettled()) return;
   const now = Date.now();
   const queued = preloadOrder.filter(item => item.state === "queued");
   const ready = queued.filter(item => !item.retryAt || item.retryAt <= now);
-  const entry = ready.find(item => item.newVersion) || ready[0];
-  const next = entry ? preloadStart : Math.min(...queued.map(item => item.retryAt));
+  const front = ready.find(item => item.rush);
+  const entry = front || ready.find(item => item.newVersion) || ready[0];
+  const next = entry ? (front ? 0 : preloadStart) : Math.min(...queued.map(item => item.retryAt));
   if (!Number.isFinite(next)) return;
   preloadTimer = setTimeout(() => {
     preloadTimer = null;
     if (entry) downloadLesson(entry);
     else schedulePreload();
   }, Math.max(0, next - now));
+}
+
+// Media named inside a lesson follows that lesson's HTML, still one at a time.
+async function cacheLessonMedia(entry, signal) {
+  let html = "";
+  try {
+    const response = await fetch(entry.key, { cache: "force-cache" });
+    if (response.ok) html = await response.text();
+  } catch { return; }
+  const found = [...html.matchAll(/(?:src|href)="([^"]+\.(?:mp4|webm|m4a|mp3|wav|ogg))(?:\?c51-sha=([a-f0-9]{64}))?"/g)];
+  for (const [, raw, named] of found) {
+    if (signal.aborted) return;
+    let target;
+    try { target = new URL(raw, new URL(entry.file, new URL("./", location.href))); } catch { continue; }
+    if (target.origin !== location.origin) continue;
+    const sha = named || target.searchParams.get("c51-sha");
+    if (!/^[a-f0-9]{64}$/.test(sha)) continue;
+    await workerCall("asset", { sha }, { signal, url: target.href }).catch(() => {});
+  }
 }
 
 async function downloadLesson(entry) {
@@ -683,6 +711,8 @@ async function downloadLesson(entry) {
       entry.state = "cached";
       entry.retryAt = 0;
       entry.failures = 0;
+      entry.rush = false;
+      await cacheLessonMedia(entry, aborter.signal);
       if (viewing?.key === entry.key && viewing.failed &&
           preloadLessons.get(entry.file) === entry) setLessonFrame(curLesson());
     } else if (result.lowStorage) {
@@ -759,10 +789,15 @@ function setLessonFrame(lesson) {
   }
   if (preloadWorker) {
     if (entry.state !== "cached") {
+      // J 261123: the opened lesson jumps the queue and takes the bandwidth now.
       clearTimeout(preloadTimer);
       preloadTimer = null;
+      for (const other of preloadOrder) if (other !== entry) other.rush = false;
+      entry.rush = true;
+      entry.retryAt = 0;
       preloadOpening = { entry };
-      if (preloadActive?.entry !== entry) preloadActive?.aborter.abort();
+      if (preloadActive && preloadActive.entry !== entry) preloadActive.aborter.abort();
+      else workerCall("yield").catch(() => {});
     } else if (preloadLow) {
       preloadOpening = { entry };
     }
@@ -848,13 +883,16 @@ function waitForPreloadWorker(serviceWorker, script) {
 }
 
 async function initPreload() {
+  // J 261123: once saved, the buffer stays. Ask the browser not to evict it.
+  try { await navigator.storage.persist(); } catch {}
   const serviceWorker = navigator.serviceWorker;
   if (!serviceWorker) return;
-  const script = new URL("sw.js", new URL("./", location.href)).href;
+  const script = new URL(new URLSearchParams(location.search).get("sw") || "sw.js", new URL("./", location.href)).href;
   try {
     const registration = await serviceWorker.register(script, { scope: "./", updateViaCache: "none" });
     if (!registration) return;
     preloadWorker = await waitForPreloadWorker(serviceWorker, script);
+    pumpThumbs();
     serviceWorker.addEventListener("controllerchange", async () => {
       const controller = serviceWorker.controller;
       if (controller?.scriptURL !== script || controller === preloadWorker) return;
@@ -1020,21 +1058,49 @@ function visibleLessons(){
   return subject?DATA.lessons.filter(l=>typeof l.subject==="string"&&l.subject.startsWith(subject)):DATA.lessons;
 }
 
+// t3180 (J 261123): the catalogue loads every cover top to bottom, four at a time,
+// before any lesson HTML is fetched. A cover is asked for by its fingerprint, so a
+// reload is served from cache and costs no network request.
 const thumbQueue=[];
-let thumbTimer=null;
-const thumbObserver=new IntersectionObserver(entries=>{
-  for(const item of entries)if(item.isIntersecting){thumbObserver.unobserve(item.target);thumbQueue.push(item.target)}
+let thumbInflight=0, thumbsDone=false, thumbsStarted=false;
+const thumbSlots=4;
+function thumbSettled(){
+  thumbInflight--;
+  if(!thumbQueue.length && thumbInflight===0){ thumbsDone=true; schedulePreload(); }
   pumpThumbs();
-},{rootMargin:"200px"});
+}
 function pumpThumbs(){
-  if(thumbTimer||!thumbQueue.length)return;
-  const img=thumbQueue.shift();
-  if(img.isConnected){
-    img.onload=()=>clearLoadError("thumb:"+img.dataset.src);
-    img.onerror=()=>showLoadError("thumb:"+img.dataset.src,()=>{img.src=img.dataset.src});
-    img.src=img.dataset.src;
+  // Covers wait for the worker so the first view can be saved and a reload costs nothing.
+  // Issued strictly in catalogue order, four in flight at once (J 261123).
+  if(!preloadWorker)return;
+  while(thumbInflight<thumbSlots && thumbQueue.length){
+    const img=thumbQueue[0];
+    if(img.dataset.issued)break;
+    thumbQueue.shift();
+    if(!img.isConnected)continue;
+    thumbInflight++;
+    const src=img.dataset.src;
+    const sha=(src.split("c51-sha=")[1]||"").slice(0,64);
+    const finish=()=>{ clearLoadError("thumb:"+src); thumbSettled(); };
+    const fail=()=>{ showLoadError("thumb:"+src,()=>{img.src=src}); thumbSettled(); };
+    // Ask the worker first: a saved cover comes back with no network request.
+    const cached = preloadWorker && /^[a-f0-9]{64}$/.test(sha)
+      ? workerCall("thumb", { file: src.split("?")[0], sha }).catch(() => ({})) : Promise.resolve({});
+    cached.then(async result => {
+      if (!img.isConnected) { thumbSettled(); return; }
+      img.onload = finish; img.onerror = fail;
+      // A saved cover is painted from the blob the worker returns, so a reload costs no
+      // request. Cache Storage itself drops entries on a worker restart (Chrome), so
+      // the worker keeps the bytes in the HTTP cache and reads them back.
+      if (result.cached && result.blob) {
+        img.onloadstart = () => pumpThumbs();
+        img.src = URL.createObjectURL(result.blob);
+        return;
+      }
+      img.onloadstart = () => pumpThumbs();
+      img.src = src;
+    });
   }
-  thumbTimer=setTimeout(()=>{thumbTimer=null;pumpThumbs()},800);
 }
 function renderHome(){
   if(!AUTH_SITE)$("whoBtn").textContent=st.name?("👤 "+st.name):T("who");
@@ -1056,8 +1122,8 @@ function renderHome(){
       b.dataset.file=l.file||"";
       if(state)b.dataset.reviewState=state;
       const badge=ok?(label?'<span class="st '+col+'">'+esc(T(label))+'</span>':""):'<span class="st make">'+esc(T("stM"))+'</span>';
-      b.innerHTML=(ok&&l.thumb?'<img class="th" alt="" loading="lazy" decoding="async" data-src="'+esc(l.thumb)+'">':'')+'<div class="hd"><span class="no">'+esc(lbl(l))+'</span>'+badge+'</div><div class="tt"></div><div class="meta"></div>';
-      const thumb=b.querySelector(".th"); if(thumb){if(thumb.dataset.src.startsWith("data:"))thumb.src=thumb.dataset.src;else thumbObserver.observe(thumb)}
+      b.innerHTML=(ok&&l.thumb?'<img class="th" alt="" decoding="async"'+(thumbQueue.length<thumbSlots?' fetchpriority="high"':'')+' data-src="'+esc(l.thumb)+'">':'')+'<div class="hd"><span class="no">'+esc(lbl(l))+'</span>'+badge+'</div><div class="tt"></div><div class="meta"></div>';
+      const thumb=b.querySelector(".th"); if(thumb){if(thumb.dataset.src.startsWith("data:"))thumb.src=thumb.dataset.src;else thumbQueue.push(thumb)}
       b.querySelector(".tt").textContent=tr(l.title);
       if(ok){
         renderCommentCounts(b,lid(l));
@@ -1078,6 +1144,8 @@ function renderHome(){
     h.appendChild(c);
   });
   document.title=AUTH_SITE&&reviewerRole===null?T("title"):T("docT")(ng,nr,nc,ready.length);
+  if(!thumbQueue.length && thumbInflight===0) thumbsDone=true;
+  pumpThumbs();
 }
 
 let tick=null, pendingS=0, resumeAfter=false, editingComment=null, followupDraft=null;
@@ -1909,7 +1977,8 @@ async function loadCatalog(){
     const d=await r.json(); if(!Array.isArray(d.lessons))throw new Error("Invalid catalog");
     DATA=d; clearLoadError("catalog"); renderHome();
     loadSummary(); loadReviewStatus();
-    preloadStart=Date.now()+1500;
+    // Covers go first; lessons start the moment the last cover settles.
+    preloadStart=0;
     preloadInit=initPreload();
     preloadInit.then(refreshManifest);
   }catch{showLoadError("catalog",loadCatalog)}

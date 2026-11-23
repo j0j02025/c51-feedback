@@ -2,15 +2,29 @@
 
 const scope = new URL(self.registration.scope);
 const lessonRoot = new URL("lessons/", scope).pathname;
+const thumbRoot = new URL("thumbs/", scope).pathname;
 const cachePrefix = "c51-lessons:" + scope.pathname + ":";
 const cacheName = cachePrefix + "v1";
 const shaParam = "c51-sha";
 const minimumFree = 2 * 1024 ** 3;
 const background = new Map();
 const foreground = new Map();
+const thumbCache = new Map();
+const thumbWrites = new Map();
+// Chrome drops cache.put calls that overlap. Every write waits for the one before it.
+let cacheWrite = Promise.resolve();
+function writeCache(action) {
+  const result = cacheWrite.then(action, action);
+  cacheWrite = result.then(() => {}, () => {});
+  return result;
+}
 let versions;
 let manifestRequest;
 let cacheChanges = Promise.resolve();
+
+// t3180: one background transfer at a time. The page cancels it when a lesson
+// the reviewer opened needs the bandwidth (J 261123: clicked lesson jumps the queue).
+let activeDownload = null;
 
 function lessonURL(file) {
   if (typeof file !== "string") return null;
@@ -28,6 +42,18 @@ function cacheKey(url, sha) {
   const key = new URL(url.pathname, scope);
   key.searchParams.set(shaParam, sha);
   return key.href;
+}
+
+function thumbURL(file) {
+  if (typeof file !== "string") return null;
+  try {
+    const url = new URL(file, scope);
+    const name = url.pathname.slice(thumbRoot.length);
+    return url.origin === scope.origin && url.pathname.startsWith(thumbRoot) &&
+      /^[^/]+\.(?:jpg|jpeg|png|webp)$/.test(name) && !/%(?:2f|5c)/i.test(name) ? url : null;
+  } catch {
+    return null;
+  }
 }
 
 function isReviewPage(value) {
@@ -99,6 +125,99 @@ async function lowStorage() {
     return Number.isFinite(quota) && Number.isFinite(usage) && quota - usage < minimumFree;
   } catch {
     return false;
+  }
+}
+
+// The clicked lesson needs the wire. Abort whatever background transfer holds it.
+function yieldBandwidth() {
+  activeDownload?.abort();
+}
+
+async function fetchThumb(file, sha, { signal } = {}) {
+  const url = thumbURL(file);
+  if (!url || !/^[a-f0-9]{64}$/.test(sha)) throw new Error("Unknown thumbnail");
+  const key = cacheKey(url, sha);
+  // One cache per cover. Chrome drops earlier entries when several are written into
+  // the same cache in a burst, so each cover gets a cache of its own.
+  const own = "c51-thumb:" + sha + ":" + url.pathname.split("/").pop();
+  try {
+    await thumbWrites.get(own);
+    const hit = await (await caches.open(own)).match("cover");
+    if (hit) return { cached: true, blob: await hit.blob() };
+  } catch {}
+  if (await lowStorage()) return { lowStorage: true };
+  const aborter = new AbortController();
+  const stop = () => aborter.abort();
+  signal?.addEventListener("abort", stop, { once: true });
+  // Covers are small and run four at a time; they do not take the lesson lock.
+  try {
+    // An <img> sends a no-cors request, so only an opaque response can answer it.
+    const response = await fetch(key, {
+      cache: "force-cache", mode: "same-origin", redirect: "error", signal: aborter.signal
+    });
+    const copy = response.clone();
+    const bytes = await response.arrayBuffer();
+    if (aborter.signal.aborted || !bytes.byteLength) return { cached: false };
+    const digest = await crypto.subtle.digest("SHA-256", bytes);
+    if (hex(new Uint8Array(digest)) !== sha) return { cached: false };
+    const own = "c51-thumb:" + sha + ":" + url.pathname.split("/").pop();
+    const writing = writeCache(() => caches.open(own).then(store => store.put("cover", new Response(bytes, {
+      headers: { "Content-Type": response.headers.get("Content-Type") || "image/jpeg" }
+    }))));
+    thumbWrites.set(own, writing);
+    await writing;
+    return { cached: true, blob: new Blob([bytes]) };
+  } finally {
+    signal?.removeEventListener("abort", stop);
+  }
+}
+
+// Media referenced by a stub or a lesson, stored under its own fingerprint so an
+// unchanged asset is never fetched twice. One at a time; abort yields the wire.
+async function fetchAsset(url, sha, { signal, progress } = {}) {
+  let target;
+  try { target = new URL(url); } catch { return false; }
+  if (target.origin !== scope.origin || !/^[a-f0-9]{64}$/.test(sha)) return false;
+  const key = cacheKey(target, sha);
+  const cache = await caches.open(cacheName);
+  if (await cache.match(key)) return true;
+  if (await lowStorage()) return false;
+  const aborter = new AbortController();
+  const stop = () => aborter.abort();
+  signal?.addEventListener("abort", stop, { once: true });
+  activeDownload = aborter;
+  try {
+    const response = await fetch(key, {
+      cache: "no-store", mode: "same-origin", redirect: "error", signal: aborter.signal
+    });
+    if (!response.ok || response.redirected) {
+      await response.body?.cancel().catch(() => {});
+      return false;
+    }
+    const encoding = response.headers.get("Content-Encoding");
+    const total = !encoding || encoding === "identity"
+      ? Number(response.headers.get("Content-Length")) : 0;
+    let received = 0, last = -1;
+    const stream = response.body?.pipeThrough(new TransformStream({
+      transform(chunk, controller) {
+        received += chunk.byteLength;
+        const percent = total > 0 ? Math.min(99, Math.floor(received * 100 / total)) : null;
+        if (percent !== last && progress) progress(last = percent);
+        controller.enqueue(chunk);
+      }
+    }), { signal: aborter.signal });
+    const bytes = await new Response(stream).arrayBuffer();
+    if (aborter.signal.aborted) return false;
+    const digest = await crypto.subtle.digest("SHA-256", bytes);
+    if (hex(new Uint8Array(digest)) !== sha) return false;
+    const headers = new Headers(response.headers);
+    headers.delete("Content-Encoding");
+    headers.set("Content-Length", String(bytes.byteLength));
+    await mutateCache(async store => { await store.put(key, new Response(bytes, { headers })); });
+    return true;
+  } finally {
+    if (activeDownload === aborter) activeDownload = null;
+    signal?.removeEventListener("abort", stop);
   }
 }
 
@@ -188,6 +307,27 @@ self.addEventListener("message", event => {
         port.postMessage(await refreshManifest());
         return;
       }
+      // t3180: covers are cached by fingerprint too, so a reload costs 0 requests.
+      if (type === "thumb") {
+        const existing = thumbCache.get(sha);
+        if (existing) { port.postMessage(await existing); return; }
+        const download = fetchThumb(file, sha).catch(() => ({ cached: false }));
+        thumbCache.set(sha, download);
+        try { port.postMessage(await download); }
+        finally { if (thumbCache.get(sha) === download) thumbCache.delete(sha); }
+        return;
+      }
+      // The reviewer opened a lesson: drop the background transfer immediately.
+      if (type === "yield") { yieldBandwidth(); port.postMessage({ yielded: true }); return; }
+      if (type === "asset") {
+        const aborter = new AbortController();
+        port.onmessage = () => aborter.abort();
+        const ok = await fetchAsset(event.data?.url, sha, {
+          signal: aborter.signal, progress: percent => port.postMessage({ percent })
+        }).catch(() => false);
+        port.postMessage({ cached: ok });
+        return;
+      }
       const url = lessonURL(file);
       if (!url || !/^[a-f0-9]{64}$/.test(sha)) throw new Error("Unknown lesson");
       const key = cacheKey(url, sha);
@@ -219,6 +359,7 @@ self.addEventListener("message", event => {
         if (aborter.signal.aborted) throw new Error("Preload cancelled");
 
         const download = (async () => {
+          activeDownload = aborter;
           const response = await fetch(key, {
             cache: "no-store", mode: "same-origin", redirect: "error", signal: aborter.signal
           });
@@ -232,6 +373,7 @@ self.addEventListener("message", event => {
           port.postMessage({ cached: await download });
         } finally {
           if (background.get(key) === download) background.delete(key);
+          if (activeDownload === aborter) activeDownload = null;
         }
       } finally {
         clearTimeout(timeout);
@@ -253,7 +395,48 @@ function unavailableLesson() {
 
 self.addEventListener("fetch", event => {
   const request = event.request;
-  if (request.method !== "GET" || request.destination !== "iframe" ||
+  if (request.method !== "GET") return;
+
+  // Covers first, and synchronously: respondWith must run before any await.
+  const thumb = thumbURL(request.url);
+  const thumbSha = thumb?.searchParams.get(shaParam);
+  if (thumb && /^[a-f0-9]{64}$/.test(thumbSha) && isReviewPage(request.referrer)) {
+    const key = cacheKey(thumb, thumbSha);
+    event.respondWith((async () => {
+      const cache = await caches.open(cacheName);
+      const hit = await cache.match(key);
+      if (hit) return hit.clone();
+      const response = await fetch(event.request);
+      if (response.ok && !response.redirected) {
+        event.waitUntil(mutateCache(async store => { await store.put(key, response.clone()); }).catch(() => {}));
+      }
+      return response;
+    })());
+    return;
+  }
+
+
+  if (new URL(request.url).pathname.endsWith("/sw-probe")) {
+    const served = (async () => {
+      const cache = await caches.open(cacheName);
+      const sample = (await cache.keys()).find(k => k.url.includes("ru-lang-65-c.jpg"));
+      const hit = sample && await cache.match(sample);
+      return hit ? hit.clone() : new Response("nohit", { headers: { "Content-Type": "text/plain" } });
+    })();
+    event.respondWith(served);
+    return;
+  }
+
+  // Fingerprinted media referenced by a lesson, same rule as the covers.
+  const assetSha = new URL(request.url).searchParams.get(shaParam);
+  if (request.destination !== "iframe" && /^[a-f0-9]{64}$/.test(assetSha) &&
+      new URL(request.url).origin === scope.origin && isReviewPage(request.referrer)) {
+    const key = cacheKey(new URL(request.url), assetSha);
+    event.respondWith((async () => (await (await caches.open(cacheName)).match(key)) || fetch(request))());
+    return;
+  }
+
+  if (request.destination !== "iframe" ||
       request.headers.has("Range") || !isReviewPage(request.referrer)) return;
   const url = lessonURL(request.url);
   const sha = url?.searchParams.get(shaParam);
