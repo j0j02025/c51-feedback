@@ -387,6 +387,30 @@
    "title": "单位面积产量（新知）（俄哈合一）",
    "file": "lessons/kk-math-82-bi-c.html",
    "sha": "9036d02820a084ae99b16dfa92cee104d7044bb7cab6ce84708632168a998040"
+  },
+  {
+   "id": "aiavatar-shikun-1121",
+   "no": 0,
+   "subject": "哈语 AI-Avatar",
+   "title": "AI-Avatar · 11-21 交付(课号待确认)",
+   "file": "lessons/aiavatar-shikun-1121.html",
+   "sha": "a40f10bf10d6ac7c301e5a3ef4586ddf3edb73c900a3d1c1600b04ae6e800fad"
+  },
+  {
+   "id": "aiavatar-shikun-kk66",
+   "no": 66,
+   "subject": "哈语 AI-Avatar",
+   "title": "AI-Avatar · 彩虹谜语",
+   "file": "lessons/aiavatar-shikun-kk66.html",
+   "sha": "f2159c91b2b72e2828cfb1847e60bb84b10fe6a5cc5f174ca395172b256c8395"
+  },
+  {
+   "id": "aiavatar-shikun-ru68",
+   "no": 68,
+   "subject": "俄语 AI-Avatar",
+   "title": "AI-Avatar · 第 68 课",
+   "file": "lessons/aiavatar-shikun-ru68.html",
+   "sha": "85cf17082aab1f97f2b622f8378e19002b42765c77ce8fde4f4491f3c74ef9c0"
   }
  ]
 }
