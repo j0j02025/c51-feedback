@@ -1,235 +1,235 @@
 {
- "form": "https://01ai.feishu.cn/share/base/shrcnh66aNh5pTemXe9b9sk02pd",
- "lessons": [
-  {
-   "no": 65,
-   "subject": "俄语",
-   "title": "数词：基数词与序数词｜自然现象有哪些",
-   "style": "毡纸艺·别克小剧场 · #46 镜头推拉 + 删数数拍手 + #34 脚步声压低(每步 −4.9 dB)11-22 · ee24d2df · qa 俄英中 100 · CCC3 复审 PASS",
-   "status": "待评审",
-   "file": "lessons/ru-lang-65-c.html",
-   "thumb": "thumbs/ru-lang-65-c.jpg",
-   "by": "ccc"
-  },
-  {
-   "no": 66,
-   "subject": "俄语",
-   "title": "基数词与序数词的拼写（第一课）｜瀑布(重构版)",
-   "style": "重构贴图版 · 返修 11-22 · f98e329f · #47 狗和羊不再被裁 + 去 BGM · qa 俄英中 100 · CCC2 复审 PASS",
-   "status": "待评审",
-   "file": "lessons/ru-lang-66-rb.html",
-   "thumb": "thumbs/ru-lang-66-rb.jpg",
-   "by": "ccc"
-  },
-  {
-   "no": 67,
-   "subject": "俄语",
-   "title": "基数词与序数词的拼写（第二课）｜瀑布(重构版)",
-   "style": "重构贴图版 11-22 · 独立复审 PASS(t3005)· Lijun #35 返修 124cf580(狐狸朝向 + 教鞭放慢 · qa 俄 100)",
-   "status": "待评审",
-   "file": "lessons/ru-lang-67-rb.html",
-   "thumb": "thumbs/ru-lang-67-rb.jpg",
-   "by": "ccc"
-  },
-  {
-   "no": 68,
-   "subject": "俄语",
-   "title": "数词词组、句子与形态分析（第一课，含抄写）｜风的力量",
-   "style": "小兔子 · 草原驿路 · 返修 11-22 · 107069cd · #36 宠物不挡风车 + 俄语收尾句 + 去 BGM + 音效逐个限幅 · qa 俄中英 100 · CCC4 复审 PASS",
-   "status": "待评审",
-   "file": "lessons/ru-lang-68-c.html",
-   "thumb": "thumbs/ru-lang-68-c.jpg",
-   "by": "ccc"
-  },
-  {
-   "no": 16,
-   "subject": "俄语数字素养",
-   "title": "演示文稿所需的信息",
-   "style": "暖纸 · 返修 11-22 · b2f935ef · 删两键 + 删环境声 + 音效 −4 dB 限幅 + 去 BGM · qa 100 · CCC2 复审 PASS",
-   "status": "待评审",
-   "file": "lessons/ru-dl-16-c.html",
-   "thumb": "thumbs/ru-dl-16-c.jpg",
-   "by": "ccc"
-  },
-  {
-   "no": 81,
-   "subject": "俄语数学",
-   "title": "数量关系与圆形图",
-   "style": "暖纸 · 三语新版 11-20 · 返修 11-23 · 70679ea0 · 去点头、三处换思考姿势 + 土豆卡片随句亮起 + 音效逐个限幅(48 kHz 复核)+ 出题答题全景(1065.1A)· qa 100 · CCC2 复审 PASS",
-   "status": "待评审",
-   "file": "lessons/ru-math-81-c.html",
-   "thumb": "thumbs/ru-math-81-c.jpg",
-   "by": "ccc"
-  },
-  {
-   "no": 82,
-   "subject": "俄语数学",
-   "title": "单位面积产量（新知）（俄哈合一）",
-   "style": "小兔子 · 俄哈合一 11-22 · 9450a6be · qa 俄哈英中 100 · 无背景音乐",
-   "status": "待评审",
-   "file": "lessons/ru-math-82-bi-c.html",
-   "by": "ccc",
-   "thumb": "thumbs/ru-math-82-bi-c.jpg"
-  },
-  {
-   "no": 83,
-   "subject": "俄语数学",
-   "title": "单位面积产量（巩固）",
-   "style": "小兔子 · 草原驿路 · 俄哈合一 · 返修 11-23 · def6f4bb · 农夫两人 + 麦田三张图换新(t3144)· 此前:去 BGM/环境声/音乐键 + 结尾回顾卡 + 总线限幅 · qa 俄哈英中 100 · CCC1 复审 PASS",
-   "status": "待评审",
-   "file": "lessons/ru-math-83-c.html",
-   "thumb": "thumbs/ru-math-83-c.jpg",
-   "by": "ccc"
-  },
-  {
-   "no": 84,
-   "subject": "俄语数学",
-   "title": "图像",
-   "style": "暖纸 · 返修 11-23 · f52daaf7 · ccc-031.6 FIX1 · 人声压低三语 <1% 不需 trim · qa 俄英中 100 · CCC2 复审 PASS",
-   "status": "待评审",
-   "file": "lessons/ru-math-84-c.html",
-   "thumb": "thumbs/ru-math-84-c.jpg",
-   "by": "ccc"
-  },
-  {
-   "no": 85,
-   "subject": "俄语数学",
-   "title": "解决问题",
-   "style": "骑自行车 · 返修 11-23 · ebc12e15 · #70 出题答题全景(1065.1A)+ 总线限幅 + 英文 H11 · CCC2 复审 PASS",
-   "status": "待评审",
-   "file": "lessons/ru-math-85-c.html",
-   "thumb": "thumbs/ru-math-85-c.jpg",
-   "by": "ccc"
-  },
-  {
-   "no": 65,
-   "subject": "哈语",
-   "title": "词法世界之旅",
-   "style": "毡纸艺·别克小剧场 · 返修 11-22(5:0 卡片在桌面层 · 5:2 去角色拉伸)· 434e2195 · qa 哈英 100 中 98.5",
-   "status": "待评审",
-   "file": "lessons/kk-lang-65-c.html",
-   "thumb": "thumbs/kk-lang-65-c.jpg",
-   "by": "ccc"
-  },
-  {
-   "no": 66,
-   "subject": "哈语",
-   "title": "词类",
-   "style": "羊毛毡 · 三语新版 11-20 · #14:0 毡画重出 6 张 11-21",
-   "status": "待评审",
-   "file": "lessons/kk-lang-66-c.html",
-   "thumb": "thumbs/kk-lang-66-c.jpg",
-   "by": "ccc"
-  },
-  {
-   "no": 67,
-   "subject": "哈语",
-   "title": "名词（第一课）(重构版)",
-   "style": "重构贴图版 · 返修 11-23 · 729dbad0 · J 1074 卡片 2 灰框去掉 + 指示棒头换实心(无虚线圈)+ 人声 trim(哈 −3.0 / 英 −2.5 / 中 −3.5 dB)· 此前:#41 焦点圈/指示棒 + 黑板换 KLP 原句 + 去 BGM + 分段进度条 + 倍速 125/100/75 + Shantell Sans 字体 + 音效逐个限幅 · qa 哈英中 100 · CCC3 复审 PASS",
-   "status": "待评审",
-   "file": "lessons/kk-lang-67-rb.html",
-   "thumb": "thumbs/kk-lang-67-rb.jpg",
-   "by": "ccc"
-  },
-  {
-   "no": 68,
-   "subject": "哈语",
-   "title": "名词（第二课）(重构版)",
-   "style": "第二次重构 · 跟进 11-22 · 5f6b4a41 · 海鸥扇翅 + L20 木板落槽 · qa 哈 100 · CCC2 复审 PASS",
-   "status": "待评审",
-   "file": "lessons/kk-lang-68-rb2.html",
-   "by": "ccc",
-   "thumb": "thumbs/kk-lang-68-rb2.jpg"
-  },
-  {
-   "no": 17,
-   "subject": "哈语数字素养",
-   "title": "演示文稿所需的信息",
-   "style": "评审返修 11-22 · 9ee7fef8 · 删两键(#43)+ 开头标点(#53)+ 音效 −4 dB 限幅 + 去 BGM · qa 哈 100 · CCC3 复审 PASS",
-   "status": "待评审",
-   "file": "lessons/kk-dl-17-c.html",
-   "thumb": "thumbs/kk-dl-17-c.jpg",
-   "by": "ccc"
-  },
-  {
-   "no": 81,
-   "subject": "哈语数学",
-   "title": "数量关系与圆形图",
-   "style": "暖纸 · 三语新版 11-20 · 返修 11-23 · 3b672a8e · 去点头、三处换思考姿势 + 音效逐个限幅(48 kHz 复核)+ 出题答题全景(1065.1A)· qa 100 · CCC2 复审 PASS",
-   "status": "待评审",
-   "file": "lessons/kk-math-81.html",
-   "thumb": "thumbs/kk-math-81.jpg",
-   "by": "ccc"
-  },
-  {
-   "no": 82,
-   "subject": "哈语数学",
-   "title": "单位面积产量（新知）（俄哈合一）",
-   "style": "小兔子 · 俄哈合一 11-22 · 9450a6be · qa 俄哈英中 100 · 无背景音乐",
-   "status": "待评审",
-   "file": "lessons/kk-math-82-bi-c.html",
-   "by": "ccc",
-   "thumb": "thumbs/kk-math-82-bi-c.jpg"
-  },
-  {
-   "no": 83,
-   "subject": "哈语数学",
-   "title": "单位面积产量（巩固）（小绿人重做）",
-   "style": "小兔子 · 草原驿路 · 俄哈合一 · 返修 11-23 · def6f4bb · 农夫两人 + 麦田三张图换新(t3144)· 此前:去 BGM/环境声/音乐键 + 结尾回顾卡 + 总线限幅 · qa 俄哈英中 100 · CCC1 复审 PASS",
-   "status": "待评审",
-   "file": "lessons/kk-math-83-lgm-c.html",
-   "thumb": "thumbs/kk-math-83-lgm-c.jpg",
-   "by": "ccc"
-  },
-  {
-   "no": 84,
-   "subject": "哈语数学",
-   "title": "图像",
-   "style": "暖纸 · 返修 11-20 · 倒数音效 75% 11-21",
-   "status": "待评审",
-   "file": "lessons/kk-math-84-c.html",
-   "thumb": "thumbs/kk-math-84-c.jpg",
-   "by": "ccc"
-  },
-  {
-   "no": 85,
-   "subject": "哈语数学",
-   "title": "解决问题",
-   "style": "骑自行车 · 三语新版 11-20",
-   "status": "待评审",
-   "file": "lessons/kk-math-85-c.html",
-   "thumb": "thumbs/kk-math-85-c.jpg",
-   "by": "ccc"
-  },
-  {
-   "no": 0,
-   "subject": "哈语 AI-Avatar",
-   "title": "AI-Avatar · 11-21 交付(课号待确认)",
-   "style": "吾世昆 · AI-Avatar · 飞书外链 · 152 秒 · 1080p · 只收意见不返修",
-   "status": "待评审",
-   "file": "lessons/aiavatar-shikun-1121.html",
-   "thumb": "thumbs/aiavatar-shikun-1121.jpg",
-   "by": "世昆"
-  },
-  {
-   "no": 66,
-   "subject": "哈语 AI-Avatar",
-   "title": "AI-Avatar · 彩虹谜语",
-   "style": "吾世昆 · AI-Avatar · 飞书外链 · 157 秒 · 1080p · 只收意见不返修",
-   "status": "待评审",
-   "file": "lessons/aiavatar-shikun-kk66.html",
-   "thumb": "thumbs/aiavatar-shikun-kk66.jpg",
-   "by": "世昆"
-  },
-  {
-   "no": 68,
-   "subject": "俄语 AI-Avatar",
-   "title": "AI-Avatar · 第 68 课",
-   "style": "吾世昆 · AI-Avatar · 飞书外链 · 247 秒 · 720p · 只收意见不返修",
-   "status": "待评审",
-   "file": "lessons/aiavatar-shikun-ru68.html",
-   "thumb": "thumbs/aiavatar-shikun-ru68.jpg",
-   "by": "世昆"
-  }
- ]
+  "form": "https://01ai.feishu.cn/share/base/shrcnh66aNh5pTemXe9b9sk02pd",
+  "lessons": [
+    {
+      "no": 65,
+      "subject": "俄语",
+      "title": "数词：基数词与序数词｜自然现象有哪些",
+      "style": "毡纸艺·别克小剧场 · #46 镜头推拉 + 删数数拍手 + #34 脚步声压低(每步 −4.9 dB)11-22 · ee24d2df · qa 俄英中 100 · CCC3 复审 PASS",
+      "status": "待评审",
+      "file": "lessons/ru-lang-65-c.html",
+      "thumb": "thumbs/ru-lang-65-c.jpg?c51-sha=6a2f35564df3851aedce263703bb38e4caa6bd58181352d5ab6d8077d93013c5",
+      "by": "ccc"
+    },
+    {
+      "no": 66,
+      "subject": "俄语",
+      "title": "基数词与序数词的拼写（第一课）｜瀑布(重构版)",
+      "style": "重构贴图版 · 返修 11-22 · f98e329f · #47 狗和羊不再被裁 + 去 BGM · qa 俄英中 100 · CCC2 复审 PASS",
+      "status": "待评审",
+      "file": "lessons/ru-lang-66-rb.html",
+      "thumb": "thumbs/ru-lang-66-rb.jpg?c51-sha=45bee96eeba18ed871e44c9cf2a6f4438a32b1dfd25c580dacc82a9bdf20a810",
+      "by": "ccc"
+    },
+    {
+      "no": 67,
+      "subject": "俄语",
+      "title": "基数词与序数词的拼写（第二课）｜瀑布(重构版)",
+      "style": "重构贴图版 11-22 · 独立复审 PASS(t3005)· Lijun #35 返修 124cf580(狐狸朝向 + 教鞭放慢 · qa 俄 100)",
+      "status": "待评审",
+      "file": "lessons/ru-lang-67-rb.html",
+      "thumb": "thumbs/ru-lang-67-rb.jpg?c51-sha=8c28efaf6722bf1beaa115385fa8c190b0e2d592fc9bd860c397493931fdce07",
+      "by": "ccc"
+    },
+    {
+      "no": 68,
+      "subject": "俄语",
+      "title": "数词词组、句子与形态分析（第一课，含抄写）｜风的力量",
+      "style": "小兔子 · 草原驿路 · 返修 11-22 · 107069cd · #36 宠物不挡风车 + 俄语收尾句 + 去 BGM + 音效逐个限幅 · qa 俄中英 100 · CCC4 复审 PASS",
+      "status": "待评审",
+      "file": "lessons/ru-lang-68-c.html",
+      "thumb": "thumbs/ru-lang-68-c.jpg?c51-sha=fb7e5b4d85f3a60c571b24c16fae2b49a03209f68053fae697863a67ff4da9be",
+      "by": "ccc"
+    },
+    {
+      "no": 16,
+      "subject": "俄语数字素养",
+      "title": "演示文稿所需的信息",
+      "style": "暖纸 · 返修 11-22 · b2f935ef · 删两键 + 删环境声 + 音效 −4 dB 限幅 + 去 BGM · qa 100 · CCC2 复审 PASS",
+      "status": "待评审",
+      "file": "lessons/ru-dl-16-c.html",
+      "thumb": "thumbs/ru-dl-16-c.jpg?c51-sha=9cbfda2437d9b233380dcad74f0ef96757c31bf6cf574ad63b3af0604280fde1",
+      "by": "ccc"
+    },
+    {
+      "no": 81,
+      "subject": "俄语数学",
+      "title": "数量关系与圆形图",
+      "style": "暖纸 · 三语新版 11-20 · 返修 11-23 · 70679ea0 · 去点头、三处换思考姿势 + 土豆卡片随句亮起 + 音效逐个限幅(48 kHz 复核)+ 出题答题全景(1065.1A)· qa 100 · CCC2 复审 PASS",
+      "status": "待评审",
+      "file": "lessons/ru-math-81-c.html",
+      "thumb": "thumbs/ru-math-81-c.jpg?c51-sha=2f34207add9d26c467c8f8d2237fd7a6feaa49b473543ff3566623159b979557",
+      "by": "ccc"
+    },
+    {
+      "no": 82,
+      "subject": "俄语数学",
+      "title": "单位面积产量（新知）（俄哈合一）",
+      "style": "小兔子 · 俄哈合一 11-22 · 9450a6be · qa 俄哈英中 100 · 无背景音乐",
+      "status": "待评审",
+      "file": "lessons/ru-math-82-bi-c.html",
+      "by": "ccc",
+      "thumb": "thumbs/ru-math-82-bi-c.jpg?c51-sha=99d65e1906cc9d106f6c8b61036bdd81f39c464dc64c448974efc07a58715bdf"
+    },
+    {
+      "no": 83,
+      "subject": "俄语数学",
+      "title": "单位面积产量（巩固）",
+      "style": "小兔子 · 草原驿路 · 俄哈合一 · 返修 11-23 · def6f4bb · 农夫两人 + 麦田三张图换新(t3144)· 此前:去 BGM/环境声/音乐键 + 结尾回顾卡 + 总线限幅 · qa 俄哈英中 100 · CCC1 复审 PASS",
+      "status": "待评审",
+      "file": "lessons/ru-math-83-c.html",
+      "thumb": "thumbs/ru-math-83-c.jpg?c51-sha=45f8dc69391cd6aec5696829f82e28d1454d2b7cc073662b74ed82ba3ae49ca8",
+      "by": "ccc"
+    },
+    {
+      "no": 84,
+      "subject": "俄语数学",
+      "title": "图像",
+      "style": "暖纸 · 返修 11-23 · f52daaf7 · ccc-031.6 FIX1 · 人声压低三语 <1% 不需 trim · qa 俄英中 100 · CCC2 复审 PASS",
+      "status": "待评审",
+      "file": "lessons/ru-math-84-c.html",
+      "thumb": "thumbs/ru-math-84-c.jpg?c51-sha=ac6176480317f13f4af81b576159a5a0bb56a0acd8866f4fbea9db2af20b9896",
+      "by": "ccc"
+    },
+    {
+      "no": 85,
+      "subject": "俄语数学",
+      "title": "解决问题",
+      "style": "骑自行车 · 返修 11-23 · ebc12e15 · #70 出题答题全景(1065.1A)+ 总线限幅 + 英文 H11 · CCC2 复审 PASS",
+      "status": "待评审",
+      "file": "lessons/ru-math-85-c.html",
+      "thumb": "thumbs/ru-math-85-c.jpg?c51-sha=7ae8c3b60f75efdd5d0c2a3973692eb7a8f20082936e2fa7aecb7e36d94afff2",
+      "by": "ccc"
+    },
+    {
+      "no": 65,
+      "subject": "哈语",
+      "title": "词法世界之旅",
+      "style": "毡纸艺·别克小剧场 · 返修 11-22(5:0 卡片在桌面层 · 5:2 去角色拉伸)· 434e2195 · qa 哈英 100 中 98.5",
+      "status": "待评审",
+      "file": "lessons/kk-lang-65-c.html",
+      "thumb": "thumbs/kk-lang-65-c.jpg?c51-sha=ce982652b310df7435e09b12bd4f71054f5721b82cb9ee672888521960aa4a78",
+      "by": "ccc"
+    },
+    {
+      "no": 66,
+      "subject": "哈语",
+      "title": "词类",
+      "style": "羊毛毡 · 三语新版 11-20 · #14:0 毡画重出 6 张 11-21",
+      "status": "待评审",
+      "file": "lessons/kk-lang-66-c.html",
+      "thumb": "thumbs/kk-lang-66-c.jpg?c51-sha=3a2d07b9d6511483e309a1681879b2a7d63d79296eb7cd22ec2d40b1638a1409",
+      "by": "ccc"
+    },
+    {
+      "no": 67,
+      "subject": "哈语",
+      "title": "名词（第一课）(重构版)",
+      "style": "重构贴图版 · 返修 11-23 · 729dbad0 · J 1074 卡片 2 灰框去掉 + 指示棒头换实心(无虚线圈)+ 人声 trim(哈 −3.0 / 英 −2.5 / 中 −3.5 dB)· 此前:#41 焦点圈/指示棒 + 黑板换 KLP 原句 + 去 BGM + 分段进度条 + 倍速 125/100/75 + Shantell Sans 字体 + 音效逐个限幅 · qa 哈英中 100 · CCC3 复审 PASS",
+      "status": "待评审",
+      "file": "lessons/kk-lang-67-rb.html",
+      "thumb": "thumbs/kk-lang-67-rb.jpg?c51-sha=3f3ec56a7d6667742338816112f394804ffa53b42618f4d24f6dd9d807948158",
+      "by": "ccc"
+    },
+    {
+      "no": 68,
+      "subject": "哈语",
+      "title": "名词（第二课）(重构版)",
+      "style": "第二次重构 · 跟进 11-22 · 5f6b4a41 · 海鸥扇翅 + L20 木板落槽 · qa 哈 100 · CCC2 复审 PASS",
+      "status": "待评审",
+      "file": "lessons/kk-lang-68-rb2.html",
+      "by": "ccc",
+      "thumb": "thumbs/kk-lang-68-rb2.jpg?c51-sha=0404e401b2f322bf9f2d46ecce8954d932a508f7b3e3de1785d2e23caae080ad"
+    },
+    {
+      "no": 17,
+      "subject": "哈语数字素养",
+      "title": "演示文稿所需的信息",
+      "style": "评审返修 11-22 · 9ee7fef8 · 删两键(#43)+ 开头标点(#53)+ 音效 −4 dB 限幅 + 去 BGM · qa 哈 100 · CCC3 复审 PASS",
+      "status": "待评审",
+      "file": "lessons/kk-dl-17-c.html",
+      "thumb": "thumbs/kk-dl-17-c.jpg?c51-sha=d29c78d164b3d36e483a5ac3095c1a4999f49201e8f38700f23f71f17c23899c",
+      "by": "ccc"
+    },
+    {
+      "no": 81,
+      "subject": "哈语数学",
+      "title": "数量关系与圆形图",
+      "style": "暖纸 · 三语新版 11-20 · 返修 11-23 · 3b672a8e · 去点头、三处换思考姿势 + 音效逐个限幅(48 kHz 复核)+ 出题答题全景(1065.1A)· qa 100 · CCC2 复审 PASS",
+      "status": "待评审",
+      "file": "lessons/kk-math-81.html",
+      "thumb": "thumbs/kk-math-81.jpg?c51-sha=29c85455d3ef33f9d27c7380a922ce6571bb727dd2b403a736a851e5230f4a86",
+      "by": "ccc"
+    },
+    {
+      "no": 82,
+      "subject": "哈语数学",
+      "title": "单位面积产量（新知）（俄哈合一）",
+      "style": "小兔子 · 俄哈合一 11-22 · 9450a6be · qa 俄哈英中 100 · 无背景音乐",
+      "status": "待评审",
+      "file": "lessons/kk-math-82-bi-c.html",
+      "by": "ccc",
+      "thumb": "thumbs/kk-math-82-bi-c.jpg?c51-sha=99d65e1906cc9d106f6c8b61036bdd81f39c464dc64c448974efc07a58715bdf"
+    },
+    {
+      "no": 83,
+      "subject": "哈语数学",
+      "title": "单位面积产量（巩固）（小绿人重做）",
+      "style": "小兔子 · 草原驿路 · 俄哈合一 · 返修 11-23 · def6f4bb · 农夫两人 + 麦田三张图换新(t3144)· 此前:去 BGM/环境声/音乐键 + 结尾回顾卡 + 总线限幅 · qa 俄哈英中 100 · CCC1 复审 PASS",
+      "status": "待评审",
+      "file": "lessons/kk-math-83-lgm-c.html",
+      "thumb": "thumbs/kk-math-83-lgm-c.jpg?c51-sha=96c6ef798ba5bc0348b9fe709301863e3b2684915676f96c408e1b7525f11b8a",
+      "by": "ccc"
+    },
+    {
+      "no": 84,
+      "subject": "哈语数学",
+      "title": "图像",
+      "style": "暖纸 · 返修 11-20 · 倒数音效 75% 11-21",
+      "status": "待评审",
+      "file": "lessons/kk-math-84-c.html",
+      "thumb": "thumbs/kk-math-84-c.jpg?c51-sha=67901adf396eff5967ae42517f8249b1783d168874520de6cd80c19ed164f3fd",
+      "by": "ccc"
+    },
+    {
+      "no": 85,
+      "subject": "哈语数学",
+      "title": "解决问题",
+      "style": "骑自行车 · 三语新版 11-20",
+      "status": "待评审",
+      "file": "lessons/kk-math-85-c.html",
+      "thumb": "thumbs/kk-math-85-c.jpg?c51-sha=b04daaaf85a79c1cf2dddced29c51a1c846d3af7deefb84c979f376e009e2a14",
+      "by": "ccc"
+    },
+    {
+      "no": 0,
+      "subject": "哈语 AI-Avatar",
+      "title": "AI-Avatar · 11-21 交付(课号待确认)",
+      "style": "吾世昆 · AI-Avatar · 飞书外链 · 152 秒 · 1080p · 只收意见不返修",
+      "status": "待评审",
+      "file": "lessons/aiavatar-shikun-1121.html",
+      "thumb": "thumbs/aiavatar-shikun-1121.jpg?c51-sha=e011e6207b0c74c4180572f254d9cdb949d19037de0aa9276129bdba8de28394",
+      "by": "世昆"
+    },
+    {
+      "no": 66,
+      "subject": "哈语 AI-Avatar",
+      "title": "AI-Avatar · 彩虹谜语",
+      "style": "吾世昆 · AI-Avatar · 飞书外链 · 157 秒 · 1080p · 只收意见不返修",
+      "status": "待评审",
+      "file": "lessons/aiavatar-shikun-kk66.html",
+      "thumb": "thumbs/aiavatar-shikun-kk66.jpg?c51-sha=8f9be97015f982da50382aed14ea975a256c1c634b1b8d051511252b2e0be519",
+      "by": "世昆"
+    },
+    {
+      "no": 68,
+      "subject": "俄语 AI-Avatar",
+      "title": "AI-Avatar · 第 68 课",
+      "style": "吾世昆 · AI-Avatar · 飞书外链 · 247 秒 · 720p · 只收意见不返修",
+      "status": "待评审",
+      "file": "lessons/aiavatar-shikun-ru68.html",
+      "thumb": "thumbs/aiavatar-shikun-ru68.jpg?c51-sha=15b376d01299021b540e955dfcbd2d3edc32077ae3bada515e04ddc30491ea00",
+      "by": "世昆"
+    }
+  ]
 }

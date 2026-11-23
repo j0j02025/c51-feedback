@@ -1909,7 +1909,7 @@ async function loadCatalog(){
     const d=await r.json(); if(!Array.isArray(d.lessons))throw new Error("Invalid catalog");
     DATA=d; clearLoadError("catalog"); renderHome();
     loadSummary(); loadReviewStatus();
-    preloadStart=Date.now()+10000;
+    preloadStart=Date.now()+1500;
     preloadInit=initPreload();
     preloadInit.then(refreshManifest);
   }catch{showLoadError("catalog",loadCatalog)}
