@@ -36307,11 +36307,40 @@ void main() {
     const x = 2 * i / 8192 - 1, a = Math.abs(x);
     return a <= 0.88 ? x : Math.sign(x) * (0.88 + 0.12 * Math.tanh((a - 0.88) / 0.12));
   });
-  function connectSfxBus(context, gain) {
+  function connectSfxBus(context, gain, out) {
     const limit = context.createWaveShaper();
     limit.curve = SFX_BUS_LIMIT;
-    gain.connect(limit).connect(context.destination);
+    gain.connect(limit).connect(out || context.destination);
   }
+
+  // ccc-rl65lim, rule B (JCC om_x100b7f001f6e64a4c1e7919c6d39f86): one lookahead true-peak limiter on the summed voice + SFX output,
+  // true peak <= -1 dBTP as played. Voice data URI bytes are untouched; the voice element joins the graph only for this limiter.
+  // The SFX levels are set per event (SFX_LANG, SFX_STACK); the limiter is a ceiling, not the level control.
+  var MASTER_LIM = { ceiling_db: -1.6, lookahead_s: 0.003, release_s: 0.04 };
+  // ccc-rl65trim (JCC 08:44 UTC rule): fixed pre-limiter trim on voice + SFX per language view, the smallest 0.5 dB step that keeps
+  // the limiter's speech gain reduction <= 1 dB on >= 99 % of speech (48 kHz render; search table in REPORT ccc-rl65trim).
+  var MASTER_TRIM_DB = {"en":-3.5,"ru":-4.0,"zh":-4.0};
+  const masterTrimGain = (l) => Math.pow(10, (MASTER_TRIM_DB[l] ?? 0) / 20);
+  var MASTER_LIM_SRC = "class CccMasterLimiter extends AudioWorkletProcessor{\nconstructor(o){super();const p=o.processorOptions;this.c=p.ceiling;this.L=Math.max(1,p.look|0);this.W=2*this.L;this.a=1-Math.exp(-1/(p.rel*sampleRate));\nthis.rr=new Float32Array(this.W).fill(1);this.cnt=0;this.bx=new Float32Array(this.L).fill(1);this.sum=this.L;this.ms=1;this.d0=new Float32Array(this.L);this.d1=new Float32Array(this.L);this.n=0;this.h=[0,0,0,0,0,0];\nthis.go=!!p.gr;this.st={pi:0,po:0,gmin:1,red:0,n:0};this.port.onmessage=()=>{this.port.postMessage(this.st);this.st={pi:0,po:0,gmin:1,red:0,n:0}}}\ntp(p0,p1,p2,p3){let m=Math.abs(p2);for(const t of [.25,.5,.75]){const t2=t*t,t3=t2*t,v=.5*(2*p1+(-p0+p2)*t+(2*p0-5*p1+4*p2-p3)*t2+(-p0+3*p1-3*p2+p3)*t3),av=Math.abs(v);if(av>m)m=av}return m}\nprocess(ins,outs){const i=ins[0],o=outs[0],N=o[0].length,x0=i&&i[0],x1=i&&(i[1]||i[0]),y0=o[0],y1=o[1]||o[0],c=this.c,L=this.L,W=this.W,rr=this.rr,bx=this.bx,h=this.h,st=this.st;\nfor(let k=0;k<N;k++){const a=x0?x0[k]:0,b=x1?x1[k]:0,pk=Math.max(this.tp(h[0],h[1],h[2],a),this.tp(h[3],h[4],h[5],b),Math.abs(a),Math.abs(b));h[0]=h[1];h[1]=h[2];h[2]=a;h[3]=h[4];h[4]=h[5];h[5]=b;\nconst r=pk>c?c/pk:1,n=this.n,p=n%W,q=n%L;\nif(rr[p]<1)this.cnt--;rr[p]=r;if(r<1)this.cnt++;let m=1;if(this.cnt>0)for(let j=0;j<W;j++)if(rr[j]<m)m=rr[j];\nconst ms=m<this.ms?m:this.ms+(m-this.ms)*this.a;this.ms=ms;this.sum+=ms-bx[q];bx[q]=ms;const g=this.sum/L;\nconst da=this.d0[q],db=this.d1[q];this.d0[q]=a;this.d1[q]=b;let u=da*g,v=db*g;if(u>c)u=c;else if(u<-c)u=-c;if(v>c)v=c;else if(v<-c)v=-c;y0[k]=u;if(y1!==y0)y1[k]=this.go?g:v;\nconst ia=Math.abs(da)>Math.abs(db)?Math.abs(da):Math.abs(db),oa=Math.abs(u)>Math.abs(v)?Math.abs(u):Math.abs(v);if(ia>st.pi)st.pi=ia;if(oa>st.po)st.po=oa;if(g<st.gmin)st.gmin=g;if(g<0.94406)st.red++;st.n++;this.n=n+1}\nreturn true}}\nregisterProcessor('ccc-master-limiter',CccMasterLimiter);";
+  var MASTER_LIM_URL = null;
+  function masterLimiterModule(c) {
+    if (!c.audioWorklet) return Promise.reject(new Error("no audioWorklet"));
+    // data: module first: a blob: module fails on a file:// page (opaque origin)
+    const d = "data:application/javascript;charset=utf-8," + encodeURIComponent(MASTER_LIM_SRC);
+    return c.audioWorklet.addModule(d).catch(() => {
+      MASTER_LIM_URL = MASTER_LIM_URL || URL.createObjectURL(new Blob([MASTER_LIM_SRC], { type: "application/javascript" }));
+      return c.audioWorklet.addModule(MASTER_LIM_URL);
+    });
+  }
+  function makeMasterLimiter(c, gr) {
+    return new AudioWorkletNode(c, "ccc-master-limiter", { numberOfInputs: 1, numberOfOutputs: 1, outputChannelCount: [2], channelCount: 2,
+      channelCountMode: "explicit", channelInterpretation: "speakers",
+      processorOptions: { ceiling: Math.pow(10, MASTER_LIM.ceiling_db / 20), look: Math.round(MASTER_LIM.lookahead_s * c.sampleRate), rel: MASTER_LIM.release_s, gr: !!gr } });
+  }
+  // ccc-rl65lim: played gain = isolated-event gain (SFX_LANG, what check.py H20 reads) x SFX_STACK (<= 1). SFX_STACK lowers only
+  // events that share a 400 ms window with other events (the 7-pluck count run), so the stacked window sits at -4 +/- 1 dB as played.
+  // Keys: "id:v" or "id:v@t" (t = scene seconds, 3 decimals). No onset moves.
+  var SFX_STACK = {"en":{"clunk:0@14.910":0.63274,"clunk:0@55.250":0.62573,"clunk:0@70.080":0.63427,"count:6@8.160":0.76245,"ding:0@8.340":0.76245,"hop:0@46.460":0.75783,"hop:0@61.840":0.74865,"land:0@11.570":0.67279,"land:0@15.360":0.63274,"land:0@55.396":0.62573,"land:0@63.560":0.65152,"land:1@63.810":0.65152,"pluck:0@0.730":0.5486,"pluck:1@0.860":0.5486,"pluck:2@0.990":0.5486,"pluck:3@1.120":0.5486,"pluck:4@1.250":0.5486,"pluck:5@1.380":0.57494,"pluck:6@1.510":0.67008,"pop:0@31.118":0.75754,"stamp:0@55.046":0.62573,"step:0@0.538":0.87826,"step:0@11.283":0.67279,"step:0@12.051":0.82381,"step:0@14.779":0.63274,"step:0@27.161":0.79476,"step:0@46.852":0.79628,"step:0@63.974":0.65152,"step:0@70.238":0.63427,"step:0@85.275":0.80183,"step:1@15.624":0.82237,"step:3@1.105":0.5486,"step:3@47.470":0.79809,"tick:0@46.160":0.75804,"tick:1@46.560":0.75783,"tick:2@46.960":0.79791,"tick:3@47.360":0.79809,"tick:4@31.080":0.75754,"whoosh:0@10.870":0.67279,"whoosh:0@14.210":0.63274,"whoosh:0@26.920":0.79476,"whoosh:0@54.550":0.62573,"whoosh:0@61.590":0.74865,"whoosh:0@69.780":0.63427,"whoosh:0@84.860":0.80183},"ru":{"clunk:0@14.910":0.79476,"clunk:0@55.250":0.61117,"clunk:0@70.080":0.6408,"count:6@8.160":0.76131,"ding:0@8.340":0.76131,"hop:0@46.460":0.50898,"hop:0@61.840":0.75908,"land:0@11.570":0.79244,"land:0@15.360":0.79085,"land:0@55.396":0.61117,"land:0@63.560":0.75366,"land:1@63.810":0.75366,"pluck:0@0.730":0.51698,"pluck:1@0.860":0.51698,"pluck:2@0.990":0.51698,"pluck:3@1.120":0.51698,"pluck:4@1.250":0.51698,"pluck:5@1.380":0.54154,"pluck:6@1.510":0.57497,"pop:0@31.118":0.7575,"stamp:0@55.046":0.61117,"step:0@0.538":0.69816,"step:0@11.283":0.79244,"step:0@14.779":0.79476,"step:0@27.161":0.79841,"step:0@46.852":0.67021,"step:0@63.974":0.78938,"step:0@70.238":0.6408,"step:0@85.275":0.80239,"step:1@15.624":0.79085,"step:3@1.105":0.51698,"step:3@47.470":0.81209,"tick:0@46.160":0.79623,"tick:1@46.560":0.50898,"tick:2@46.960":0.76099,"tick:3@47.360":0.76099,"tick:4@31.080":0.7575,"whoosh:0@10.870":0.79244,"whoosh:0@14.210":0.79476,"whoosh:0@26.920":0.79841,"whoosh:0@54.550":0.61117,"whoosh:0@61.590":0.75908,"whoosh:0@69.780":0.6408,"whoosh:0@84.860":0.80239},"zh":{"clunk:0@14.910":0.79397,"clunk:0@55.250":0.7534,"clunk:0@70.080":0.66718,"count:6@8.160":0.76226,"ding:0@8.340":0.76226,"hop:0@46.460":0.7578,"hop:0@61.840":0.76039,"land:0@11.570":0.79247,"land:0@15.360":0.79085,"land:0@55.396":0.7534,"land:0@63.560":0.75367,"land:1@63.810":0.75367,"pluck:0@0.730":0.5486,"pluck:1@0.860":0.5486,"pluck:2@0.990":0.5486,"pluck:3@1.120":0.5486,"pluck:4@1.250":0.5486,"pluck:5@1.380":0.57597,"pluck:6@1.510":0.66969,"pop:0@31.118":0.75754,"stamp:0@55.046":0.7534,"step:0@0.538":0.87826,"step:0@11.283":0.79247,"step:0@14.779":0.79397,"step:0@27.161":0.79762,"step:0@46.852":0.79734,"step:0@63.974":0.81072,"step:0@70.238":0.66718,"step:0@85.275":0.80186,"step:1@15.624":0.79085,"step:3@1.105":0.5486,"step:3@47.470":0.79837,"tick:0@17.560":0.98175,"tick:0@29.080":0.98175,"tick:0@46.160":0.98175,"tick:1@18.020":0.99312,"tick:1@29.580":0.99312,"tick:1@46.560":0.7578,"tick:2@46.960":0.79734,"tick:3@18.940":0.98062,"tick:3@30.580":0.98062,"tick:3@47.360":0.79837,"tick:4@31.080":0.75754,"whoosh:0@10.870":0.79247,"whoosh:0@14.210":0.79397,"whoosh:0@26.920":0.79762,"whoosh:0@54.550":0.75719,"whoosh:0@61.590":0.76039,"whoosh:0@69.780":0.66718,"whoosh:0@84.860":0.80186}};
 
   var LEN = { pluck: 0.55, count: 0.16, land: 0.2, ding: 0.75, pop: 0.12, whoosh: 0.6, clunk: 0.16, tick: 0.05, query: 0.32, hop: 0.22, stamp: 0.25, flip: 0.16, countdown: 0.34, confetti: 0.9, step: 0.09 };
   function makeSound(events) {
@@ -36376,12 +36405,34 @@ void main() {
       const gains = SFX_LANG[lang] ?? SFX_LANG.ru;
       return gains[e.id + ":" + e.v];
     };
+    const stackOf = (e) => {
+      const S = SFX_STACK[lang] || {}, k = e.id + ":" + e.v;
+      return S[k + "@" + e.t.toFixed(3)] ?? S[k] ?? 1;
+    };
+    const playedGain = (e) => window.sfxEventGain(e) * stackOf(e);
+    window.__sfxPlayedGain = playedGain;
     function connectEvent(o, output, event) {
       const source = o.createBufferSource(), level = o.createGain();
       source.buffer = sbuf(event);
-      level.gain.value = window.sfxEventGain(event);
+      level.gain.value = playedGain(event);
       source.connect(level).connect(output);
       return source;
+    }
+    let mix = null, lim = null, nsrc = null, trim = null;
+    function retrim() {
+      if (!trim) return;
+      const g = Math.fround(masterTrimGain(lang));
+      if (trim.gain.value !== g) trim.gain.value = g;
+    }
+    // The voice joins the graph only when the context runs and the limiter is ready (before that it keeps its native output).
+    function routeNarration() {
+      if (!ctx || nsrc || !lim || ctx.state !== "running") return;
+      try {
+        nsrc = ctx.createMediaElementSource(media);
+        nsrc.connect(mix);
+      } catch (error) {
+        console.warn("narration routing failed", error?.message);
+      }
     }
     function kick() {
       if (!window.AudioContext) return;
@@ -36389,12 +36440,27 @@ void main() {
         ctx = new AudioContext({ latencyHint: "interactive" });
         gain = ctx.createGain();
         gain.gain.value = SFXG();
-        connectSfxBus(ctx, gain);
+        mix = ctx.createGain();
+        mix.connect(ctx.destination);
+        connectSfxBus(ctx, gain, mix);
+        const c = ctx;
+        masterLimiterModule(c).then(() => {
+          const n = makeMasterLimiter(c), tr = c.createGain();
+          tr.gain.value = masterTrimGain(lang);
+          mix.disconnect();
+          mix.connect(tr).connect(n).connect(c.destination);
+          trim = tr;
+          lim = n;
+          routeNarration();
+        }).catch((error) => console.warn("master limiter unavailable", error?.message));
+        c.addEventListener("statechange", routeNarration);
       }
       if (ctx.state !== "running") ctx.resume().catch(() => {
       });
+      routeNarration();
     }
     function tick(t, { playing, muted }) {
+      retrim();
       const prev = lastT;
       lastT = t;
       if (!playing || muted || prev === null || !SBUF || !ctx || ctx.state !== "running") return;
@@ -36447,7 +36513,62 @@ void main() {
       return { key, gain: window.sfxEventGain(e), count: EVENTS.filter((x) => x.id + ":" + x.v === key).length, wav: btoa(bin) };
     };
     window.__sfxBusGain = () => gain ? gain.gain.value : null;
-    return { EVENTS, ready, kick, tick, setMuted: setMuted2, get loaded() {
+    // ccc-rl65lim measurement hooks. Voice time of an event = the first voice time whose scene time reaches the event (the live tick
+    // fires the event on that frame), on the current language's clock (inverse of sceneSeconds by bisection; ru = identity).
+    const voiceForScene = (t) => {
+      if (lang === "ru") return t;
+      let lo = 0, hi = track.duration;
+      for (let k = 0; k < 60; k++) { const mid = (lo + hi) / 2; if (sceneSeconds(mid) < t) lo = mid; else hi = mid; }
+      return hi;
+    };
+    const plan = () => EVENTS.map((e, i) => ({ i, t: e.t, id: e.id, v: e.v, key: e.id + ":" + e.v, a: voiceForScene(e.t), len: LEN[e.id],
+      iso: window.sfxEventGain(e), played: playedGain(e), stack: stackOf(e) }));
+    window.__sfxPlan = async () => { await ready; return { lang, events: plan() }; };
+    const b64f = (f) => { const u = new Uint8Array(f.buffer, f.byteOffset, f.byteLength); let bin = ""; for (let i = 0; i < u.length; i += 32768) bin += String.fromCharCode.apply(null, u.subarray(i, i + 32768)); return btoa(bin); };
+    // opts: voice (true), sfx (true), limiter (false), nobus (false: skip the SFX bus knee, to read events before it), gr (false: channel 1 = limiter gain), iso (false: isolated gains), only ([event
+    // indexes]), delays ([s per event index], live-firing jitter tests), gains ([played gain per event index], solver only), rate (48000 = the browser context rate here), from / to (s, voice clock; output starts at from).
+    window.__mixRender = async (opts = {}) => {
+      await ready;
+      if (!SBUF) return null;
+      const rate = opts.rate || 48000, P = plan(), only = opts.only ? new Set(opts.only) : null;
+      let voice = null;
+      if (opts.voice !== false) {
+        const raw = Uint8Array.from(atob(AUDIO[lang].split(",")[1]), (ch) => ch.charCodeAt(0));
+        voice = await new OfflineAudioContext(1, rate, rate).decodeAudioData(raw.buffer);
+      }
+      const from = opts.from || 0, to = opts.to ?? Math.max(voice ? voice.duration : 0, ...P.map((p) => p.a + p.len)) + 0.5;
+      const o = new OfflineAudioContext(2, Math.ceil((to - from) * rate), rate), mix = o.createGain(), tr = o.createGain();
+      tr.gain.value = opts.notrim ? 1 : typeof opts.trim === "number" ? Math.pow(10, opts.trim / 20) : masterTrimGain(lang);
+      mix.connect(tr);
+      if (opts.limiter) { await masterLimiterModule(o); const n = makeMasterLimiter(o, !!opts.gr); tr.connect(n).connect(o.destination); }
+      else tr.connect(o.destination);
+      if (voice) { const v = o.createBufferSource(); v.buffer = voice; v.connect(mix); v.start(0, from); }
+      if (opts.sfx !== false) {
+        const bus = o.createGain();
+        bus.gain.value = SFXG();
+        if (opts.nobus) bus.connect(mix); else connectSfxBus(o, bus, mix);
+        for (const p of P) {
+          if (only && !only.has(p.i)) continue;
+          if (p.a + p.len < from || p.a > to) continue;
+          const e = EVENTS[p.i], src = o.createBufferSource(), g = o.createGain();
+          src.buffer = sbuf(e);
+          g.gain.value = opts.gains ? opts.gains[p.i] : opts.iso ? p.iso : p.played;
+          src.connect(g).connect(bus);
+          const at = p.a + (opts.delays ? opts.delays[p.i] || 0 : 0);
+          if (at >= from) src.start(at - from); else src.start(0, from - at);
+        }
+      }
+      const r = await o.startRendering(), L = r.getChannelData(0), R = r.getChannelData(1);
+      let lr = 0;
+      if (!opts.gr) for (let i = 0; i < L.length; i++) { const d = Math.abs(L[i] - R[i]); if (d > lr) lr = d; }
+      return { lang, rate, from, n: L.length, lrMaxDiff: lr, trimGain: tr.gain.value, ch0: b64f(L), ch1: opts.gr ? b64f(R) : null };
+    };
+    window.__masterInfo = () => ({ live: true, state: ctx ? ctx.state : null, rate: ctx ? ctx.sampleRate : null, limiter: !!lim, voiceRouted: !!nsrc,
+        mixToLimiter: !!lim, ceiling_db: MASTER_LIM.ceiling_db, lookahead_s: MASTER_LIM.lookahead_s, release_s: MASTER_LIM.release_s,
+        sfxBus: gain ? gain.gain.value : null, muted: media.muted,
+        trim_db: MASTER_TRIM_DB[lang] ?? 0, trimNode: trim ? trim.gain.value : null, trimTable: MASTER_TRIM_DB });
+    window.__masterStats = () => lim ? new Promise((res) => { lim.port.onmessage = (m) => res(m.data); lim.port.postMessage("stats"); }) : Promise.resolve(null);
+    return { EVENTS, ready, kick, tick, retrim, setMuted: setMuted2, get loaded() {
       return !!SBUF;
     }, get live() {
       return ctx;
@@ -36681,7 +36802,7 @@ void main() {
   // q46 camera (JCC #46:0): one uniform scale + translate of #cam per teaching beat. A key = (line, offset in that line's scene
   // time) -> a frame rect [x, y, w] in the 1920x1080 stage (h = w * 9 / 16). Each key starts a move of CAM_EASE seconds on the
   // current language's voice clock, so every language moves on its own timeline (scene offsets scale with each line, like the scene).
-  var CAM_KEYS = [{"line": 1, "at": 0.1, "rect": [170, 85, 1440], "name": "M1 rainbow + семь цветов, Bek"}, {"line": 1, "at": 1.82, "rect": [370, 165, 960], "name": "C2 rainbow + 1-7 + семь цветов (with Bek nod at the label; count in close-up)"}, {"line": 3, "at": 0.0, "rect": [0, 0, 1920], "name": "wide"}, {"line": 3, "at": 0.8, "rect": [0, 175, 900], "name": "C3 Количество column"}, {"line": 4, "at": 0.0, "rect": [0, 0, 1920], "name": "wide"}, {"line": 5, "at": 0.0, "rect": [280, 168, 900], "name": "C4 clock ticks 1-5 + пятый час"}, {"line": 6, "at": 0.0, "rect": [60, 85, 1440], "name": "M6 пятый + Который?, Bek"}, {"line": 7, "at": 0.05, "rect": [150, 163, 1300], "name": "M7 Порядок column, Bek"}, {"line": 8, "at": 2.07, "rect": [232, 172, 903], "name": "C8 Количество | Порядок"}, {"line": 9, "at": 0.0, "rect": [0, 0, 1920], "name": "wide"}, {"line": 10, "at": 0.1, "rect": [0, 175, 1490], "name": "G10 семь column, Bek"}, {"line": 11, "at": 0.1, "rect": [215, 175, 1490], "name": "G11 пятый column, Bek"}, {"line": 12, "at": 0.1, "rect": [390, 175, 1490], "name": "G12 third column, Bek"}, {"line": 15, "at": 0.0, "rect": [0, 0, 1920], "name": "wide"}, {"line": 16, "at": 0.1, "rect": [300, 200, 1440], "name": "Q16 quiz, Bek"}, {"line": 20, "at": 0.0, "rect": [490, 200, 1230], "name": "C20 answer C, Bek"}, {"line": 21, "at": 0.0, "rect": [0, 0, 1920], "name": "wide"}, {"line": 22, "at": 0.4, "rect": [215, 175, 1490], "name": "G22 Значение + Вопрос, Bek (s22-s25)"}, {"line": 25, "at": 1.25, "rect": [0, 0, 1920], "name": "wide"}];
+  var CAM_KEYS = [{"line": 1, "at": 0.1, "rect": [170, 85, 1440], "name": "M1 rainbow + семь цветов, Bek"}, {"line": 1, "at": 1.82, "rect": [370, 165, 960], "name": "C2 rainbow + 1-7 + семь цветов (with Bek nod at the label; count in close-up)"}, {"line": 3, "at": 0.0, "rect": [0, 0, 1920], "name": "wide"}, {"line": 3, "at": 0.8, "rect": [0, 175, 900], "name": "C3 Количество column"}, {"line": 4, "at": 0.0, "rect": [0, 0, 1920], "name": "wide"}, {"line": 5, "at": 0.0, "rect": [280, 168, 900], "name": "C4 clock ticks 1-5 + пятый час"}, {"line": 6, "at": 0.0, "rect": [60, 85, 1440], "name": "M6 пятый + Который?, Bek"}, {"line": 7, "at": 0.05, "rect": [150, 163, 1300], "name": "M7 Порядок column, Bek"}, {"line": 8, "at": 2.07, "rect": [232, 172, 903], "name": "C8 Количество | Порядок"}, {"line": 9, "at": 0.0, "rect": [0, 0, 1920], "name": "wide"}, {"line": 10, "at": 0.1, "rect": [0, 175, 1490], "name": "G10 семь column, Bek"}, {"line": 11, "at": 0.1, "rect": [215, 175, 1490], "name": "G11 пятый column, Bek"}, {"line": 12, "at": 0.1, "rect": [390, 175, 1490], "name": "G12 third column, Bek"}, {"line": 15, "at": 0.0, "rect": [0, 0, 1920], "name": "wide"}, {"line": 16, "at": 0.1, "rect": [0, 0, 1920], "name": "wide: quiz s16-s19 (J 1065.1A, was Q16 [300, 200, 1440])"}, {"line": 20, "at": 0.0, "rect": [0, 0, 1920], "name": "wide: answer s20 (J 1065.1A, was C20 [490, 200, 1230])"}, {"line": 21, "at": 0.0, "rect": [0, 0, 1920], "name": "wide"}, {"line": 22, "at": 0.4, "rect": [215, 175, 1490], "name": "G22 Значение + Вопрос, Bek (s22-s25)"}, {"line": 25, "at": 1.25, "rect": [0, 0, 1920], "name": "wide"}];
   var CAM_EASE = 0.5;
   var CAM_WIDE = [0, 0, 1920];
   var camEase = (x) => x < 0.5 ? 4 * x * x * x : 1 - (-2 * x + 2) ** 3 / 2;
@@ -36905,6 +37026,7 @@ void main() {
     internalSeek = null;
     lang = next;
     track = tracks[lang];
+    sound.retrim();
     if (unmute) {
       autoMuted = false;
       media.muted = false;
