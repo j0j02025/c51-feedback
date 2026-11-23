@@ -25,7 +25,7 @@
       "no": 67,
       "subject": "俄语",
       "title": "基数词与序数词的拼写（第二课）｜瀑布(重构版)",
-      "style": "重构贴图版 11-22 · 独立复审 PASS(t3005)· Lijun #35 返修 124cf580(狐狸朝向 + 教鞭放慢 · qa 俄 100)",
+      "style": "重构贴图版 · 返修 11-23 · 5247f923 · ccc-022 r2b 人声 trim(俄 −2.9 / 中 −3.1 dB)+ 音效逐个 −4 dB + 去 BGM · 此前:Lijun #35 狐狸朝向 + 教鞭放慢 · qa 俄英中 100 · CCC3 复审 PASS",
       "status": "待评审",
       "file": "lessons/ru-lang-67-rb.html",
       "thumb": "thumbs/ru-lang-67-rb.jpg?c51-sha=8c28efaf6722bf1beaa115385fa8c190b0e2d592fc9bd860c397493931fdce07",
