@@ -386,14 +386,6 @@
       "subject": "哈语 AI-Avatar",
       "title": "AI-Avatar · 11-21 交付(课号待确认)",
       "styleShort": "AI-Avatar · 交付 11-21",
-      "format": "avatar",
-      "formatWhy": {
-        "zh": "真人感老师讲解,和 C2V 是两条线,本轮不做 C2V 分类",
-        "en": "This lifelike teacher-led explanation is a separate format, so it stays outside this round of C2V classification.",
-        "ru": "Объяснение ведёт реалистичный ИИ-учитель, поэтому этот отдельный формат в данном раунде не оценивается по критериям C2V.",
-        "kk": "Сабақты шынайы мұғалімге ұқсайтын ЖИ мұғалімі түсіндіреді, сондықтан бұл бөлек формат осы кезеңде C2V санатына жатқызылмайды."
-      },
-      "formatVoteId": "aiavatar-shikun-1121",
       "style": "吾世昆 · AI-Avatar · 飞书外链 · 152 秒 · 1080p · 只收意见不返修",
       "status": "待评审",
       "file": "lessons/aiavatar-shikun-1121.html",
@@ -405,14 +397,6 @@
       "subject": "哈语 AI-Avatar",
       "title": "AI-Avatar · 彩虹谜语",
       "styleShort": "AI-Avatar · 收录 11-23",
-      "format": "avatar",
-      "formatWhy": {
-        "zh": "真人感老师讲解,和 C2V 是两条线,本轮不做 C2V 分类",
-        "en": "This lifelike teacher-led explanation is a separate format, so it stays outside this round of C2V classification.",
-        "ru": "Объяснение ведёт реалистичный ИИ-учитель, поэтому этот отдельный формат в данном раунде не оценивается по критериям C2V.",
-        "kk": "Сабақты шынайы мұғалімге ұқсайтын ЖИ мұғалімі түсіндіреді, сондықтан бұл бөлек формат осы кезеңде C2V санатына жатқызылмайды."
-      },
-      "formatVoteId": "aiavatar-shikun-kk66",
       "style": "吾世昆 · AI-Avatar · 飞书外链 · 157 秒 · 1080p · 只收意见不返修",
       "status": "待评审",
       "file": "lessons/aiavatar-shikun-kk66.html",
@@ -424,14 +408,6 @@
       "subject": "俄语 AI-Avatar",
       "title": "AI-Avatar · 第 68 课",
       "styleShort": "AI-Avatar · 收录 11-23",
-      "format": "avatar",
-      "formatWhy": {
-        "zh": "真人感老师讲解,和 C2V 是两条线,本轮不做 C2V 分类",
-        "en": "This lifelike teacher-led explanation is a separate format, so it stays outside this round of C2V classification.",
-        "ru": "Объяснение ведёт реалистичный ИИ-учитель, поэтому этот отдельный формат в данном раунде не оценивается по критериям C2V.",
-        "kk": "Сабақты шынайы мұғалімге ұқсайтын ЖИ мұғалімі түсіндіреді, сондықтан бұл бөлек формат осы кезеңде C2V санатына жатқызылмайды."
-      },
-      "formatVoteId": "aiavatar-shikun-ru68",
       "style": "吾世昆 · AI-Avatar · 飞书外链 · 247 秒 · 720p · 只收意见不返修",
       "status": "待评审",
       "file": "lessons/aiavatar-shikun-ru68.html",
