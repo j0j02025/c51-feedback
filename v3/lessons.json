@@ -6,12 +6,12 @@
       "subject": "俄语",
       "title": "数词：基数词与序数词｜自然现象有哪些",
       "styleShort": "毡纸艺·别克小剧场 · 返修 11-23",
-      "format": "whiteboard",
+      "format": "c2v",
       "formatWhy": {
-        "zh": "讲的是拼写、词形、词类这类规则,一块板书加卡片就讲清,角色走动不帮忙理解",
-        "en": "A whiteboard and cards can explain spelling, word forms and parts of speech clearly without character movement.",
-        "ru": "Правила написания, формы слов и части речи достаточно показать на доске с карточками: движение персонажей не помогает их понять.",
-        "kk": "Емле, сөз тұлғалары мен сөз таптарын тақта мен карточкалар арқылы түсіндіруге болады, кейіпкерлердің қимылы оларды түсінуге көмектеспейді."
+        "zh": "评审后保留当前 C2V 形式",
+        "en": "Kept as C2V after review",
+        "ru": "Оставлено в формате C2V после рецензии",
+        "kk": "Рецензиядан кейін C2V форматында қалдырылды"
       },
       "formatVoteId": "ru-lang-65",
       "style": "毡纸艺·别克小剧场 · 返修 11-23 · 4761f241 · 人声防爆音 + trim(俄 −4.0 / 英 −3.5 / 中 −4.0 dB,整体轻约 4 dB)· 此前:#46 镜头推拉 + 删数数拍手 + #34 脚步声压低 · qa 俄英中 100 · CCC3 复审 PASS",
@@ -25,7 +25,7 @@
       "subject": "俄语",
       "title": "基数词与序数词的拼写（第一课）｜瀑布(重构版)",
       "styleShort": "重构贴图版 · 返修 11-24",
-      "format": "whiteboard",
+      "format": "noc2v",
       "formatWhy": {
         "zh": "讲的是拼写、词形、词类这类规则,一块板书加卡片就讲清,角色走动不帮忙理解",
         "en": "A whiteboard and cards can explain spelling, word forms and parts of speech clearly without character movement.",
@@ -44,7 +44,7 @@
       "subject": "俄语",
       "title": "基数词与序数词的拼写（第二课）｜瀑布(重构版)",
       "styleShort": "重构贴图版 · 返修 11-24",
-      "format": "whiteboard",
+      "format": "noc2v",
       "formatWhy": {
         "zh": "讲的是拼写、词形、词类这类规则,一块板书加卡片就讲清,角色走动不帮忙理解",
         "en": "A whiteboard and cards can explain spelling, word forms and parts of speech clearly without character movement.",
@@ -63,7 +63,7 @@
       "subject": "俄语",
       "title": "数词词组、句子与形态分析（第一课，含抄写）｜风的力量",
       "styleShort": "小兔子 · 草原驿路 · 返修 11-22",
-      "format": "whiteboard",
+      "format": "noc2v",
       "formatWhy": {
         "zh": "讲的是拼写、词形、词类这类规则,一块板书加卡片就讲清,角色走动不帮忙理解",
         "en": "A whiteboard and cards can explain spelling, word forms and parts of speech clearly without character movement.",
@@ -101,12 +101,12 @@
       "subject": "俄语数学",
       "title": "数量关系与圆形图",
       "styleShort": "暖纸 · 返修 11-23",
-      "format": "3d",
+      "format": "c2v",
       "formatWhy": {
-        "zh": "比例和圆形图要孩子自己拖动、改数看变化,看视频不如动手",
-        "en": "Learners understand ratios and pie charts better by dragging elements and changing values themselves to see what changes.",
-        "ru": "Чтобы понять пропорции и круговые диаграммы, полезнее самим перетаскивать элементы и менять числа, наблюдая за результатом.",
-        "kk": "Қатынас пен дөңгелек диаграмманы түсіну үшін оқушылар элементтерді өздері жылжытып, сандарды өзгертіп, нәтижесін көргені пайдалырақ."
+        "zh": "评审后保留当前 C2V 形式",
+        "en": "Kept as C2V after review",
+        "ru": "Оставлено в формате C2V после рецензии",
+        "kk": "Рецензиядан кейін C2V форматында қалдырылды"
       },
       "formatVoteId": "ru-math-81",
       "style": "暖纸 · 三语新版 11-20 · 返修 11-23 · 70679ea0 · 去点头、三处换思考姿势 + 土豆卡片随句亮起 + 音效逐个限幅(48 kHz 复核)+ 出题答题全景(1065.1A)· qa 100 · CCC2 复审 PASS",
@@ -120,7 +120,7 @@
       "subject": "俄语数学",
       "title": "单位面积产量（新知）（俄哈合一）",
       "styleShort": "小兔子 · 合版 11-22",
-      "format": "3d",
+      "format": "noc2v",
       "formatWhy": {
         "zh": "单位面积产量要孩子自己划分地块、试着算,强互动更合适",
         "en": "An interactive activity lets learners divide land into plots and try calculating yield per unit area themselves.",
@@ -139,12 +139,12 @@
       "subject": "俄语数学",
       "title": "单位面积产量（巩固）",
       "styleShort": "小兔子 · 草原驿路 · 返修 11-23",
-      "format": "3d",
+      "format": "c2v",
       "formatWhy": {
-        "zh": "巩固课是让孩子自己做题、改答案,互动练习比看视频有效",
-        "en": "For consolidation, interactive practice works better than video because learners can solve problems and revise their answers.",
-        "ru": "Для закрепления материала интерактивные задания полезнее видео: ученики сами решают задачи и исправляют ответы.",
-        "kk": "Бекіту сабағында бейне көргеннен гөрі есепті өздері шығарып, жауаптарын түзете алатын интерактивті жаттығу тиімді."
+        "zh": "评审后保留当前 C2V 形式",
+        "en": "Kept as C2V after review",
+        "ru": "Оставлено в формате C2V после рецензии",
+        "kk": "Рецензиядан кейін C2V форматында қалдырылды"
       },
       "formatVoteId": "ru-math-83",
       "style": "小兔子 · 草原驿路 · 俄哈合一 · 返修 11-23 · def6f4bb · 农夫两人 + 麦田三张图换新(t3144)· 此前:去 BGM/环境声/音乐键 + 结尾回顾卡 + 总线限幅 · qa 俄哈英中 100 · CCC1 复审 PASS",
@@ -196,12 +196,12 @@
       "subject": "哈语",
       "title": "词法世界之旅",
       "styleShort": "毡纸艺·别克小剧场 · 返修 11-23",
-      "format": "whiteboard",
+      "format": "c2v",
       "formatWhy": {
-        "zh": "讲的是拼写、词形、词类这类规则,一块板书加卡片就讲清,角色走动不帮忙理解",
-        "en": "A whiteboard and cards can explain spelling, word forms and parts of speech clearly without character movement.",
-        "ru": "Правила написания, формы слов и части речи достаточно показать на доске с карточками: движение персонажей не помогает их понять.",
-        "kk": "Емле, сөз тұлғалары мен сөз таптарын тақта мен карточкалар арқылы түсіндіруге болады, кейіпкерлердің қимылы оларды түсінуге көмектеспейді."
+        "zh": "评审后保留当前 C2V 形式",
+        "en": "Kept as C2V after review",
+        "ru": "Оставлено в формате C2V после рецензии",
+        "kk": "Рецензиядан кейін C2V форматында қалдырылды"
       },
       "formatVoteId": "kk-lang-65",
       "style": "毡纸艺·别克小剧场 · 返修 11-23 · df5d2acc · ccc-031.12 人声 trim(哈 −3.4 / 英 −3.0 / 中 −3.4 dB)+ 音效逐个 −4 dB · 此前:5:0 卡片在桌面层 · 5:2 去角色拉伸 · qa 哈英中 100 · CCC2 复审 PASS",
@@ -215,12 +215,12 @@
       "subject": "哈语",
       "title": "词类",
       "styleShort": "羊毛毡 · 更新 11-21",
-      "format": "whiteboard",
+      "format": "c2v",
       "formatWhy": {
-        "zh": "讲的是拼写、词形、词类这类规则,一块板书加卡片就讲清,角色走动不帮忙理解",
-        "en": "A whiteboard and cards can explain spelling, word forms and parts of speech clearly without character movement.",
-        "ru": "Правила написания, формы слов и части речи достаточно показать на доске с карточками: движение персонажей не помогает их понять.",
-        "kk": "Емле, сөз тұлғалары мен сөз таптарын тақта мен карточкалар арқылы түсіндіруге болады, кейіпкерлердің қимылы оларды түсінуге көмектеспейді."
+        "zh": "评审后保留当前 C2V 形式",
+        "en": "Kept as C2V after review",
+        "ru": "Оставлено в формате C2V после рецензии",
+        "kk": "Рецензиядан кейін C2V форматында қалдырылды"
       },
       "formatVoteId": "kk-lang-66",
       "style": "羊毛毡 · 三语新版 11-20 · #14:0 毡画重出 6 张 11-21",
@@ -234,7 +234,7 @@
       "subject": "哈语",
       "title": "名词（第一课）(重构版)",
       "styleShort": "重构贴图版 · 返修 11-23",
-      "format": "whiteboard",
+      "format": "noc2v",
       "formatWhy": {
         "zh": "讲的是拼写、词形、词类这类规则,一块板书加卡片就讲清,角色走动不帮忙理解",
         "en": "A whiteboard and cards can explain spelling, word forms and parts of speech clearly without character movement.",
@@ -253,7 +253,7 @@
       "subject": "哈语",
       "title": "名词（第二课）(重构版)",
       "styleShort": "第二次重构 · 跟进 11-22",
-      "format": "whiteboard",
+      "format": "noc2v",
       "formatWhy": {
         "zh": "讲的是拼写、词形、词类这类规则,一块板书加卡片就讲清,角色走动不帮忙理解",
         "en": "A whiteboard and cards can explain spelling, word forms and parts of speech clearly without character movement.",
@@ -291,12 +291,12 @@
       "subject": "哈语数学",
       "title": "数量关系与圆形图",
       "styleShort": "暖纸 · 返修 11-23",
-      "format": "3d",
+      "format": "c2v",
       "formatWhy": {
-        "zh": "比例和圆形图要孩子自己拖动、改数看变化,看视频不如动手",
-        "en": "Learners understand ratios and pie charts better by dragging elements and changing values themselves to see what changes.",
-        "ru": "Чтобы понять пропорции и круговые диаграммы, полезнее самим перетаскивать элементы и менять числа, наблюдая за результатом.",
-        "kk": "Қатынас пен дөңгелек диаграмманы түсіну үшін оқушылар элементтерді өздері жылжытып, сандарды өзгертіп, нәтижесін көргені пайдалырақ."
+        "zh": "评审后保留当前 C2V 形式",
+        "en": "Kept as C2V after review",
+        "ru": "Оставлено в формате C2V после рецензии",
+        "kk": "Рецензиядан кейін C2V форматында қалдырылды"
       },
       "formatVoteId": "kk-math-81",
       "style": "暖纸 · 三语新版 11-20 · 返修 11-23 · 3b672a8e · 去点头、三处换思考姿势 + 音效逐个限幅(48 kHz 复核)+ 出题答题全景(1065.1A)· qa 100 · CCC2 复审 PASS",
@@ -310,7 +310,7 @@
       "subject": "哈语数学",
       "title": "单位面积产量（新知）（俄哈合一）",
       "styleShort": "小兔子 · 合版 11-22",
-      "format": "3d",
+      "format": "noc2v",
       "formatWhy": {
         "zh": "单位面积产量要孩子自己划分地块、试着算,强互动更合适",
         "en": "An interactive activity lets learners divide land into plots and try calculating yield per unit area themselves.",
@@ -329,7 +329,7 @@
       "subject": "哈语数学",
       "title": "单位面积产量（巩固）（小绿人重做）",
       "styleShort": "小兔子 · 草原驿路 · 返修 11-23",
-      "format": "3d",
+      "format": "noc2v",
       "formatWhy": {
         "zh": "巩固课是让孩子自己做题、改答案,互动练习比看视频有效",
         "en": "For consolidation, interactive practice works better than video because learners can solve problems and revise their answers.",

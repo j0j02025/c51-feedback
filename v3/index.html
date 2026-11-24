@@ -61,6 +61,7 @@ button{border:0;border-radius:12px;cursor:pointer;background:#eef1f5;color:var(-
 .format-tag.c2v{background:#e3f1e1;color:#24672f}
 .format-tag.whiteboard{background:#e1efff;color:#1d4b89}
 .format-tag.fmt-3d{background:#ffead7;color:#8a3e07}
+.format-tag.noc2v{background:#ffead7;color:#8a3e07}
 .format-tag.avatar{background:#eceef0;color:#404952}
 .format-votes{position:relative;z-index:3;display:flex;flex-wrap:wrap;align-items:center;gap:3px 6px}
 .format-votes>span{flex:1 1 125px}
@@ -515,7 +516,7 @@ const REVIEW_UI={
     followupError:"追问提交失败，请重试。",
     followupStale:"这条回复已更新。请关闭后查看最新历史。",
     tooLarge:"评论太长，请缩短后再提交",
-    formatLabels:{c2v:"适合做 C2V",whiteboard:"适合改白板","3d":"不适合 C2V·建议 3D 互动",avatar:"AI 老师"},
+    formatLabels:{c2v:"适合做 C2V",whiteboard:"适合改白板","3d":"不适合 C2V·建议 3D 互动",avatar:"AI 老师",noc2v:"不适合 C2V"},
     formatQuestion:"认为这个展现形式适合本节课么?",formatUp:"适合",formatDown:"不适合",
     formatVoteError:"投票未确认，请重试。",formatNoCount:"票数暂未加载",
     docT:(g,r,c,a)=>"看课评审 · 通过 "+g+" · 不通过 "+r+" · 待复查 "+c+" / "+a},
@@ -530,7 +531,7 @@ const REVIEW_UI={
     followupError:"Could not send your follow-up. Try again.",
     followupStale:"This reply has changed. Close this box to see the latest history.",
     tooLarge:"Shorten your comments and try again",
-    formatLabels:{c2v:"Suitable for C2V",whiteboard:"Better as a whiteboard lesson","3d":"Unsuitable for C2V · Try interactive 3D",avatar:"AI teacher"},
+    formatLabels:{c2v:"Suitable for C2V",whiteboard:"Better as a whiteboard lesson","3d":"Unsuitable for C2V · Try interactive 3D",avatar:"AI teacher",noc2v:"Unsuitable for C2V"},
     formatQuestion:"Do you think this format suits the lesson?",formatUp:"Suitable",formatDown:"Unsuitable",
     formatVoteError:"Could not confirm your vote. Try again.",formatNoCount:"Vote count is unavailable",
     docT:(g,r,c,a)=>"Lesson review · Passed "+g+" · Failed "+r+" · Ready for recheck "+c+" / "+a},
@@ -545,7 +546,7 @@ const REVIEW_UI={
     followupError:"Не удалось отправить уточнение. Попробуйте снова.",
     followupStale:"Ответ изменился. Закройте окно и посмотрите историю.",
     tooLarge:"Сократите комментарии и попробуйте снова",
-    formatLabels:{c2v:"Подходит для C2V",whiteboard:"Лучше объяснить на доске","3d":"C2V не подходит · Рекомендуется интерактивное 3D",avatar:"ИИ-учитель"},
+    formatLabels:{c2v:"Подходит для C2V",whiteboard:"Лучше объяснить на доске","3d":"C2V не подходит · Рекомендуется интерактивное 3D",avatar:"ИИ-учитель",noc2v:"C2V не подходит"},
     formatQuestion:"Подходит ли этот формат для урока?",formatUp:"Подходит",formatDown:"Не подходит",
     formatVoteError:"Не удалось подтвердить голос. Попробуйте снова.",formatNoCount:"Число голосов пока недоступно",
     docT:(g,r,c,a)=>"Оценка уроков · Принято "+g+" · Не принято "+r+" · На повторной проверке "+c+" / "+a},
@@ -560,7 +561,7 @@ const REVIEW_UI={
     followupError:"Нақтылау жіберілмеді. Қайталап көріңіз.",
     followupStale:"Жауап өзгерді. Соңғы тарихты көру үшін терезені жабыңыз.",
     tooLarge:"Пікірлерді қысқартып, қайта жіберіңіз",
-    formatLabels:{c2v:"C2V форматына қолайлы",whiteboard:"Тақтада түсіндірген дұрыс","3d":"C2V қолайсыз · Интерактивті 3D ұсынылады",avatar:"ЖИ мұғалімі"},
+    formatLabels:{c2v:"C2V форматына қолайлы",whiteboard:"Тақтада түсіндірген дұрыс","3d":"C2V қолайсыз · Интерактивті 3D ұсынылады",avatar:"ЖИ мұғалімі",noc2v:"C2V қолайсыз"},
     formatQuestion:"Бұл формат осы сабаққа сай ма?",formatUp:"Сай",formatDown:"Сай емес",
     formatVoteError:"Дауысыңыз расталмады. Қайталап көріңіз.",formatNoCount:"Дауыс саны әзірге қолжетімсіз",
     docT:(g,r,c,a)=>"Сабақтарды бағалау · Өтті "+g+" · Өтпеді "+r+" · Қайта тексеруге дайын "+c+" / "+a}
