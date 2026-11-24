@@ -610,11 +610,9 @@ self.addEventListener("fetch", event => {
     const reviewers = client?.url === request.referrer ? [client] :
       (await self.clients.matchAll({ type: "window" }).catch(() => []))
         .filter(candidate => candidate.url === request.referrer);
-    const progress = update => {
-      for (const reviewer of reviewers) {
-        reviewer.postMessage({ type: "lesson-progress", key, ...update });
-      }
-    };
+    const progress = reviewers.length === 1
+      ? update => reviewers[0].postMessage({ type: "lesson-progress", key, ...update })
+      : undefined;
     const verified = await downloadOpenedLesson(request, key, progress);
     // Preserve the login redirect so an expired session can be renewed.
     if (verified.type === "opaqueredirect") return { response: verified };
