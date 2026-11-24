@@ -2,63 +2,6 @@
   "form": "https://01ai.feishu.cn/share/base/shrcnh66aNh5pTemXe9b9sk02pd",
   "lessons": [
     {
-      "no": 65,
-      "subject": "俄语",
-      "title": "数词：基数词与序数词｜自然现象有哪些",
-      "styleShort": "毡纸艺·别克小剧场 · 返修 11-23",
-      "format": "noc2v",
-      "formatWhy": {
-        "zh": "讲的是拼写、词形、词类这类规则,一块板书加卡片就讲清,角色走动不帮忙理解",
-        "en": "A whiteboard and cards can explain spelling, word forms and parts of speech clearly without character movement.",
-        "ru": "Правила написания, формы слов и части речи достаточно показать на доске с карточками: движение персонажей не помогает их понять.",
-        "kk": "Емле, сөз тұлғалары мен сөз таптарын тақта мен карточкалар арқылы түсіндіруге болады, кейіпкерлердің қимылы оларды түсінуге көмектеспейді."
-      },
-      "formatVoteId": "ru-lang-65",
-      "style": "毡纸艺·别克小剧场 · 返修 11-23 · 4761f241 · 人声防爆音 + trim(俄 −4.0 / 英 −3.5 / 中 −4.0 dB,整体轻约 4 dB)· 此前:#46 镜头推拉 + 删数数拍手 + #34 脚步声压低 · qa 俄英中 100 · CCC3 复审 PASS",
-      "status": "待评审",
-      "file": "lessons/ru-lang-65-c.html",
-      "thumb": "thumbs/ru-lang-65-c.jpg?c51-sha=6a2f35564df3851aedce263703bb38e4caa6bd58181352d5ab6d8077d93013c5",
-      "by": "ccc"
-    },
-    {
-      "no": 66,
-      "subject": "俄语",
-      "title": "基数词与序数词的拼写（第一课）｜瀑布(重构版)",
-      "styleShort": "重构贴图版 · 返修 11-24",
-      "format": "noc2v",
-      "formatWhy": {
-        "zh": "讲的是拼写、词形、词类这类规则,一块板书加卡片就讲清,角色走动不帮忙理解",
-        "en": "A whiteboard and cards can explain spelling, word forms and parts of speech clearly without character movement.",
-        "ru": "Правила написания, формы слов и части речи достаточно показать на доске с карточками: движение персонажей не помогает их понять.",
-        "kk": "Емле, сөз тұлғалары мен сөз таптарын тақта мен карточкалар арқылы түсіндіруге болады, кейіпкерлердің қимылы оларды түсінуге көмектеспейді."
-      },
-      "formatVoteId": "ru-lang-66",
-      "style": "重构贴图版 · 返修 11-24 · 9c837918 · ccc-rl66rb73 B2 推近镜头(s7/s20/s23 ×1.4–1.6,出题答题全景)· 此前 #73 #74 · kittitle 标题提示 + 窄屏字幕 F1(433a2dca) · qa 俄英中 100 · CCC2 复审 PASS",
-      "status": "待评审",
-      "file": "lessons/ru-lang-66-rb.html",
-      "thumb": "thumbs/ru-lang-66-rb.jpg?c51-sha=45bee96eeba18ed871e44c9cf2a6f4438a32b1dfd25c580dacc82a9bdf20a810",
-      "by": "ccc"
-    },
-    {
-      "no": 67,
-      "subject": "俄语",
-      "title": "基数词与序数词的拼写（第二课）｜瀑布(重构版)",
-      "styleShort": "重构贴图版 · 返修 11-24",
-      "format": "noc2v",
-      "formatWhy": {
-        "zh": "讲的是拼写、词形、词类这类规则,一块板书加卡片就讲清,角色走动不帮忙理解",
-        "en": "A whiteboard and cards can explain spelling, word forms and parts of speech clearly without character movement.",
-        "ru": "Правила написания, формы слов и части речи достаточно показать на доске с карточками: движение персонажей не помогает их понять.",
-        "kk": "Емле, сөз тұлғалары мен сөз таптарын тақта мен карточкалар арқылы түсіндіруге болады, кейіпкерлердің қимылы оларды түсінуге көмектеспейді."
-      },
-      "formatVoteId": "ru-lang-67",
-      "style": "重构贴图版 · 返修 11-24 · 919beb13 · ccc-022 r3 L19 推近 ×1.391 + 去 BGM 键 + #42 六格重出 · 此前 r2b 人声 trim + 音效逐个 −4 dB · qa 俄英中 100 · CCC3 复审 PASS",
-      "status": "待评审",
-      "file": "lessons/ru-lang-67-rb.html",
-      "thumb": "thumbs/ru-lang-67-rb.jpg?c51-sha=8c28efaf6722bf1beaa115385fa8c190b0e2d592fc9bd860c397493931fdce07",
-      "by": "ccc"
-    },
-    {
       "no": 68,
       "subject": "俄语",
       "title": "数词词组、句子与形态分析（第一课，含抄写）｜风的力量",
@@ -114,25 +57,6 @@
       "file": "lessons/ru-math-81-c.html",
       "thumb": "thumbs/ru-math-81-c.jpg?c51-sha=2f34207add9d26c467c8f8d2237fd7a6feaa49b473543ff3566623159b979557",
       "by": "ccc"
-    },
-    {
-      "no": 82,
-      "subject": "俄语数学",
-      "title": "单位面积产量（新知）（俄哈合一）",
-      "styleShort": "小兔子 · 返修 11-24",
-      "format": "noc2v",
-      "formatWhy": {
-        "zh": "单位面积产量要孩子自己划分地块、试着算,强互动更合适",
-        "en": "An interactive activity lets learners divide land into plots and try calculating yield per unit area themselves.",
-        "ru": "Интерактивное задание позволит ученикам самим делить землю на участки и пробовать вычислять урожайность с единицы площади.",
-        "kk": "Интерактивті тапсырмада оқушылар жерді өздері бөліктерге бөліп, бірлік аудандағы өнімділікті есептеп көре алады."
-      },
-      "formatVoteId": "ru-math-82",
-      "style": "小兔子 · 俄哈合一 11-22 · 9450a6be · qa 俄哈英中 100 · 无背景音乐 · 11-24 返修 2b272605 · 手机竖屏改 16:9 卡片 + 语言条竖屏可见(横屏不变)· 音效逐个压线 · qa 8×100 · CCC2 复审 PASS",
-      "status": "待评审",
-      "file": "lessons/ru-math-82-bi-c.html",
-      "by": "ccc",
-      "thumb": "thumbs/ru-math-82-bi-c.jpg?c51-sha=99d65e1906cc9d106f6c8b61036bdd81f39c464dc64c448974efc07a58715bdf"
     },
     {
       "no": 83,
@@ -249,25 +173,6 @@
       "by": "ccc"
     },
     {
-      "no": 68,
-      "subject": "哈语",
-      "title": "名词（第二课）(重构版)",
-      "styleShort": "第二次重构 · 跟进 11-22",
-      "format": "noc2v",
-      "formatWhy": {
-        "zh": "讲的是拼写、词形、词类这类规则,一块板书加卡片就讲清,角色走动不帮忙理解",
-        "en": "A whiteboard and cards can explain spelling, word forms and parts of speech clearly without character movement.",
-        "ru": "Правила написания, формы слов и части речи достаточно показать на доске с карточками: движение персонажей не помогает их понять.",
-        "kk": "Емле, сөз тұлғалары мен сөз таптарын тақта мен карточкалар арқылы түсіндіруге болады, кейіпкерлердің қимылы оларды түсінуге көмектеспейді."
-      },
-      "formatVoteId": "kk-lang-68",
-      "style": "第二次重构 · 跟进 11-22 · 5f6b4a41 · 海鸥扇翅 + L20 木板落槽 · qa 哈 100 · CCC2 复审 PASS",
-      "status": "待评审",
-      "file": "lessons/kk-lang-68-rb2.html",
-      "by": "ccc",
-      "thumb": "thumbs/kk-lang-68-rb2.jpg?c51-sha=0404e401b2f322bf9f2d46ecce8954d932a508f7b3e3de1785d2e23caae080ad"
-    },
-    {
       "no": 17,
       "subject": "哈语数字素养",
       "title": "演示文稿所需的信息",
@@ -303,44 +208,6 @@
       "status": "待评审",
       "file": "lessons/kk-math-81.html",
       "thumb": "thumbs/kk-math-81.jpg?c51-sha=29c85455d3ef33f9d27c7380a922ce6571bb727dd2b403a736a851e5230f4a86",
-      "by": "ccc"
-    },
-    {
-      "no": 82,
-      "subject": "哈语数学",
-      "title": "单位面积产量（新知）（俄哈合一）",
-      "styleShort": "小兔子 · 返修 11-24",
-      "format": "noc2v",
-      "formatWhy": {
-        "zh": "单位面积产量要孩子自己划分地块、试着算,强互动更合适",
-        "en": "An interactive activity lets learners divide land into plots and try calculating yield per unit area themselves.",
-        "ru": "Интерактивное задание позволит ученикам самим делить землю на участки и пробовать вычислять урожайность с единицы площади.",
-        "kk": "Интерактивті тапсырмада оқушылар жерді өздері бөліктерге бөліп, бірлік аудандағы өнімділікті есептеп көре алады."
-      },
-      "formatVoteId": "kk-math-82",
-      "style": "小兔子 · 俄哈合一 11-22 · 9450a6be · qa 俄哈英中 100 · 无背景音乐 · 11-24 返修 2b272605 · 手机竖屏改 16:9 卡片 + 语言条竖屏可见(横屏不变)· 音效逐个压线 · qa 8×100 · CCC2 复审 PASS",
-      "status": "待评审",
-      "file": "lessons/kk-math-82-bi-c.html",
-      "by": "ccc",
-      "thumb": "thumbs/kk-math-82-bi-c.jpg?c51-sha=99d65e1906cc9d106f6c8b61036bdd81f39c464dc64c448974efc07a58715bdf"
-    },
-    {
-      "no": 83,
-      "subject": "哈语数学",
-      "title": "单位面积产量（巩固）（小绿人重做）",
-      "styleShort": "小兔子 · 草原驿路 · 返修 11-23",
-      "format": "noc2v",
-      "formatWhy": {
-        "zh": "巩固课是让孩子自己做题、改答案,互动练习比看视频有效",
-        "en": "For consolidation, interactive practice works better than video because learners can solve problems and revise their answers.",
-        "ru": "Для закрепления материала интерактивные задания полезнее видео: ученики сами решают задачи и исправляют ответы.",
-        "kk": "Бекіту сабағында бейне көргеннен гөрі есепті өздері шығарып, жауаптарын түзете алатын интерактивті жаттығу тиімді."
-      },
-      "formatVoteId": "kk-math-83",
-      "style": "小兔子 · 草原驿路 · 俄哈合一 · 返修 11-23 · def6f4bb · 农夫两人 + 麦田三张图换新(t3144)· 此前:去 BGM/环境声/音乐键 + 结尾回顾卡 + 总线限幅 · qa 俄哈英中 100 · CCC1 复审 PASS",
-      "status": "待评审",
-      "file": "lessons/kk-math-83-lgm-c.html",
-      "thumb": "thumbs/kk-math-83-lgm-c.jpg?c51-sha=96c6ef798ba5bc0348b9fe709301863e3b2684915676f96c408e1b7525f11b8a",
       "by": "ccc"
     },
     {
