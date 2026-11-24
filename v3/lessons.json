@@ -21,63 +21,6 @@
       "by": "ccc"
     },
     {
-      "no": 66,
-      "subject": "俄语",
-      "title": "基数词与序数词的拼写（第一课）｜瀑布(重构版)",
-      "styleShort": "重构贴图版 · 返修 11-24",
-      "format": "whiteboard",
-      "formatWhy": {
-        "zh": "讲的是拼写、词形、词类这类规则,一块板书加卡片就讲清,角色走动不帮忙理解",
-        "en": "A whiteboard and cards can explain spelling, word forms and parts of speech clearly without character movement.",
-        "ru": "Правила написания, формы слов и части речи достаточно показать на доске с карточками: движение персонажей не помогает их понять.",
-        "kk": "Емле, сөз тұлғалары мен сөз таптарын тақта мен карточкалар арқылы түсіндіруге болады, кейіпкерлердің қимылы оларды түсінуге көмектеспейді."
-      },
-      "formatVoteId": "ru-lang-66",
-      "style": "重构贴图版 · 返修 11-24 · 9c837918 · ccc-rl66rb73 B2 推近镜头(s7/s20/s23 ×1.4–1.6,出题答题全景)· 此前 #73 #74 · kittitle 标题提示 + 窄屏字幕 F1(433a2dca) · qa 俄英中 100 · CCC2 复审 PASS",
-      "status": "待评审",
-      "file": "lessons/ru-lang-66-rb.html",
-      "thumb": "thumbs/ru-lang-66-rb.jpg?c51-sha=45bee96eeba18ed871e44c9cf2a6f4438a32b1dfd25c580dacc82a9bdf20a810",
-      "by": "ccc"
-    },
-    {
-      "no": 67,
-      "subject": "俄语",
-      "title": "基数词与序数词的拼写（第二课）｜瀑布(重构版)",
-      "styleShort": "重构贴图版 · 返修 11-24",
-      "format": "whiteboard",
-      "formatWhy": {
-        "zh": "讲的是拼写、词形、词类这类规则,一块板书加卡片就讲清,角色走动不帮忙理解",
-        "en": "A whiteboard and cards can explain spelling, word forms and parts of speech clearly without character movement.",
-        "ru": "Правила написания, формы слов и части речи достаточно показать на доске с карточками: движение персонажей не помогает их понять.",
-        "kk": "Емле, сөз тұлғалары мен сөз таптарын тақта мен карточкалар арқылы түсіндіруге болады, кейіпкерлердің қимылы оларды түсінуге көмектеспейді."
-      },
-      "formatVoteId": "ru-lang-67",
-      "style": "重构贴图版 · 返修 11-24 · 919beb13 · ccc-022 r3 L19 推近 ×1.391 + 去 BGM 键 + #42 六格重出 · 此前 r2b 人声 trim + 音效逐个 −4 dB · qa 俄英中 100 · CCC3 复审 PASS",
-      "status": "待评审",
-      "file": "lessons/ru-lang-67-rb.html",
-      "thumb": "thumbs/ru-lang-67-rb.jpg?c51-sha=8c28efaf6722bf1beaa115385fa8c190b0e2d592fc9bd860c397493931fdce07",
-      "by": "ccc"
-    },
-    {
-      "no": 68,
-      "subject": "俄语",
-      "title": "数词词组、句子与形态分析（第一课，含抄写）｜风的力量",
-      "styleShort": "小兔子 · 草原驿路 · 返修 11-22",
-      "format": "whiteboard",
-      "formatWhy": {
-        "zh": "讲的是拼写、词形、词类这类规则,一块板书加卡片就讲清,角色走动不帮忙理解",
-        "en": "A whiteboard and cards can explain spelling, word forms and parts of speech clearly without character movement.",
-        "ru": "Правила написания, формы слов и части речи достаточно показать на доске с карточками: движение персонажей не помогает их понять.",
-        "kk": "Емле, сөз тұлғалары мен сөз таптарын тақта мен карточкалар арқылы түсіндіруге болады, кейіпкерлердің қимылы оларды түсінуге көмектеспейді."
-      },
-      "formatVoteId": "ru-lang-68",
-      "style": "小兔子 · 草原驿路 · 返修 11-22 · 107069cd · #36 宠物不挡风车 + 俄语收尾句 + 去 BGM + 音效逐个限幅 · qa 俄中英 100 · CCC4 复审 PASS",
-      "status": "待评审",
-      "file": "lessons/ru-lang-68-c.html",
-      "thumb": "thumbs/ru-lang-68-c.jpg?c51-sha=fb7e5b4d85f3a60c571b24c16fae2b49a03209f68053fae697863a67ff4da9be",
-      "by": "ccc"
-    },
-    {
       "no": 16,
       "subject": "俄语数字素养",
       "title": "演示文稿所需的信息",
@@ -228,44 +171,6 @@
       "file": "lessons/kk-lang-66-c.html",
       "thumb": "thumbs/kk-lang-66-c.jpg?c51-sha=3a2d07b9d6511483e309a1681879b2a7d63d79296eb7cd22ec2d40b1638a1409",
       "by": "ccc"
-    },
-    {
-      "no": 67,
-      "subject": "哈语",
-      "title": "名词（第一课）(重构版)",
-      "styleShort": "重构贴图版 · 返修 11-23",
-      "format": "whiteboard",
-      "formatWhy": {
-        "zh": "讲的是拼写、词形、词类这类规则,一块板书加卡片就讲清,角色走动不帮忙理解",
-        "en": "A whiteboard and cards can explain spelling, word forms and parts of speech clearly without character movement.",
-        "ru": "Правила написания, формы слов и части речи достаточно показать на доске с карточками: движение персонажей не помогает их понять.",
-        "kk": "Емле, сөз тұлғалары мен сөз таптарын тақта мен карточкалар арқылы түсіндіруге болады, кейіпкерлердің қимылы оларды түсінуге көмектеспейді."
-      },
-      "formatVoteId": "kk-lang-67",
-      "style": "重构贴图版 · 返修 11-23 · 729dbad0 · J 1074 卡片 2 灰框去掉 + 指示棒头换实心(无虚线圈)+ 人声 trim(哈 −3.0 / 英 −2.5 / 中 −3.5 dB)· 此前:#41 焦点圈/指示棒 + 黑板换 KLP 原句 + 去 BGM + 分段进度条 + 倍速 125/100/75 + Shantell Sans 字体 + 音效逐个限幅 · qa 哈英中 100 · CCC3 复审 PASS",
-      "status": "待评审",
-      "file": "lessons/kk-lang-67-rb.html",
-      "thumb": "thumbs/kk-lang-67-rb.jpg?c51-sha=3f3ec56a7d6667742338816112f394804ffa53b42618f4d24f6dd9d807948158",
-      "by": "ccc"
-    },
-    {
-      "no": 68,
-      "subject": "哈语",
-      "title": "名词（第二课）(重构版)",
-      "styleShort": "第二次重构 · 跟进 11-22",
-      "format": "whiteboard",
-      "formatWhy": {
-        "zh": "讲的是拼写、词形、词类这类规则,一块板书加卡片就讲清,角色走动不帮忙理解",
-        "en": "A whiteboard and cards can explain spelling, word forms and parts of speech clearly without character movement.",
-        "ru": "Правила написания, формы слов и части речи достаточно показать на доске с карточками: движение персонажей не помогает их понять.",
-        "kk": "Емле, сөз тұлғалары мен сөз таптарын тақта мен карточкалар арқылы түсіндіруге болады, кейіпкерлердің қимылы оларды түсінуге көмектеспейді."
-      },
-      "formatVoteId": "kk-lang-68",
-      "style": "第二次重构 · 跟进 11-22 · 5f6b4a41 · 海鸥扇翅 + L20 木板落槽 · qa 哈 100 · CCC2 复审 PASS",
-      "status": "待评审",
-      "file": "lessons/kk-lang-68-rb2.html",
-      "by": "ccc",
-      "thumb": "thumbs/kk-lang-68-rb2.jpg?c51-sha=0404e401b2f322bf9f2d46ecce8954d932a508f7b3e3de1785d2e23caae080ad"
     },
     {
       "no": 17,
