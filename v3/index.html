@@ -582,8 +582,8 @@ function paintPreload(entry) {
   // t3180 (J 261123):每张卡写明「已存 / 存储中 n% / 未存」,不再只用色点。
   let label = "", tip = "";
   if (preloadUnsupported) {
-    tip = T("preloadUnsupported");
-    label = entry.newVersion ? T("newVersion") + " · " + tip : tip;
+    // J 261124:不写「不支持离线」,只在有新版时显示角标
+    label = entry.newVersion ? T("newVersion") : ""; tip = label;
   } else if (entry.newVersion) label = T("newVersion") + (entry.state === "failed" ? " · " + T("preloadFailed") : "");
   else if (entry.state === "cached") { label = T("preloadCached"); tip = label; }
   else if (entry.state === "downloading") {
