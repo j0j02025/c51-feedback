@@ -54,7 +54,22 @@ button{border:0;border-radius:12px;cursor:pointer;background:#eef1f5;color:var(-
 .card .unreplied,.card .fixed-count{min-width:20px;border-radius:999px;background:#b92c27;color:#fff;padding:1px 6px;text-align:center;font-size:12px;font-weight:800}
 .card .tt{font-size:15px}
 .card .meta{font-size:12px;color:var(--mute)}
-.mk{display:inline-block;width:6px;height:6px;border-radius:50%;margin-left:3px;vertical-align:middle}
+.card-open{position:absolute;inset:0;width:100%;height:100%;z-index:2;background:transparent;border-radius:inherit}
+.card-open:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.format-line,.format-votes,.format-jcc{font-size:12px;overflow-wrap:anywhere}
+.format-tag{display:inline-block;border-radius:6px;padding:1px 5px;margin-inline-end:4px;font-weight:700}
+.format-tag.c2v{background:#e3f1e1;color:#24672f}
+.format-tag.whiteboard{background:#e1efff;color:#1d4b89}
+.format-tag.fmt-3d{background:#ffead7;color:#8a3e07}
+.format-tag.avatar{background:#eceef0;color:#404952}
+.format-votes{position:relative;z-index:3;display:flex;flex-wrap:wrap;align-items:center;gap:3px 6px}
+.format-votes>span{flex:1 1 125px}
+.format-buttons{display:inline-flex;gap:4px}
+.format-buttons button{min-height:44px;min-width:44px;padding:0 6px;border:1px solid var(--line);border-radius:8px;background:var(--panel);white-space:nowrap}
+.format-buttons button[aria-pressed="true"]{border-color:#1d4b89;background:#e1efff;color:#1d4b89}
+.format-buttons button[aria-disabled="true"]{cursor:wait}
+.format-jcc{color:var(--mute)}
+.card .meta time{white-space:nowrap}
 .card.off{opacity:.55}
 #player{display:none;position:fixed;inset:0;background:#0e1116;z-index:20;flex-direction:column}
 #player.on{display:flex}
@@ -166,13 +181,13 @@ button:focus-visible{outline:3px solid var(--gold2);outline-offset:2px}
 .card .tt{font-size:15px;line-height:1.35;font-weight:600;overflow-wrap:anywhere}
 .card .meta{font-size:12.5px;overflow-wrap:anywhere}
 @media (hover:hover){
-  .card:not(:disabled):hover{transform:translateY(-3px);border-color:#e2c48a;box-shadow:inset 5px 0 var(--sc,transparent),0 0 0 1px rgba(200,150,42,.35),0 16px 28px -14px rgba(120,70,10,.55)}
-  .card:not(:disabled):hover .th{transform:perspective(700px) rotateX(8deg) translateY(-2px);box-shadow:0 12px 18px -10px rgba(242,193,78,.95)}
-  .card:not(:disabled):hover::before{transform:translate(-2px,-2px);opacity:1}
-  .card:not(:disabled):hover::after{transform:scaleX(-1) translate(-2px,-2px);opacity:1}
+  .card:not(.off):hover{transform:translateY(-3px);border-color:#e2c48a;box-shadow:inset 5px 0 var(--sc,transparent),0 0 0 1px rgba(200,150,42,.35),0 16px 28px -14px rgba(120,70,10,.55)}
+  .card:not(.off):hover .th{transform:perspective(700px) rotateX(8deg) translateY(-2px);box-shadow:0 12px 18px -10px rgba(242,193,78,.95)}
+  .card:not(.off):hover::before{transform:translate(-2px,-2px);opacity:1}
+  .card:not(.off):hover::after{transform:scaleX(-1) translate(-2px,-2px);opacity:1}
 }
-.card:not(:disabled):focus-visible .th{box-shadow:0 12px 18px -10px rgba(242,193,78,.95)}
-.card:not(:disabled):active{transform:translateY(-1px) scale(.985)}
+.card:has(.card-open:focus-visible) .th{box-shadow:0 12px 18px -10px rgba(242,193,78,.95)}
+.card:not(.off):active{transform:translateY(-1px) scale(.985)}
 /* 98457cf5: the card you just came back from */
 .card.last{outline:3px solid var(--gold2);outline-offset:3px;animation:lastGlow 1.6s ease-out}
 @keyframes lastGlow{0%{box-shadow:inset 5px 0 var(--sc,transparent),0 0 0 8px rgba(242,193,78,.55)}100%{box-shadow:inset 5px 0 var(--sc,transparent),0 0 0 0 rgba(242,193,78,0)}}
@@ -259,7 +274,7 @@ button:focus-visible{outline:3px solid var(--gold2);outline-offset:2px}
 }
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation:none!important;transition:none!important}
-  .card:not(:disabled):hover,.card:not(:disabled):active,.card:not(:disabled):hover .th{transform:none}
+  .card:not(.off):hover,.card:not(.off):active,.card:not(.off):hover .th{transform:none}
 }
 #whoWrap{position:relative;min-width:0}
 #whoBtn{max-width:min(34vw,220px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -457,6 +472,16 @@ const TR={
  "毡纸艺·别克小剧场":{en:"Felt paper · Bek theater",ru:"Фетр · театр Бека",kk:"Фетр · Бектің театры"},
  "羊毛毡":{en:"Wool felt",ru:"Валяная шерсть",kk:"Киіз"},
  "骑自行车":{en:"Bicycle",ru:"Велосипед",kk:"Велосипед"},
+ "草原驿路":{en:"Steppe Road",ru:"Степной путь",kk:"Дала жолы"},
+ "重构贴图版":{en:"Redesigned artwork",ru:"Версия с обновлённой графикой",kk:"Графикасы жаңартылған нұсқа"},
+ "第二次重构":{en:"Second redesign",ru:"Вторая переработка",kk:"Екінші рет қайта жасалған нұсқа"},
+ "返修":{en:"Revised",ru:"Исправлено",kk:"Түзетілді"},
+ "跟进":{en:"Follow-up",ru:"Доработано",kk:"Толықтырылды"},
+ "合版":{en:"Combined version",ru:"Объединённая версия",kk:"Біріктірілген нұсқа"},
+ "更新":{en:"Updated",ru:"Обновлено",kk:"Жаңартылды"},
+ "新版":{en:"New version",ru:"Новая версия",kk:"Жаңа нұсқа"},
+ "交付":{en:"Delivered",ru:"Передано",kk:"Тапсырылды"},
+ "收录":{en:"Added",ru:"Добавлено",kk:"Қосылды"},
  "三语新版 11-20":{en:"Trilingual · 11-20",ru:"Трёхъязычная версия · 11-20",kk:"Үш тілді нұсқа · 11-20"},
  "草原驿路新版 11-20":{en:"Steppe Road · 11-20",ru:"Степной путь · 11-20",kk:"Дала жолы · 11-20"},
  "数词：基数词与序数词｜自然现象有哪些":{en:"Numerals: cardinal and ordinal | What natural phenomena are there",ru:"Числительные: количественные и порядковые | Какие бывают явления природы",kk:"Сан есім: есептік және реттік сан есімдер | Қандай табиғат құбылыстары бар"},
@@ -490,6 +515,9 @@ const REVIEW_UI={
     followupError:"追问提交失败，请重试。",
     followupStale:"这条回复已更新。请关闭后查看最新历史。",
     tooLarge:"评论太长，请缩短后再提交",
+    formatLabels:{c2v:"适合做 C2V",whiteboard:"适合改白板","3d":"不适合 C2V·建议 3D 互动",avatar:"AI 老师"},
+    formatQuestion:"认为这个展现形式适合本节课么?",formatUp:"适合",formatDown:"不适合",
+    formatVoteError:"投票未确认，请重试。",formatNoCount:"票数暂未加载",
     docT:(g,r,c,a)=>"看课评审 · 通过 "+g+" · 不通过 "+r+" · 待复查 "+c+" / "+a},
   en:{recheck:"Ready for recheck",stY:"Not reviewed",fixing:"Fixes in progress · New feedback goes to the next batch",
     pending:"Pending",queued:"Queued for the next batch",queuedBy:b=>"Pending once batch "+b+" closes",
@@ -502,6 +530,9 @@ const REVIEW_UI={
     followupError:"Could not send your follow-up. Try again.",
     followupStale:"This reply has changed. Close this box to see the latest history.",
     tooLarge:"Shorten your comments and try again",
+    formatLabels:{c2v:"Suitable for C2V",whiteboard:"Better as a whiteboard lesson","3d":"Unsuitable for C2V · Try interactive 3D",avatar:"AI teacher"},
+    formatQuestion:"Do you think this format suits the lesson?",formatUp:"Suitable",formatDown:"Unsuitable",
+    formatVoteError:"Could not confirm your vote. Try again.",formatNoCount:"Vote count is unavailable",
     docT:(g,r,c,a)=>"Lesson review · Passed "+g+" · Failed "+r+" · Ready for recheck "+c+" / "+a},
   ru:{recheck:"На повторной проверке",stY:"Не оценено",fixing:"Идёт исправление · Новые замечания войдут в следующий пакет",
     pending:"Ожидает обработки",queued:"В очереди на следующий пакет",queuedBy:b=>"Ожидает завершения пакета "+b,
@@ -514,6 +545,9 @@ const REVIEW_UI={
     followupError:"Не удалось отправить уточнение. Попробуйте снова.",
     followupStale:"Ответ изменился. Закройте окно и посмотрите историю.",
     tooLarge:"Сократите комментарии и попробуйте снова",
+    formatLabels:{c2v:"Подходит для C2V",whiteboard:"Лучше объяснить на доске","3d":"C2V не подходит · Рекомендуется интерактивное 3D",avatar:"ИИ-учитель"},
+    formatQuestion:"Подходит ли этот формат для урока?",formatUp:"Подходит",formatDown:"Не подходит",
+    formatVoteError:"Не удалось подтвердить голос. Попробуйте снова.",formatNoCount:"Число голосов пока недоступно",
     docT:(g,r,c,a)=>"Оценка уроков · Принято "+g+" · Не принято "+r+" · На повторной проверке "+c+" / "+a},
   kk:{recheck:"Қайта тексеруге дайын",stY:"Бағаланбаған",fixing:"Түзетіліп жатыр · Жаңа пікірлер келесі топтамаға қосылады",
     pending:"Өңдеуді күтуде",queued:"Келесі топтама кезегінде",queuedBy:b=>b+" топтамасы аяқталғанын күтуде",
@@ -526,11 +560,14 @@ const REVIEW_UI={
     followupError:"Нақтылау жіберілмеді. Қайталап көріңіз.",
     followupStale:"Жауап өзгерді. Соңғы тарихты көру үшін терезені жабыңыз.",
     tooLarge:"Пікірлерді қысқартып, қайта жіберіңіз",
+    formatLabels:{c2v:"C2V форматына қолайлы",whiteboard:"Тақтада түсіндірген дұрыс","3d":"C2V қолайсыз · Интерактивті 3D ұсынылады",avatar:"ЖИ мұғалімі"},
+    formatQuestion:"Бұл формат осы сабаққа сай ма?",formatUp:"Сай",formatDown:"Сай емес",
+    formatVoteError:"Дауысыңыз расталмады. Қайталап көріңіз.",formatNoCount:"Дауыс саны әзірге қолжетімсіз",
     docT:(g,r,c,a)=>"Сабақтарды бағалау · Өтті "+g+" · Өтпеді "+r+" · Қайта тексеруге дайын "+c+" / "+a}
 };
 const T=k=>REVIEW_UI[LANG][k]??UI[LANG][k]??UI.zh[k];
 const tr=z=>{if(!z||LANG==="zh")return z||"";const m=TR[z];return m&&m[LANG]?m[LANG]:z};
-const trStyle=z=>String(z||"").split(" · ").map(tr).join(" · ");
+const trStyle=z=>z.split(" · ").map(tr).join(" · ");
 const lbl=l=>l.label||T("lesson")(l.no);
 function applyLang(){
   document.documentElement.lang=LANG;
@@ -1052,6 +1089,7 @@ window.addEventListener("pageshow", event => {
 });
 async function refreshReview(){
   if(document.hidden||!DATA)return;
+  loadFormatVotes();
   await refreshManifest();
   loadReviewStatus();
   loadSummary();
@@ -1062,7 +1100,7 @@ setInterval(refreshReview,manifestInterval);
 
 function updatePreloadOrder(){
   // Use the rendered order because grouping can move cards relative to lessons.json.
-  preloadOrder=[...new Set(Array.from($("home").querySelectorAll(".card:not(:disabled)"),
+  preloadOrder=[...new Set(Array.from($("home").querySelectorAll(".card:not(.off)"),
     card=>preloadLessons.get(card.dataset.file)).filter(Boolean))];
 }
 
@@ -1118,6 +1156,124 @@ function pumpThumbs(){
     schedulePreload();
   }
 }
+const FORMAT_ICONS={up:"👍",down:"👎"};
+const FORMAT_VOTES_URL=(AUTH_SITE?"":"https://review.ooii.top")+"/format-votes";
+let formatVoteData=null, formatVoteRequest=0;
+const formatVotePending=new Set();
+
+function paintFormatVotes(){
+  $("home").querySelectorAll("[data-format-vote-id]").forEach(paintFormatVote);
+}
+
+function paintFormatVote(card){
+  const id=card.dataset.formatVoteId;
+  const counts=formatVoteData?.[id];
+  const pending=formatVotePending.has(id);
+  for(const button of card.querySelectorAll("[data-format-vote]")){
+    const vote=button.dataset.formatVote;
+    const count=formatVoteData?(counts?.[vote]??0):"–";
+    const label=T(vote==="up"?"formatUp":"formatDown");
+    button.textContent=FORMAT_ICONS[vote]+" "+count;
+    button.setAttribute("aria-label",label+" · "+(formatVoteData?count:T("formatNoCount")));
+    button.setAttribute("aria-pressed",String(counts?.mine===vote));
+    button.setAttribute("aria-disabled",String(pending));
+  }
+  const jcc=card.querySelector(".format-jcc");
+  const icon=FORMAT_ICONS[counts?.jcc];
+  jcc.hidden=!icon;
+  jcc.textContent=icon?"JCC: "+icon:"";
+}
+
+async function loadFormatVotes(){
+  if(formatVotePending.size)return;
+  const request=++formatVoteRequest;
+  try{
+    const response=await fetch(FORMAT_VOTES_URL,{cache:"no-store",signal:AbortSignal.timeout(5000)});
+    if(!response.ok)throw new Error("Could not load format votes");
+    const data=await response.json();
+    if(!data.ok||!data.lessons)throw new Error("Invalid format votes");
+    if(request!==formatVoteRequest)return;
+    formatVoteData=data.lessons;
+    clearLoadError("formatVotes");
+    paintFormatVotes();
+  }catch{
+    if(request===formatVoteRequest)showLoadError("formatVotes",loadFormatVotes);
+  }
+}
+
+async function saveFormatVote(id,vote){
+  if(formatVotePending.has(id))return;
+  if(!AUTH_SITE){
+    location.assign("https://review.ooii.top/v3/?"+new URLSearchParams({lang:LANG}));
+    return;
+  }
+  if(!accountKey){loadReviewer();return}
+  if(!formatVoteData){toast(T("formatNoCount"));loadFormatVotes();return}
+  const account=accountKey;
+  const desired=formatVoteData[id]?.mine===vote?null:vote;
+  ++formatVoteRequest;
+  formatVotePending.add(id);
+  paintFormatVotes();
+  try{
+    const response=await fetch(FORMAT_VOTES_URL,{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({lesson:id,vote:desired,account_key:account}),signal:AbortSignal.timeout(5000)});
+    if(response.status===401||response.status===403){await loadReviewer();return}
+    if(!response.ok)throw new Error("Could not save format vote");
+    const data=await response.json();
+    if(!data.ok||!data.counts)throw new Error("Invalid format vote");
+    if(account===accountKey&&formatVoteData)formatVoteData[id]=data.counts;
+  }catch{
+    toast(T("formatVoteError"));
+  }finally{
+    formatVotePending.delete(id);
+    paintFormatVotes();
+    loadFormatVotes();
+  }
+}
+
+function renderLessonFormat(card,lesson){
+  const meta=card.querySelector(".meta");
+  const style=lesson.styleShort??String(lesson.style||"").split(" · ")[0];
+  const date=style.match(/ (\d{2}-\d{2})$/);
+  meta.textContent=trStyle(date?style.slice(0,date.index):style);
+  if(date){
+    const day=document.createElement("time");
+    day.textContent=date[1];
+    meta.append(" ",day);
+  }
+  const label=T("formatLabels")[lesson.format];
+  if(!label||!lesson.formatVoteId)return;
+
+  card.dataset.formatVoteId=lesson.formatVoteId;
+  const detail=document.createElement("div");
+  detail.className="format-line";
+  const tag=document.createElement("span");
+  tag.className="format-tag "+(lesson.format==="3d"?"fmt-3d":lesson.format);
+  tag.textContent=label;
+  detail.append(tag," ",lesson.formatWhy?.[LANG]??lesson.formatWhy?.zh??"");
+
+  const row=document.createElement("div");
+  row.className="format-votes";
+  const question=document.createElement("span");
+  question.textContent=T("formatQuestion");
+  const buttons=document.createElement("div");
+  buttons.className="format-buttons";
+  buttons.setAttribute("role","group");
+  buttons.setAttribute("aria-label",question.textContent);
+  for(const vote of Object.keys(FORMAT_ICONS)){
+    const button=document.createElement("button");
+    button.type="button";
+    button.dataset.formatVote=vote;
+    button.onclick=()=>saveFormatVote(lesson.formatVoteId,vote);
+    buttons.appendChild(button);
+  }
+  row.append(question,buttons);
+  const jcc=document.createElement("div");
+  jcc.className="format-jcc";
+  card.append(detail,row,jcc);
+  paintFormatVote(card);
+}
+
 function renderHome(){
   if(!AUTH_SITE)$("whoBtn").textContent=st.name?("👤 "+st.name):T("who");
   const groups=[], lessons=visibleLessons();
@@ -1138,13 +1294,12 @@ function renderHome(){
       const ok=made(l), state=ok?mine(l):null;
       const [col,label]=CARD_STATES[state]??["",""];
       if(state==="pass")ng++; else if(state==="fail")nr++; else if(state==="recheck")nc++;
-      const b=document.createElement("button");
-      b.type="button";
+      const b=document.createElement("div");
       b.className="card"+(ok?(col?" "+col:""):" off");
       b.dataset.file=l.file||"";
       if(state)b.dataset.reviewState=state;
       const badge=ok?(label?'<span class="st '+col+'">'+esc(T(label))+'</span>':""):'<span class="st make">'+esc(T("stM"))+'</span>';
-      b.innerHTML='<div class="hd"><span class="no">'+esc(lbl(l))+'</span>'+badge+'</div><div class="tt"></div><div class="meta"></div>';
+      b.innerHTML='<button type="button" class="card-open"></button><div class="hd"><span class="no">'+esc(lbl(l))+'</span>'+badge+'</div><div class="tt"></div><div class="meta"></div>';
       if(ok&&l.thumb){
         let thumb=covers.get(lid(l));
         if(thumb?.dataset.src!==l.thumb){
@@ -1162,6 +1317,10 @@ function renderHome(){
         }
       }
       b.querySelector(".tt").textContent=tr(l.title);
+      const open=b.querySelector(".card-open");
+      open.setAttribute("aria-label",[lbl(l),tr(l.title),label&&T(label)].filter(Boolean).join(" · "));
+      open.disabled=!ok;
+      open.onclick=()=>openLesson(l);
       if(ok){
         renderCommentCounts(b,lid(l));
         if(fixing(l)){
@@ -1171,11 +1330,9 @@ function renderHome(){
           b.appendChild(banner);
         }
       }
-      {const sg=trStyle(l.style).split(" · "),dc={ccc:"#f08a24",codex:"#3b82f6"}[l.by];b.querySelector(".meta").innerHTML=esc(sg[0])+(dc?'<i class="mk" style="background:'+dc+'"></i>':"")+esc(sg.length>1?" · "+sg.slice(1).join(" · "):"")}
+      renderLessonFormat(b,l);
       if(ok)renderPreloadBadge(b);
-      b.disabled=!ok;
       b.dataset.lid=lid(l);
-      b.onclick=()=>openLesson(l);
       c.appendChild(b);
     });
     h.appendChild(c);
@@ -1346,6 +1503,7 @@ async function closeLesson(){
   $("home").style.display="";
   renderHome();
   loadSummary();
+  loadFormatVotes();
   await refreshManifest();
   loadReviewStatus();
   // 回到目录时停在刚才进去的位置,并让刚看的那张课卡在视野里(K 261121)
@@ -1534,9 +1692,14 @@ async function loadReviewStatus(){
     if(viewing)paintReviewActions();
     return;
   }
-  const focused=document.activeElement?.dataset.lid;
+  const focused=document.activeElement;
+  const focusedLesson=focused?.closest(".card")?.dataset.lid;
+  const focusedVote=focused?.dataset.formatVote;
   renderHome();
-  if(focused)document.querySelector('[data-lid="'+CSS.escape(focused)+'"]')?.focus({preventScroll:true});
+  if(focusedLesson){
+    const card=document.querySelector('[data-lid="'+CSS.escape(focusedLesson)+'"]');
+    card?.querySelector(focusedVote?'[data-format-vote="'+CSS.escape(focusedVote)+'"]':".card-open")?.focus({preventScroll:true});
+  }
   if(viewing){paintFixBanner($("pFix"),curLesson());paintReviewActions()}
 }
 
@@ -1580,7 +1743,7 @@ async function loadSummary(){
   if(!data?.lessons){if(accountKey)showLoadError("summary",loadSummary);return;}
   clearLoadError("summary");
   summary=data.lessons;
-  $("home").querySelectorAll(".card:not(:disabled)").forEach(card=>{
+  $("home").querySelectorAll(".card:not(.off)").forEach(card=>{
     renderCommentCounts(card,card.dataset.lid);
   });
 }
@@ -1904,8 +2067,10 @@ async function loadReviewer(){
       accountKey=profile.account_key;
       legacyPassesRestored=0;
       lessonStatus={};statusReady=false;summary={};historyView=null;
+      formatVoteData=null;
       ++statusRequest;++summaryRequest;
       st=loadDraft();
+      loadFormatVotes();
     }
     clearLoadError("login");
     FEISHU_NAME=profile.name;reviewerAvatar=profile.avatar;
@@ -2012,7 +2177,7 @@ async function loadCatalog(){
     if(!r.ok)throw new Error("Catalog unavailable");
     const d=await r.json(); if(!Array.isArray(d.lessons))throw new Error("Invalid catalog");
     DATA=d; clearLoadError("catalog"); renderHome();
-    loadSummary(); loadReviewStatus();
+    loadSummary(); loadReviewStatus(); loadFormatVotes();
     // Covers go first; lessons start the moment the last cover settles.
     preloadStart=0;
     preloadInit.then(refreshManifest);
