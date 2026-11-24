@@ -34,6 +34,14 @@ img[data-slot]{display:none}
 .bottom{background:rgba(255,248,229,.96);border-radius:10px;padding:7px 12px}
 #soundHint{left:2%;transform:none}
 .caption{background:rgba(251,243,227,.96)!important;color:#4a3426!important;text-shadow:none!important;border:3px dashed rgba(227,165,44,.9);border-radius:18px;font-weight:800}
+/* ccc-c89p1 (C89): master kit cap-below (templates/shell.html 15b27eb9 l.23-30; m81: card 56.25vw, #cvLang kept), trigger = portrait only (fitCaption) */
+html.cap-below{--caph:50px}
+html.cap-below .stage{flex-direction:column}
+html.cap-below.cap-below.cap-below .card{flex:none;width:min(100vw,calc((100vh - var(--cvh,0px) - var(--cvt,0px) - var(--caph)) * 1.777777));height:min(calc(100vh - var(--cvh,0px) - var(--cvt,0px) - var(--caph)),56.25vw)}
+html.cap-below .bottom{position:relative;flex:none;left:auto;right:auto;bottom:auto;width:100vw;height:var(--caph);justify-content:flex-start;padding:2px 8px}
+html.cap-below .lang{display:none}
+html.cap-below.cap-below #cvBar,html.cap-below.cap-below #cvLang{width:100vw}
+html.cap-below .caption{font-size:14px;margin:2px 0 0 0;max-width:none;padding:.1em .3em}
 </style></head>
 <body><div class="stage"><main class="card"><canvas id="c" width="1920" height="1080"></canvas><div class="top"><div><div class="title" id="title"></div><div class="sub" id="sub"></div></div><div class="badge" id="timer"></div></div><div id="soundHint" hidden></div><div class="bottom"><div class="lang" id="lang"></div><div class="caption" id="caption"></div></div><video id="narration" preload="auto" playsinline style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none"></video><div id="audioStatus" aria-hidden="true"></div></main></div>
 <!-- 位图槽:build.py 把 img/<slot>.png 内嵌成 data URI;没有图时 src 为空,场景画占位色块 -->
@@ -696,7 +704,16 @@ window.__renderStems=async(unity=true)=>{
 
 // ---------- 外壳:打开即播 / 被拦静音续播 / 点一下出声 / 字幕 / 播到音轨尾自动停 ----------
 const soundHint=document.querySelector('#soundHint');
-function updateText(){const i=sentence(t),C=CFG.scene&&CFG.scene.closing;caption.textContent=(C&&C.ru31&&i===cues.length-1&&document.documentElement.lang==='ru'&&t<C.on)?C.ru31:(NARR[i]||'')}  // ccc-023: closing clause appears with its voice
+function updateText(){const i=sentence(t),C=CFG.scene&&CFG.scene.closing;caption.textContent=(C&&C.ru31&&i===cues.length-1&&document.documentElement.lang==='ru'&&t<C.on)?C.ru31:(NARR[i]||'');fitCaption()}  // ccc-023: closing clause appears with its voice
+// ccc-c89p1: kit cap-below toggle (templates/shell.html 15b27eb9 fitCaption); trigger = portrait innerHeight>innerWidth (kit: innerWidth<560), so landscape never switches
+// below the frame only: kit 2-line rule, 6 % steps down to the kit 10 px floor (in-frame caption is not touched)
+let capKey='';function capLines(el){const cs=getComputedStyle(el),lh=parseFloat(cs.lineHeight)||parseFloat(cs.fontSize)*1.2;return Math.round((el.clientHeight-parseFloat(cs.paddingTop)-parseFloat(cs.paddingBottom))/lh)}
+function fitCaption(force){const root=document.documentElement,card=document.querySelector('.card'),bot=document.querySelector('.bottom'),below=innerHeight>innerWidth,key=[caption.textContent,innerWidth,innerHeight,below].join('|');
+ if(!force&&key===capKey)return;capKey=key;
+ if(below!==root.classList.contains('cap-below')){root.classList.toggle('cap-below',below);if(below)card.parentElement.insertBefore(bot,card.nextSibling);else card.insertBefore(bot,document.querySelector('#narration'))}
+ if(caption.style.fontSize)caption.style.fontSize='';if(!below||!caption.textContent)return;let fs=parseFloat(getComputedStyle(caption).fontSize);
+ for(let i=0;i<60&&capLines(caption)>2&&fs>10;i++){fs=Math.max(10,fs*0.94);caption.style.fontSize=fs.toFixed(2)+'px'}}
+addEventListener('resize',()=>fitCaption(true));
 function frame(){const n=renderScene(t);updateText();return n}
 const MIXG=(CFG.mix&&CFG.mix[LG])||{};
 function syncHint(){soundHint.hidden=!(narration.muted&&!userMuted&&L.sound);if(L.sound)soundHint.textContent='🔇 '+L.sound}
