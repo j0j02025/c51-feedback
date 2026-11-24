@@ -26,7 +26,10 @@ button{border:0;border-radius:12px;cursor:pointer;background:#eef1f5;color:var(-
 @keyframes lessonSpin{to{transform:rotate(360deg)}}
 @media (prefers-reduced-motion:reduce){#lessonSpinner{animation:none}}
 #lessonSlow{font-size:13px}
-#lessonProgress{width:min(260px,70vw);height:12px;accent-color:#f2c14e}
+#lessonProgress{appearance:none;width:min(260px,70vw);height:12px;border:0;border-radius:999px;overflow:hidden;background:#39475b}
+#lessonProgress::-webkit-progress-bar{background:#39475b}
+#lessonProgress::-webkit-progress-value{background:#f2c14e}
+#lessonProgress::-moz-progress-bar{background:#f2c14e}
 #lessonLoadPercent{font-size:13px;font-variant-numeric:tabular-nums}
 .card:not(:has(.th)):has(.preload-badge.new-version:not([hidden])){padding-top:24px}
 .preload-badge.dot{width:8px;height:8px;padding:0;border-radius:50%;top:8px;right:8px;box-shadow:0 0 0 1.5px #fff}
