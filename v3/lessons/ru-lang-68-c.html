@@ -1037,4 +1037,57 @@ html.cv-lang #cvBar,#cvLang{flex:none;width:min(100vw,calc((100vh - var(--cvh,0p
 })();
 </script>
 <!-- lang4:end -->
+<!-- kitfix-title-hint v2 -->
+<style id="kitfix-title-hint">
+#title{white-space:nowrap}
+#cvTitleRow{flex:none;display:flex;align-items:flex-end;box-sizing:border-box;padding:0 8px 4px;pointer-events:none}
+#soundHint[data-cv-hint=row]{box-sizing:border-box;padding:2px 8px;border-width:1px;border-radius:8px;font-size:13px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+</style>
+<script id="kitfix-title-hint-js">
+(()=>{
+const canvas=document.querySelector('canvas#c')||document.querySelector('canvas'),soundHint=document.querySelector('#soundHint');
+if(!canvas||!soundHint)return;
+const TITLE_MAX_FR=.38,TITLE_MIN_PX=10,HINT_PROPS=['position','left','top','right','bottom','transform','margin','max-width','z-index','pointer-events'];let titleKey='',titleHome=null,hintHome=null;
+function fitTitle(force){
+ const el=document.querySelector('#title'),root=document.documentElement,row=document.querySelector('#cvLang'),card=document.querySelector('.card'),stage=card&&card.parentElement,rr=row&&row.getBoundingClientRect();
+ const key=[el?el.textContent:'',canvas.clientWidth,canvas.clientHeight,innerWidth,innerHeight,root.className,root.dataset.chrome,rr?[rr.left,rr.top,rr.width,rr.height].join():''].join('|');
+ if(!force&&key===titleKey)return;titleKey=key;
+ if(el)fitTitleTag(el,root,row,card,stage);placeHint(row);
+}
+function fitTitleTag(el,root,row,card,stage){
+ const s=el.style;for(const p of['font-size','max-width','overflow','text-overflow'])s.removeProperty(p);
+ // portrait (window taller than wide) with spare height above the frame: the title tag gets its own row above the frame = never over the canvas; else it goes back into the frame
+ if(!titleHome)titleHome=[el.parentNode,el.nextSibling];let tr=document.querySelector('#cvTitleRow');
+ const used=stage?[...stage.children].filter(c=>c!==tr&&c!==soundHint).reduce((a,c)=>a+c.getBoundingClientRect().height,0):innerHeight;
+ if(el.textContent&&stage&&card&&innerHeight>innerWidth&&innerHeight-used>=el.getBoundingClientRect().height+12){
+  if(!tr){tr=document.createElement('div');tr.id='cvTitleRow';stage.insertBefore(tr,row&&row.parentElement===stage?row:card)}
+  tr.style.width=card.getBoundingClientRect().width.toFixed(1)+'px';const tp=titleHome[0].closest&&titleHome[0].closest('.top');tr.style.justifyContent=tp?getComputedStyle(tp).justifyContent:'flex-start';
+  if(el.parentElement!==tr)tr.appendChild(el)}
+ else if(tr||el.parentNode!==titleHome[0]){if(titleHome[0].isConnected)titleHome[0].insertBefore(el,titleHome[1]&&titleHome[1].parentNode===titleHome[0]?titleHome[1]:null);if(tr)tr.remove();tr=null}
+ if(!el.textContent)return;
+ const top=el.closest('.top'),tm=document.querySelector('#timer');
+ const mw=tr?tr.clientWidth-16:root.dataset.chrome==='flat'?canvas.clientWidth*TITLE_MAX_FR:Math.max(40,(top?top.clientWidth:canvas.clientWidth)-(tm&&tm.offsetWidth?tm.offsetWidth+12:0));
+ s.setProperty('max-width',mw.toFixed(1)+'px','important');
+ let fs=parseFloat(getComputedStyle(el).fontSize);
+ for(let i=0;i<60&&el.scrollWidth>el.clientWidth+.5&&fs>TITLE_MIN_PX;i++){fs=Math.max(TITLE_MIN_PX,fs*.94);s.setProperty('font-size',fs.toFixed(2)+'px','important')}
+ if(el.scrollWidth>el.clientWidth+.5){s.setProperty('overflow','hidden','important');s.setProperty('text-overflow','ellipsis','important')}
+}
+// sound hint: a STAGE-level element, never inside [data-cv-controls] (the controls can be hidden on their own, the hint must stay visible while muted), laid over the
+// left part of the language row = outside the canvas; it still hides once sound is on (the page's own hidden flag). Back to its lesson place when the row goes (render() / capture).
+function placeHint(row){
+ const hs=soundHint.style;if(!hintHome)hintHome=[soundHint.parentNode,soundHint.nextSibling];
+ const host=row?(row.parentElement&&!row.parentElement.closest('[data-cv-controls]')?row.parentElement:document.body):null;
+ if(host){
+  if(soundHint.parentElement!==host)host.insertBefore(soundHint,host===row.parentElement?row:null);
+  soundHint.dataset.cvHint='row';
+  const rr=row.getBoundingClientRect(),br=(row.querySelector('button')||row).getBoundingClientRect(),x=rr.left+8,lim=(br.width>0&&br!==rr&&br.left>x?br.left-6:rr.right-8)-x;
+  for(const[p,v]of[['position','fixed'],['left',x.toFixed(1)+'px'],['top',(rr.top+rr.height/2).toFixed(1)+'px'],['right','auto'],['bottom','auto'],['transform','translateY(-50%)'],['margin','0'],['max-width',Math.max(0,Math.min(rr.width*.62,lim)).toFixed(1)+'px'],['z-index','5'],['pointer-events','none']])hs.setProperty(p,v,'important')}
+ else if(soundHint.dataset.cvHint){delete soundHint.dataset.cvHint;for(const p of HINT_PROPS)hs.removeProperty(p);if(hintHome[0]&&hintHome[0].isConnected)hintHome[0].insertBefore(soundHint,hintHome[1]&&hintHome[1].parentNode===hintHome[0]?hintHome[1]:null)}
+}
+function tick(){try{fitTitle()}catch(e){console.warn('kitfix-title-hint',e)}requestAnimationFrame(tick)}
+addEventListener('resize',()=>fitTitle(true));if(typeof ResizeObserver==='function')new ResizeObserver(()=>fitTitle(true)).observe(canvas);
+window.__kitfix={id:'kitfix-title-hint',ver:'v2',fit:fitTitle};tick();
+})();
+</script>
+<!-- /kitfix-title-hint v2 -->
 </body></html>
