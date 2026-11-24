@@ -716,6 +716,11 @@ function compileLesson() {
   return TL;
 }
 
+// ccc-rl66rb73-B: push-in shots per language, solved by ccc-rl66rb73/tools/camsolve.py (do not edit by hand)
+// CAM_TABLE BEGIN
+const CAM_TABLE = {"ru": [{"s": 7, "T0": 38.68, "T1": 42.38, "x0": 12.0, "y0": 304.0, "z": 1.4}, {"s": 20, "T0": 92.24, "T1": 101.62, "x0": 184.0, "y0": 344.0, "z": 1.47}, {"s": 23, "T0": 108.54, "T1": 111.92, "x0": 720.0, "y0": 404.0, "z": 1.6}], "en": [{"s": 7, "T0": 36.488, "T1": 40.588, "x0": 12.0, "y0": 304.0, "z": 1.4}, {"s": 20, "T0": 90.96, "T1": 98.492, "x0": 184.0, "y0": 344.0, "z": 1.47}, {"s": 23, "T0": 105.612, "T1": 109.16, "x0": 720.0, "y0": 404.0, "z": 1.6}], "zh": [{"s": 6, "T0": 36.23, "T1": 38.43, "x0": 180.0, "y0": 304.0, "z": 1.59}, {"s": 7, "T0": 39.83, "T1": 44.53, "x0": 12.0, "y0": 304.0, "z": 1.4}, {"s": 20, "T0": 103.19, "T1": 113.57, "x0": 184.0, "y0": 344.0, "z": 1.47}, {"s": 23, "T0": 122.77, "T1": 126.63, "x0": 720.0, "y0": 404.0, "z": 1.6}]};
+// CAM_TABLE END
+
 // ===== ccc-007 · ru-lang-66 · RENDER (fixed camera; watercolor workshop props; characters = base-page sprite sets) =====
 const ANCH = CFG.scene.anchors;
 const HT = { R: 180, P: 190, S: 190 };
@@ -1054,8 +1059,11 @@ function drawBoard(b, t) {
 }
 // parts of a board inside the shed are clipped away anyway; skipping their draw calls keeps them out of every layout check
 function shedGuard(on) {
-  if (!on) { delete ctx.roundRect; delete ctx.drawImage; delete ctx.fillText; return; }
-  const P = CanvasRenderingContext2D.prototype, right = (g, x) => { const m = g.getTransform(); return m.a * x + m.e; };
+  if (!on) { delete ctx.roundRect; delete ctx.drawImage; delete ctx.fillText; if (CAM_CULL) ctx.fillText = camFill; return; }
+  // ccc-rl66rb73-B2 camera: compare in SCENE px (undo the camera transform), so a zoomed frame skips exactly the draws the
+  // wide shot skips (with the camera off __cam is z 1, x0 0: the same arithmetic as before)
+  const P = CanvasRenderingContext2D.prototype, cam = window.__cam || { z: 1, x0: 0 },
+    right = (g, x) => { const m = g.getTransform(); return (m.a * x + m.e) / cam.z + cam.x0; };
   ctx.roundRect = function (x, y, w, h, r) { if (right(this, Math.max(x, x + w)) <= DOOR) return; return P.roundRect.apply(this, arguments); };
   ctx.drawImage = function (im, ...a) {
     const r = a.length === 2 ? [a[0], a[1], im.width, im.height] : a.length === 4 ? a : a.slice(4);
@@ -1063,7 +1071,7 @@ function shedGuard(on) {
   };
   ctx.fillText = function (s, x, y) {
     const w = this.measureText(s).width, al = this.textAlign, x1 = al === 'center' ? x + w / 2 : (al === 'right' || al === 'end') ? x : x + w;
-    if (right(this, x1) <= DOOR) return; return P.fillText.apply(this, arguments);
+    if (right(this, x1) <= DOOR) return; return (CAM_CULL ? camFill : P.fillText).apply(this, arguments);
   };
 }
 function drawBoardBody(b, t, dx, y) {
@@ -1331,10 +1339,41 @@ function layerOfR(ps) {
   return y <= LANE[1] + 1 ? 1 : y <= LANE[2] + 1 ? 2 : 3;
 }
 let LAST_DRAWN = {};
+// ccc-rl66rb73-B2 camera (J 1044.7A, JCC ruling (B) instant cut-ins): on a detail sentence the picture CUTS (one frame wide,
+// the next frame zoomed, no ease) to the named row / letter, centred, 1.4-1.6x; it cuts back to the wide shot at the next
+// whole-picture sentence. Every Q/A segment (s8-s14 and the answer window) stays wide from 0.3 s before the question
+// (J 1065.1A). CAM_TABLE (lesson.js) lists, per language, shots {s, T0, T1, x0, y0, z} in scene seconds and scene pixels.
+// Each shot was solved so that every text, card, prop and character drawn while it is on screen is either fully inside the
+// visible frame (canvas minus caption band, sound hint, title) or fully outside the frame: 0 cut of anything.
+// window.__camOff = true draws the wide shot (proof: content with the camera off = base).
+// ccc-rl66rb73-B2 camera: on a zoomed frame a text that the cut-in puts WHOLLY outside the canvas is not drawn (it would not
+// show; the pixels are the same). Its draw call would otherwise sit outside the frame for every layout check (check.py L1
+// "out"). A text that is partly inside is drawn as before. Wide frames (camera off, z 1) never cull: same draws as the base.
+let CAM_CULL = false;
+function camFill(s, x, y, mw) {
+  const S = String(s), m = this.measureText(S); let w = m.width; if (mw && w > mw) w = mw;
+  const al = this.textAlign, dx = al === 'center' ? -w / 2 : (al === 'right' || al === 'end') ? -w : 0, T = this.getTransform();
+  let a = Infinity, b = Infinity, c = -Infinity, d = -Infinity;
+  for (const px of [x + dx, x + dx + w]) for (const py of [y - m.actualBoundingBoxAscent, y + m.actualBoundingBoxDescent]) {
+    const u = T.a * px + T.c * py + T.e, v = T.b * px + T.d * py + T.f;
+    a = Math.min(a, u); c = Math.max(c, u); b = Math.min(b, v); d = Math.max(d, v);
+  }
+  if (c <= 0 || a >= this.canvas.width || d <= 0 || b >= this.canvas.height) return;
+  return CanvasRenderingContext2D.prototype.fillText.apply(this, arguments);
+}
+function camWin(c) { return c ? { x0: c.x0, y0: c.y0, x1: c.x0 + W / c.z, y1: c.y0 + H / c.z } : { x0: 0, y0: 0, x1: W, y1: H }; }
+function camAt(t) {
+  const L = (!window.__camOff && typeof CAM_TABLE !== 'undefined' && CAM_TABLE[TLANG]) || [];
+  for (const c of L) if (t >= c.T0 && t < c.T1) return camWin(c);
+  return camWin(null);
+}
 function renderScene(tt) {
   wiresUpdate(tt, playing);
   BOXES = []; timer.textContent = '';
-  const t = tt;
+  const t = tt, cw = camAt(t), cz = W / (cw.x1 - cw.x0);
+  ctx.save(); ctx.setTransform(cz, 0, 0, cz, -cw.x0 * cz, -cw.y0 * cz);   // ccc-rl66rb73-B2 camera
+  window.__cam = { t, z: cz, x0: cw.x0, y0: cw.y0 };
+  CAM_CULL = cz !== 1; if (CAM_CULL) ctx.fillText = camFill; else delete ctx.fillText;
   drawBackground(t); drawShed(t);
   const pR = poseOf('R', t), pP = poseOf('P', t), pS = poseOf('S', t), lr = layerOfR(pR);
   LAST_DRAWN = { R: pR, P: pP, S: pS, layerR: lr };
@@ -1367,6 +1406,8 @@ function renderScene(tt) {
       ctx.strokeStyle = `rgba(255,255,255,${0.8 * (1 - q)})`; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(lerp(PX(13), PX(1), q), LANE[1] - 30, 18 + 10 * Math.sin(q * 6), 0, 7); ctx.stroke(); }
   }
   drawReadingGuide(t, pR);
+  if (CAM_CULL) { delete ctx.fillText; CAM_CULL = false; }
+  ctx.restore();
   return { sentence: sentence(tt) };
 }
 // Re-read visible examples during pauses in the demonstration. Keep the answer window clear.
