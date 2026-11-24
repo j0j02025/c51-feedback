@@ -58,7 +58,7 @@
    "subject": "俄语数字素养",
    "title": "演示文稿所需的信息",
    "file": "lessons/ru-dl-16-c.html",
-   "sha": "848b47e5cf4c079a9872a75f47b60d5bc8504041ad1b0b18afb43094bf481f88"
+   "sha": "0ad15fafb92a9ac4a04f806dcc9322b1d4b255ecff1ec844fbf7250e216e9b1a"
   },
   {
    "id": "ru-math-81",
@@ -106,7 +106,7 @@
    "subject": "俄语数学",
    "title": "图像",
    "file": "lessons/ru-math-84-c.html",
-   "sha": "ff506ebd0884cc89fc28ac381c1bf92cffac96082fccbcb0f2663a3fbda848db"
+   "sha": "20aa5bd1e84c22a37f331733dbfdb7aa02437c8dbafa5f2156df3efdf7007123"
   },
   {
    "id": "ru-math-85",
@@ -122,7 +122,7 @@
    "subject": "俄语数学",
    "title": "解决问题",
    "file": "lessons/ru-math-85-c.html",
-   "sha": "f7720a1b2cf9a18f99eeddaf095c2aa62baf452e18df3206ce801ceed5de13e8"
+   "sha": "6b33ce999cc7e7dd87c9343c7d68ded279c961c8bb29e538f87ebb0141825481"
   },
   {
    "id": "kk-lang-65",
@@ -186,7 +186,7 @@
    "subject": "哈语数字素养",
    "title": "演示文稿所需的信息",
    "file": "lessons/kk-dl-17-c.html",
-   "sha": "32bcb2b7b11c7514be9ea9beb113a1b5f00198c216e1803732a90697dd2c15a3"
+   "sha": "b72e3ea39bbfd6b058b1443665f80b5c97f826090187d01976f1b27ef5be8d1a"
   },
   {
    "id": "kk-math-81",
@@ -242,7 +242,7 @@
    "subject": "哈语数学",
    "title": "图像",
    "file": "lessons/kk-math-84-c.html",
-   "sha": "0a9eee7c63a8097161f9a373ad8544a88c4a250d5ecfc4fa88a7d9929097c7c6"
+   "sha": "466026b7e28b509b3a75952b958effa1572a4f9450b3135f9a2a29a78738ba3e"
   },
   {
    "id": "kk-math-85",
@@ -298,7 +298,7 @@
    "subject": "俄语数学",
    "title": "单位面积产量（巩固）",
    "file": "lessons/ru-math-83-c.html",
-   "sha": "d73b0d254f3c2c223135ccd65d50950e563d89c62363f821cc694432d9a61674"
+   "sha": "ccc04d533729366993eb3536126e4857476f116469e8e52bbef298f315e56c32"
   },
   {
    "id": "kk-lang-67-c",
@@ -314,7 +314,7 @@
    "subject": "哈语数学",
    "title": "单位面积产量（巩固）（小绿人重做）",
    "file": "lessons/kk-math-83-lgm-c.html",
-   "sha": "43546d53e4fb52c0ce70fd740a2c90544fc060580d67683c3a03092117dab92f"
+   "sha": "7ec54d3aebe7463c8e7ecda72c4086855f98536722c8b1ce0cecba24bb769ee3"
   },
   {
    "id": "kk-lang-68-c",
@@ -378,7 +378,7 @@
    "subject": "哈语",
    "title": "名词（第二课）(重构版)",
    "file": "lessons/kk-lang-68-rb2.html",
-   "sha": "cd7c499c765f27b3f88b0ab0254497cc9bb118d99497af02a278e507043b5c7b"
+   "sha": "6f3a27e0e15e88f3410ddee4349306b4a49703a7faf348e9a0fa8725e239b635"
   },
   {
    "id": "kk-math-82-bi-c",
