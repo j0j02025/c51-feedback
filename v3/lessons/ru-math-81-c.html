@@ -16,6 +16,15 @@ canvas{width:100%;height:100%;display:block}
 .badge{background:var(--sun);border:4px solid var(--ink);border-radius:16px;padding:6px 14px;font-weight:900;font-size:clamp(14px,1.6vw,30px);box-shadow:4px 4px 0 var(--ink);white-space:nowrap}
 /* 底部字幕带显示当前配音语言的字幕。 */
 .bottom{position:absolute;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:stretch;z-index:3;pointer-events:none}
+/* ccc-kitcap F1 (JCC 261123):字幕跟画面走。画内:保持本课原字号,只有越出字幕带(画布 y<SAFE.y1)或超过 2 行时才按比例缩,没有 18px 下限,最小 10px(JCC S2);
+   窗口宽 <560px:字幕整块搬到画面下方(与控制条同列),画面让出固定的 --caph(14px 两行),换句不改画面大小。fitCaption() 负责,见 updateText。 */
+html.cap-below .stage{flex-direction:column;justify-content:flex-start}
+html.cap-below .card{flex:none;width:min(100vw,calc((100vh - var(--cvh,0px) - var(--caph)) * 1.777777))}
+html.cap-below .card{height:min(calc(100vh - var(--cvh) - var(--caph)),56.25vw)}
+html.cap-below .bottom{position:relative;flex:none;left:auto;right:auto;bottom:auto;width:100vw;height:var(--caph);justify-content:flex-start}
+.bottom .lang,html.cap-below .lang{display:none !important}@media (orientation:landscape){html.cap-below #cvLang{display:none !important}}
+html.cap-below.cap-below #cvBar,html.cap-below.cap-below #cvLang{width:100vw}
+html.cap-below .caption{font-size:14px;margin:2px 0 0 0;max-width:none;padding:.1em .3em}
 .caption{margin:0 4% .5% 4%;display:flex;align-items:center;justify-content:center;text-align:center;font-size:clamp(18px,2.2vw,42px);font-weight:900;line-height:1.2;color:var(--ink);text-shadow:2px 2px 0 #fff,-2px -2px 0 #fff,2px -2px 0 #fff,-2px 2px 0 #fff}
 .lang{align-self:flex-end;margin:0 1.5% 3px 0;font-size:clamp(14px,.75vw,16px);font-weight:700;opacity:.75}
 #soundHint{position:absolute;top:2.6%;left:50%;transform:translateX(-50%);padding:4px 12px;border-radius:12px;background:rgba(255,255,255,.92);border:2px solid var(--ink);font-size:clamp(13px,1vw,18px);font-weight:800;white-space:nowrap;pointer-events:none;z-index:4}
@@ -150,7 +159,7 @@ const S=path=>{let o=SC;for(const k of path){if(o==null)return'';o=o[k]}return t
 const UA=()=>S(['steps',4,'items',0,'text']).replace(/^\?\s*/,'')||'м²';
 const UL=()=>UA().replace('²','').replace('平方','');
 const WORD={
- lesson:()=>[S(['lesson_number']),L.doc_title].filter(Boolean).join(' · '),
+ lesson:()=>L.doc_title,
  chapter:i=>S(['chapters',i,1]),
  chip:j=>S(['steps',3,'items',[1,3,5][j],'text']),
  ask:j=>S(['steps',4,'items',j,'text']),
@@ -169,7 +178,9 @@ const TAPE_Y=PL.y+PL.h+22;
 const CI={x:1530,y:350,r:195};                              // the circle diagram
 const AYA={x:1010,feet:838,h:440};
 const CARD=[{x:230,c:'tom',img:'tomato'},{x:450,c:'cuc',img:'cucumber'},{x:670,c:'pot',img:'potato'}];
-const CARD_IMG_Y=672,CHIP_Y=752,VAL_Y=812;
+const CARD_IMG_Y=672,CHIP_Y=752,VAL_Y=820;
+const CHIP_DY=6; // ccc-m81fin D1(a)(b): the chip line sits 6 px lower than before, so the wobbling cucumber tip never touches its name (zh glyphs are taller);
+// the value line moves 812 -> 820 and the card grows 8 px (bottom 846 -> 854, still above the caption band at 860) so the dropping answer clears the stacked fraction
 const EQ_L={x:PL.x,y1:506,y2:564},EQ_R={x:1262,y3:694,y4:766};
 const OPT={y:578,w:150,h:90,gap:24};
 const STRIP_Y=150;                                          // pinned notes: the two finished equations, sentences 8–22
@@ -216,6 +227,15 @@ let TQ=null;
 function later(f){if(!TQ)return f();const m=ctx.getTransform(),a=ctx.globalAlpha;TQ.push(()=>{ctx.save();ctx.setTransform(m);ctx.globalAlpha=a;f();ctx.restore()})}
 function flushText(){const q=TQ||[];TQ=null;for(const f of q)f()}
 function tx(s,x,y,px,c=C.inkD,al='center',w=700){if(!s)return 0;fnt(px,w);const tw=ctx.measureText(s).width;later(()=>{fnt(px,w);ctx.textAlign=al;ctx.textBaseline='middle';ctx.fillStyle=c;ctx.fillText(s,x,y)});return tw}
+// ccc-m81frac #80/#82: a slash fraction (1/4, 1/2, 2/4) drawn stacked — numerator centred over a horizontal bar, denominator below, bar = the wider of the two, same colour and weight, digits at the same size (T1 floor). A whole number stays to the left of the bar.
+const FRAC_RE=/(\d+)[\/\u2044](\d+)/g;
+// ccc-m81fin D1(b): numerator and denominator are drawn at the SAME px as the line (not smaller than the old slash digits); the bar sits at the
+// visual centre of a digit written at y, the digits keep a gap of max(2,px*.06) to the bar. fracX(px,w) = [top,bottom] of the stack relative to y.
+function fracX(px,w){fnt(px,w);const b=ctx.textBaseline;ctx.textBaseline='middle';const m=ctx.measureText('0123456789');ctx.textBaseline=b;const da=m.actualBoundingBoxAscent,dd=m.actualBoundingBoxDescent,yb=(dd-da)/2,lw=Math.max(2,px/14),g=Math.max(2,px*.06);return{yb,lw,g,da,dd,top:yb-lw/2-g-da-dd,bot:yb+lw/2+g+da+dd}}
+function fracW(s,px,w){fnt(px,w);let x=0,last=0,m;FRAC_RE.lastIndex=0;while((m=FRAC_RE.exec(s))){x+=ctx.measureText(s.slice(last,m.index)).width;const nw=ctx.measureText(m[1]).width,dw=ctx.measureText(m[2]).width;x+=Math.max(nw,dw)+px*.5;last=m.index+m[0].length}return x+ctx.measureText(s.slice(last)).width}
+function fracDraw(s,x0,y,px,c,w){const X=fracX(px,w);fnt(px,w);ctx.textBaseline='middle';ctx.fillStyle=c;ctx.strokeStyle=c;let cx=x0,last=0,m;FRAC_RE.lastIndex=0;while((m=FRAC_RE.exec(s))){const pre=s.slice(last,m.index);if(pre){ctx.textAlign='left';ctx.fillText(pre,cx,y);cx+=ctx.measureText(pre).width}const nw=ctx.measureText(m[1]).width,dw=ctx.measureText(m[2]).width,bar=Math.max(nw,dw)+px*.5,yb=y+X.yb;ctx.textAlign='center';ctx.fillText(m[1],cx+bar/2,yb-X.lw/2-X.g-X.dd);ctx.fillText(m[2],cx+bar/2,yb+X.lw/2+X.g+X.da);ctx.lineWidth=X.lw;ctx.beginPath();ctx.moveTo(cx+px*.06,yb);ctx.lineTo(cx+bar-px*.06,yb);ctx.stroke();cx+=bar;last=m.index+m[0].length}const post=s.slice(last);if(post){ctx.textAlign='left';ctx.fillText(post,cx,y)}}
+// k<1: written on left to right like writeLine (clip + gold pencil dot), D1(d)
+function drawFrac(s,x,y,px,c,al,w,k=1){const tw=fracW(s,px,w),x0=al==='right'?x-tw:al==='left'?x:x-tw/2,X=fracX(px,w);if(k<=0)return tw;later(()=>{ctx.save();if(k<1){ctx.beginPath();ctx.rect(x0-6,y+X.top-8,tw*cl(k)+12,X.bot-X.top+16);ctx.clip()}fracDraw(s,x0,y,px,c,w);ctx.restore();if(k<1)disc(x0+tw*cl(k)+4,y+px*.32,7,C.gold)});return tw}
 // One string, two inks (left part ink, answer gold): a single fillText so the whole sentence reads as one line.
 function tx2(s,cut,x,y,px,c1,c2,al='left',w=800){fnt(px,w);const tw=ctx.measureText(s).width,cw=ctx.measureText(s.slice(0,cut)).width,x0=al==='left'?x:al==='right'?x-tw:x-tw/2;
  const g=ctx.createLinearGradient(x0,0,x0+tw,0),f=cl(cw/tw);g.addColorStop(0,c1);g.addColorStop(f,c1);g.addColorStop(Math.min(1,f+1e-4),c2);g.addColorStop(1,c2);
@@ -407,7 +427,7 @@ function drawEquations(tt){
  const gray1=K(TW.circ0,.8,tt)*(1-K(TW.e3,.5,tt)*0)+0,gray=t2=>Math.max(gray1, K(TW.whole-3,.8,tt));
  // line 1: first the question (? = 240 · 1/4), then the division that answers it
  const q=K(TW.quarter,.6,tt),out=K(TW.w240-.65,.4,tt);
- if(q>0&&out<1){ctx.save();ctx.globalAlpha*=1-out;writeLine('? = 240 · 1/4',EQ_L.x,EQ_L.y1,46,q,null,0);ctx.restore()}
+ if(q>0&&out<1){ctx.save();ctx.globalAlpha*=1-out;drawFrac('240 · 1/4 = ?',EQ_L.x,EQ_L.y1,46,C.inkD,'left',800,q);ctx.restore()}
  const e1=WORD.eq1(),c1=e1.lastIndexOf('60');
  const k1=K(TW.w240-.1,TW.w60-TW.w240+.1,tt);
  // When the page makes room for the circle (sentence 8), both lines are pinned as small grey notes in a strip under the
@@ -461,12 +481,12 @@ function drawCards(tt){
    }
   // name · share
   const name=WORD.chip(j),cc=C[cd.c],ccD=C[cd.c+'D'];
-  const nk=K(drops[j]+.05,.35,tt);if(nk>0){ctx.save();ctx.globalAlpha*=nk;const px=fitPx(name,hot>0?lerp(34,40,hot):34,cw-18,800);tx(name,cx,CHIP_Y,px,ccD,'center',800);ctx.restore()}
+  const nk=K(drops[j]+.05,.35,tt);if(nk>0){ctx.save();ctx.globalAlpha*=nk;const px=fitPx(name,hot>0?lerp(34,40,hot):34,cw-18,800);drawFrac(name,cx,CHIP_Y+CHIP_DY,px,ccD,'center',800);ctx.restore()}
   // the area slot: ? m² until the circle sends the answer back
   const v=cardValue(j,tt);if(v.k>0){ctx.save();ctx.globalAlpha*=cl(v.k*1.4);const px=fitPx(v.s,v.at?40:36,cw-18,800);const dy=v.at?(1-back(v.k))*-18:Math.sin(TAU*(tt-TW.ask)*.8+j)*2*(tt<TW.full?1:0);
    tx(v.s,cx,VAL_Y+dy,px,v.at?C.inkD:'#9a8f78','center',800);ctx.restore();if(v.at)sparkle(cx,VAL_Y,K(v.at,.8,tt),cc,12,10,80,j+20)}
   // potato card asks for help: its 1/2 gets a gold marker
-  if(hot>0){fnt(40,800);const w=ctx.measureText(name).width;ctx.save();ctx.globalAlpha*=hot;sg(cx-w/2,CHIP_Y+26,cx-w/2+w*hot,CHIP_Y+26,C.goldF,7);ctx.restore()}
+  if(hot>0){const w=fracW(name,40,800),my=CHIP_Y+CHIP_DY+fracX(40,800).bot+6;ctx.save();ctx.globalAlpha*=hot;sg(cx-w/2,my,cx-w/2+w*hot,my,C.goldF,7);ctx.restore()}
   if(k>.5)rg('label','card'+j,cx-cw/2,top,cw,ch);
  });
 }
@@ -542,7 +562,7 @@ function drawCircle(tt){
  for(const[q,n,at]of keys){const k=K(at,.4,tt);if(k<=0||!ready(n))continue;const tr=trim(n),m=[-1.22,-1.92,0,1.22][q],bw=q===1?50:52,bh=bw*tr.h/tr.w,cx=x+Math.cos(m)*r*.76,cy=y+Math.sin(m)*r*.76;
   ctx.save();ctx.globalAlpha*=cl(k*1.4);ctx.translate(cx,cy-(1-back(k))*20);ctx.drawImage(ICON[n],tr.x,tr.y,tr.w,tr.h,-bw/2,-bh/2,bw,bh);ctx.restore()}
  // "1/4" tag on the tomato quarter during the method recap
- const tag=K(TW.k1,.4,tt);if(tag>0){ctx.save();ctx.globalAlpha*=tag*(1-K(TW.link,.6,tt));const m=-0.62,px=x+Math.cos(m)*(r+52),py=y+Math.sin(m)*(r+44);panel(px-40,py-26,80,52,14,'#fff3ee',C.tom,3,false);tx('1/4',px,py+2,34,C.tomD,'center',800);ctx.restore()}
+ const tag=K(TW.k1,.4,tt);if(tag>0){ctx.save();ctx.globalAlpha*=tag*(1-K(TW.link,.6,tt));const m=-0.62,px=x+Math.cos(m)*(r+52),py=y+Math.sin(m)*(r+44),X=fracX(34,800),th=Math.max(52,Math.ceil(X.bot-X.top)+12);panel(px-40,py-th/2,80,th,14,'#fff3ee',C.tom,3,false);drawFrac('1/4',px,py+2,34,C.tomD,'center',800);ctx.restore()}
  rg('label','circle',x-r-6,y-r-6,2*r+12,2*r+12);
 }
 // The two brown quarters lift off as one half (seam closes, 7200 shows) and then travel to the potato card.
@@ -606,7 +626,7 @@ function drawOptions(tt){
  const leave=K(TW.half-.05,.6,tt);if(leave>=1)return;
  const rv=K(TW.ansB,.35,tt);
  for(let j=0;j<3;j++){const k=K(shows[j]-.05,.45,tt);if(k<=0)continue;const good=j===1;
-  const x=left+j*(OPT.w+OPT.gap)+(1-back(k))*160+leave*(j-1)*0,y=OPT.y+leave*40;
+  const x=left+j*(OPT.w+OPT.gap)+(1-back(k))*Math.min(160,1920-(left+j*(OPT.w+OPT.gap)+OPT.w))+leave*(j-1)*0,y=OPT.y+leave*40;
   const dim=rv>0&&!good?1-rv*.65:1;ctx.save();ctx.globalAlpha*=cl(k*1.4)*dim*(1-leave);
   const green=good&&rv>0;const bump=green?pulse(TW.ansB,.5,tt)*-10:0;
   panel(x,y+bump,OPT.w,OPT.h,20,green?C.okS:'#fffaf0',green?C.ok:'rgba(29,79,145,.55)',green?6:3,true);
@@ -655,7 +675,7 @@ function drawTick(tt){const k=K(TW.sweep+2.3,.45,tt);if(k<=0)return;const x=CI.x
  ctx.strokeStyle=C.ok;ctx.lineWidth=14;ctx.lineCap='round';ctx.lineJoin='round';poly([[x-34,y],[x-10,y+28],[x+38,y-34]],eo(k));ctx.restore();sparkle(x,y,K(TW.sweep+2.5,.9,tt),'#9fd3a8',12,10,80,17)}
 // "1/2 = 2/4" under the circle once the options have left
 function drawHalf(tt){const k=K(TW.half+.62,.5,tt);if(k<=0)return;const s=WORD.half(),g=K(TW.e3-1,.6,tt)*0;ctx.save();ctx.globalAlpha*=cl(k*1.4);
- const px=48,y=OPT.y+OPT.h/2,w=TWm(s,px,800);tx(s,CI.x,y+(1-back(k))*16,px,C.potD,'center',800);ctx.restore();rg('label','half',CI.x-w/2,y-28,w,56)}
+ const px=48,y=OPT.y+OPT.h/2,w=fracW(s,px,800),X=fracX(px,800),dy=(1-back(k))*16;drawFrac(s,CI.x,y+dy,px,C.potD,'center',800);ctx.restore();rg('label','half',CI.x-w/2,y+dy+X.top,w,X.bot-X.top)}  // ccc-m81fin: registered box = the stacked fraction's ink box (as drawFrac's clip), not ±px
 // gold pencil-tip pointer: glides to the focus of each sentence and keeps circling it
 function drawPointer(tt){if(tt<TW.walkEnd)return;const a=focusOf(tt),b=focusOf(Math.max(0,cues[sentence(tt)]-.01)),k=eio(K(cues[sentence(tt)],.6,tt)),i=sentence(tt);
  const prev=i?focusOf(cues[i]-.02):a;const x=lerp(prev[0],a[0],k)+Math.cos(TAU*tt/2.2)*14,y=lerp(prev[1],a[1],k)+Math.sin(TAU*tt/1.1)*7;
@@ -681,7 +701,7 @@ function renderScene(tt){
 // ccc-031.4 FIX5 (J 1065.1A): during any question / answer / choices segment the full question and all its data stay in frame, so the
 // camera is back on the wide shot before the first question starts (ask key -0.75 s) and stays wide through the second question, the
 // choices A / B / C, the countdown and the answer (the option and countdown push-ins are gone); push-ins remain for explanation only.
-const CAM_EASE=.5,CAM_M=24,CAM_KEYS=[["trace0",-0.15,18,198,1458],["tom",-0.35,372,372,1082],["ask",-0.75,0,0,1920],["w240",-0.4,12,198,1458],["circ0",-0.6,0,0,1920],["c14400",-0.3,96,108,1682],["paintT",-0.3,0,0,1920],["half",-0.1,852,396,1066],["vT",-0.4,0,0,1920],["s1",-0.3,852,438,1066],["sweep",-0.3,0,0,1920]];
+const CAM_EASE=.5,CAM_M=24,CAM_KEYS=[["trace0",-0.15,18,198,1458],["tom",-0.35,372,372,1082],["ask",-1.9,0,0,1920],["w240",-0.4,12,198,1458],["circ0",-0.6,0,0,1920],["c14400",-0.3,96,108,1682],["paintT",-0.3,0,0,1920],["half",0.6,852,396,1066],["vT",-0.4,0,0,1920],["s1",-0.3,852,438,1066],["sweep",-0.3,0,0,1920]];
 let CAMR=[0,0,1920],CAMTXT=[];
 function camAt(tt){const a=TMAP.s2a(tt);let r0=[0,0,1920],r1=[0,0,1920],ak=-1e9;
  for(const k of CAM_KEYS){const kk=TMAP.s2a(TW[k[0]]+k[1]);if(kk>a)break;r0=r1;r1=[k[2],k[3],k[4]];ak=kk}
@@ -703,7 +723,9 @@ function sceneState(tt){return{sentence:sentence(tt),pose:poseAt(tt).cur[1]}}
 function sceneKey(tt){return String(Math.round(tt*30))}
 // ---------- caption strip: warm paper slip with a gold top edge ----------
 (()=>{const st=document.createElement('style');st.textContent=`
+.card{container-type:inline-size}
 .caption{margin:0 7% .7% 7%;padding:.28em .9em;background:rgba(255,250,236,.95);color:${C.inkD};text-shadow:none;border-top:5px solid ${C.goldF};border-radius:14px;font-size:clamp(18px,1.8vw,34px);font-weight:700;line-height:1.25}
+@container (max-width:560px){.caption{font-size:13px;line-height:1.15;padding:2px 12px;border-top-width:3px;margin:0 7% 2px 7%}}
 .caption:empty{display:none}
 #soundHint{color:${C.inkD};border-color:${C.ink}}`;document.head.appendChild(st)})();
 // ---------- sound: every effect explains a move on the paper ----------
@@ -823,8 +845,11 @@ function masterLimiterModule(ctx){if(!ctx.audioWorklet)return Promise.reject(new
 function makeMasterLimiter(ctx){return new AudioWorkletNode(ctx,'ccc-master-limiter',{numberOfInputs:1,numberOfOutputs:1,outputChannelCount:[2],channelCount:2,channelCountMode:'explicit',channelInterpretation:'speakers',processorOptions:{ceiling:Math.pow(10,MASTER_LIM.ceiling_db/20),look:Math.round(MASTER_LIM.lookahead_s*ctx.sampleRate),rel:MASTER_LIM.release_s}})}
 // The voice joins the WebAudio graph only once the context runs and the limiter is ready; until then it keeps its native output,
 // so autoplay, the muted fallback and pause / seek / language switch behave as before.
+// ccc-m81fin A1 trim (CCC t3184 rule: "Pre-limiter on voice+SFX", smallest passing 0.5 dB step per view; A1 = 50 ms method, JCC 00:34/01:05 UTC):
+// one gain on live.mix, where the voice element and the SFX bus sum, before the master limiter. Voice bytes, SFX gains and onsets unchanged.
+const MIX_TRIM_DB={"ru":-2.5,"en":-2.5,"zh":-3};let MIX_TRIM_LG=LG;const mixTrim=lg=>Math.pow(10,(MIX_TRIM_DB[lg]||0)/20);
 function routeNarration(){const c=live.ctx;if(!c||live.nsrc||!live.lim||c.state!=='running')return;try{live.nsrc=c.createMediaElementSource(narration);live.nsrc.connect(live.mix)}catch(e){console.warn('narration routing failed',e&&e.message)}}
-function audioKick(){if(!window.AudioContext)return;if(!live.ctx){const c=live.ctx=new AudioContext({latencyHint:'interactive'});live.master=c.createGain();live.master.gain.value=0;live.mix=c.createGain();live.master.connect(live.mix);live.mix.connect(c.destination);masterLimiterModule(c).then(()=>{const n=makeMasterLimiter(c);live.mix.disconnect();live.mix.connect(n);n.connect(c.destination);live.lim=n;routeNarration()}).catch(e=>console.warn('master limiter unavailable',e&&e.message));c.addEventListener('statechange',routeNarration);live.sfx=c.createGain();live.sfx.gain.value=SFXG();connectSfxLimiter(c,live.sfx,live.master);syncAudioGates()}if(live.ctx.state!=='running')live.ctx.resume().catch(()=>{})}
+function audioKick(){if(!window.AudioContext)return;if(!live.ctx){const c=live.ctx=new AudioContext({latencyHint:'interactive'});live.master=c.createGain();live.master.gain.value=0;live.mix=c.createGain();live.mix.gain.value=mixTrim(MIX_TRIM_LG);live.master.connect(live.mix);live.mix.connect(c.destination);masterLimiterModule(c).then(()=>{const n=makeMasterLimiter(c);live.mix.disconnect();live.mix.connect(n);n.connect(c.destination);live.lim=n;routeNarration()}).catch(e=>console.warn('master limiter unavailable',e&&e.message));c.addEventListener('statechange',routeNarration);live.sfx=c.createGain();live.sfx.gain.value=SFXG();connectSfxLimiter(c,live.sfx,live.master);syncAudioGates()}if(live.ctx.state!=='running')live.ctx.resume().catch(()=>{})}
 // ccc-031.4 FIX5: start every SFX event on the context's sample grid (moves it by at most half a sample, 10.4 us at 48 kHz). A start between
 // two samples makes Chrome interpolate the whole buffer, which dulls bright sounds (paper lost up to 1.2 dB at 48 kHz); on the grid the
 // 48 kHz buffer plays bit-exact in a 48 kHz context.
@@ -854,7 +879,25 @@ window.__renderStems=async(unity=true)=>{
 
 // ---------- 外壳:打开即播 / 被拦静音续播 / 点一下出声 / 字幕 / 播到音轨尾自动停 ----------
 const soundHint=document.querySelector('#soundHint');
-function updateText(){caption.textContent=NARR[sentence(t)]||''}
+function updateText(){const s=NARR[sentence(t)]||'';if(caption.textContent!==s)caption.textContent=s;fitCaption()}
+// ---------- ccc-kitcap F1:字幕不压画面、最多 2 行(ported from kit shell.html @ 48a73d1f) ----------
+const CAP_BELOW_W=560,CAP_MAX_LINES=2,CAP_MIN_PX=10;let capKey='';
+function capLines(el){const cs=getComputedStyle(el),lh=parseFloat(cs.lineHeight)||parseFloat(cs.fontSize)*1.2;
+ return Math.round((el.clientHeight-parseFloat(cs.paddingTop)-parseFloat(cs.paddingBottom))/lh)}
+function fitCaption(force){
+ const root=document.documentElement,card=document.querySelector('.card'),bot=document.querySelector('.bottom'),stage=document.querySelector('.stage');
+ const below=innerWidth<CAP_BELOW_W,key=[caption.textContent,innerWidth,innerHeight,card.clientWidth,card.clientHeight,root.className].join('|');
+ if(!force&&key===capKey)return;
+ if(below!==root.classList.contains('cap-below')){root.classList.toggle('cap-below',below);
+  if(below)stage.insertBefore(bot,card.nextSibling);else card.appendChild(bot)}
+ caption.style.fontSize='';
+ if(caption.textContent){let fs=parseFloat(getComputedStyle(caption).fontSize);
+  const yMax=()=>{const c=canvas.getBoundingClientRect();return c.top+c.height*(typeof SAFE==='object'?SAFE.y1:860)/1080};
+  for(let i=0;i<60;i++){const ok=capLines(caption)<=CAP_MAX_LINES&&(below||caption.getBoundingClientRect().top>=yMax());
+   if(ok||fs<=CAP_MIN_PX)break;fs=Math.max(CAP_MIN_PX,fs*0.94);caption.style.fontSize=fs.toFixed(2)+'px'}}
+ capKey=[caption.textContent,innerWidth,innerHeight,card.clientWidth,card.clientHeight,root.className].join('|');
+}
+addEventListener('resize',()=>fitCaption(true));if(typeof ResizeObserver==='function')new ResizeObserver(()=>fitCaption(true)).observe(document.querySelector('.card'));
 function frame(){const n=renderScene(t);updateText();return n}
 const MIXG=(CFG.mix&&CFG.mix[LG])||{};
 function syncHint(){soundHint.hidden=!(narration.muted&&!userMuted&&L.sound);if(L.sound)soundHint.textContent='🔇 '+L.sound}
@@ -1131,6 +1174,7 @@ function apply(lg){
  for(const[p,v]of(LS.scene||{})[lg]||[])put(p,v);
  for(const k of Object.keys(MIXG))delete MIXG[k];Object.assign(MIXG,clone(MIX0[lg]||{}));
  if(typeof live==='object'&&live&&live.sfx&&typeof SFXG==='function')live.sfx.gain.value=SFXG();
+ MIX_TRIM_LG=lg;if(typeof live==='object'&&live&&live.mix)live.mix.gain.value=mixTrim(lg);
  if(typeof syncAudioGates==='function')syncAudioGates();
  const w=warp(lg);TMAP.a2s=w.a2s;TMAP.s2a=w.s2a;
  document.documentElement.lang=lg;document.title=L.doc_title||L.title||'';
@@ -1167,8 +1211,10 @@ if(ALL.length>1&&Q.get('capture')!=='1'){
  const R=PAPER?'255px 15px 225px 15px/15px 225px 15px 255px':C.radius+'px';
  const st=document.createElement('style');st.id='cvLangCss';st.textContent=`
 html.cv-lang{--cvt:40px}
+html.cap-below{--caph:50px;--cvh:46px;--cvt:96px}
 html.cv-lang .stage{flex-direction:column}
 html.cv-lang.cv-lang .card{flex:none;width:min(100vw,calc((100vh - var(--cvh,0px) - var(--cvt)) * 1.777777));height:min(calc(100vh - var(--cvh,0px) - var(--cvt)),56.25vw)}
+html.cap-below.cv-lang .card{height:min(calc(100vh - var(--cvh) - var(--caph)),56.25vw);width:min(100vw,calc((100vh - var(--cvh) - var(--caph)) * 1.777777))}
 html.cv-lang #cvBar,#cvLang{flex:none;width:min(100vw,calc((100vh - var(--cvh,0px) - var(--cvt)) * 1.777777))}
 #cvLang{height:var(--cvt);display:flex;align-items:center;justify-content:flex-end;gap:6px;padding:0 8px;font-family:${CFONT};color:${C.fg};user-select:none;-webkit-user-select:none}
 #cvLang button{appearance:none;-webkit-appearance:none;margin:0;height:30px;min-width:56px;padding:0 10px;font:inherit;font-size:15px;font-weight:700;cursor:pointer;color:${C.fg};background:${CHIP};border:${PAPER?'2px solid '+C.fg:'0'};border-radius:${R};box-shadow:none}
