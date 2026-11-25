@@ -37,10 +37,11 @@ html.cv-compact #cvBar[data-cv-speed-bar] .cvsp button[data-cv-ctl=speed]{
  #cvBar[data-cv-speed-bar] .cvsp button[data-cv-ctl=speed]{height:28px;font-size:12px;padding:0 5px}
 }
 @media(max-width:599px){
- html:not(.cv-min){--cvh:68px}
- html:not(.cv-min) #cvBar[data-cv-speed-bar]{flex-wrap:wrap;gap:2px 5px;padding:2px 6px}
- #cvBar[data-cv-speed-bar] #cvSeg{min-width:0;font-size:12px}
- #cvBar[data-cv-speed-bar] #cvTrack{order:2;flex:1 1 100%;min-width:0}
+ html:not(.cv-min){--cvh:58px}
+ html:not(.cv-min) #cvBar[data-cv-speed-bar]{flex-wrap:wrap;gap:2px 4px;padding:2px 6px}
+ html:not(.cv-min) #cvBar[data-cv-speed-bar]::after{content:'';flex:0 0 100%;order:1;height:0}
+ #cvBar[data-cv-speed-bar] #cvSeg{order:2;min-width:0;font-size:12px}
+ #cvBar[data-cv-speed-bar] #cvTrack{order:3;flex:1 1 64px;min-width:0}
  #cvBar[data-cv-speed-bar]>button:not([data-rate]){width:28px;height:28px}
 }
 </style>

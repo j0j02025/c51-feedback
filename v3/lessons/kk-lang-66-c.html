@@ -64,6 +64,9 @@ html.cv-compact #cvBar[data-cv-speed-bar] .cvsp button[data-cv-ctl=speed]{
 }
 @media(max-width:599px){
  #cvBar[data-cv-speed-bar]{gap:4px}
+ html:not(.cv-min) #cvBar[data-cv-speed-bar]::after{content:'';flex:0 0 100%;order:1;height:0}
+ #cvBar[data-cv-speed-bar] #cvSeg{order:2;min-width:0;font-size:12px}
+ #cvBar[data-cv-speed-bar] #cvTrack{order:3;flex:1 1 64px}
  #cvBar[data-cv-speed-bar] #cvMin{margin-left:auto}
 }
 </style>
