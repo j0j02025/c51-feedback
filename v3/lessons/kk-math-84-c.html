@@ -871,7 +871,7 @@ Object.assign(LEN,{pedal:.12,bell:1.1,tick:.05,drop:.26,plop:.25,whoosh:.6,rise:
 Object.assign(SFX_TRIM,{pedal:.35,bell:.42,tick:.45,drop:.55,plop:.5,whoosh:.45,rise:.45,snip:.5,buzz:.45,sparkle:.4,confetti:.5,paper:.5,cdtick:1});
 ['pedal','tick','drop','plop','whoosh','rise','snip','sparkle','pop','block','bell','cdtick'].forEach(x=>VARIANTS.add(x));
 // countdown tick level per voice track (ccc-013, K 261121: 75 % of the voice; the voices differ in loudness and mix.sfx is 1 for all)
-const CD_LV={kk:1.097,en:.2884,zh:1.122};
+const CD_LV={kk:.66,en:.2884,zh:.675};
 const SFX_PER_EVENT=true;
 function sfxEventGain(e){const l=window.__lang?window.__lang.cur:LG;return e.id==='cdtick'?(CD_LV[l]??1):(e.id==='bell'&&l==='en'?.585:1)}
 async function renderSfx(id,v=0){const o=new OfflineAudioContext(2,Math.ceil(LEN[id]*ASR),ASR);RECIPES[id](o,o.destination,v);const r=await o.startRendering();for(let c=0;c<2;c++){const d=r.getChannelData(c);for(let i=0;i<d.length;i++)d[i]*=SFX_TRIM[id]}return r}
