@@ -26,7 +26,115 @@ html[data-chrome=flat] .title{text-shadow:none;letter-spacing:0;max-width:38vw;f
 html[data-chrome=flat] .badge{background:transparent;border:none;box-shadow:none;padding:0}
 #audioStatus:not(:empty){position:absolute;top:16%;left:50%;transform:translateX(-50%);background:#fff;padding:8px;border:2px solid var(--ink);z-index:4}
 img[data-slot]{display:none}
-</style></head>
+</style><!-- t3299 speed begin -->
+<style>
+#cvBar[data-cv-speed-bar] [data-cv-speed]{flex:none}
+html.cv-compact #cvBar[data-cv-speed-bar] .cvsp button[data-cv-ctl=speed]{
+ height:26px;font-size:12px;padding:0 4px
+}
+@media(max-width:599px){
+ #cvBar[data-cv-speed-bar] .cvsp button[data-cv-ctl=speed]{height:28px;font-size:12px;padding:0 5px}
+}
+@media(max-width:599px){
+ html.cv-on:not(.cv-min){--cvh:58px}
+ html.cv-on:not(.cv-min) #cvBar[data-cv-speed-bar]{flex-wrap:wrap;gap:2px 4px;padding:3px 4px}
+ html.cv-on:not(.cv-min) #cvBar[data-cv-speed-bar]::after{content:'';flex:0 0 100%;order:1;height:0}
+ #cvBar[data-cv-speed-bar] #cvSeg{order:2;min-width:0;font-size:12px}
+ #cvBar[data-cv-speed-bar] #cvTrack{order:3;flex:1 1 44px;min-width:44px}
+ #cvBar[data-cv-speed-bar]>button{min-width:30px;height:28px}
+ #cvBar[data-cv-speed-bar] svg{width:18px;height:18px}
+}
+</style>
+<script>
+// ---- 语速(ccc-032,J 261122:「125% / 100% / 75%」,原速记作 125%,默认 100%)----
+// 标签 125% / 100% / 75% = 真实倍速 1.0 / 0.8 / 0.6,默认 0.8。只改配音媒体元素的 playbackRate(浏览器保持音高的变速),
+// 画面、字幕、音效都读这条时钟,所以一起变慢;时钟仍是课内秒(__state().t)。
+window.CV_RATES=[{label:'125%',rate:1},{label:'100%',rate:.8},{label:'75%',rate:.6}];
+window.CV_RATE_DEFAULT=.8;
+// 媒体元素设倍速:defaultPlaybackRate 也设,换 src(换语言)重新 load 时倍速不丢;preservesPitch = 不变调
+window.cvApplyRate=function(media,r){
+ for(const k of['preservesPitch','mozPreservesPitch','webkitPreservesPitch'])if(k in media)media[k]=true;
+ media.defaultPlaybackRate=r;media.playbackRate=r;
+ if(!media.__cvRate){media.__cvRate=true;media.addEventListener('loadedmetadata',()=>{if(media.playbackRate!==media.defaultPlaybackRate)media.playbackRate=media.defaultPlaybackRate})}
+};
+// o = {mount(须在 [data-cv-controls] 根里), get:()=>当前倍速, set:倍速=>void, lang:()=>语言, look:{look,bg,fg,chip,accent,on_fg,radius,font}}
+window.cvSpeed=function(o){
+ const labels={zh:'语速',kk:'Жылдамдық',ru:'Скорость',en:'Speed'};
+ const L=o.look||{},PAPER=L.look==='paper',FG=L.fg||'#222222',BG=L.bg||'#ffffff',CHIP=L.chip||BG,ACC=L.accent||FG,ON=L.on_fg||BG;
+ if(!document.getElementById('cvSpeedCss')){const s=document.createElement('style');s.id='cvSpeedCss';s.textContent=`
+.cvsp{display:inline-flex;align-items:center;gap:0;flex:none}
+:is(#cvBar,.controls) .cvsp button[data-cv-ctl=speed]{appearance:none;-webkit-appearance:none;margin:0;cursor:pointer;font:600 13px/1 var(--cvsp-font);height:32px;min-width:0;width:auto;max-width:none;aspect-ratio:auto;outline:none;padding:0 6px;color:var(--cvsp-fg);background:var(--cvsp-chip);border:1px solid var(--cvsp-fg);border-left-width:0;border-radius:0;box-shadow:none;white-space:nowrap}
+:is(#cvBar,.controls) .cvsp-paper button[data-cv-ctl=speed]{border-width:2px;border-left-width:0}
+:is(#cvBar,.controls) .cvsp button[data-cv-ctl=speed]:first-child{border-left-width:1px;border-radius:var(--cvsp-r) 0 0 var(--cvsp-r)}
+:is(#cvBar,.controls) .cvsp-paper button[data-cv-ctl=speed]:first-child{border-left-width:2px}
+:is(#cvBar,.controls) .cvsp button[data-cv-ctl=speed]:last-child{border-radius:0 var(--cvsp-r) var(--cvsp-r) 0}
+:is(#cvBar,.controls) .cvsp button[data-cv-ctl=speed][aria-checked=true]{background:var(--cvsp-acc);color:var(--cvsp-on)}
+:is(#cvBar,.controls) .cvsp button[data-cv-ctl=speed]:focus-visible{outline:2px dashed var(--cvsp-fg);outline-offset:2px}`;document.head.appendChild(s)}
+ const el=document.createElement('div');el.className='cvsp'+(PAPER?' cvsp-paper':'');el.setAttribute('role','radiogroup');
+ el.style.cssText=`--cvsp-fg:${FG};--cvsp-chip:${CHIP};--cvsp-acc:${ACC};--cvsp-on:${ON};--cvsp-r:${Math.min(L.radius??6,12)}px;--cvsp-font:${L.font||'sans-serif'}`;
+ const bs=window.CV_RATES.map(x=>{const b=document.createElement('button');b.type='button';b.dataset.cvCtl='speed';b.dataset.rate=String(x.rate);b.setAttribute('role','radio');b.textContent=x.label;
+  b.addEventListener('click',()=>{o.set(x.rate);paint()});el.appendChild(b);return b});
+ el.addEventListener('keydown',e=>{const i=window.CV_RATES.findIndex(x=>Math.abs(x.rate-o.get())<1e-3),d=e.key==='ArrowRight'?1:e.key==='ArrowLeft'?-1:0;
+  if(!d)return;e.preventDefault();e.stopPropagation();const j=Math.max(0,Math.min(bs.length-1,i+d));o.set(window.CV_RATES[j].rate);bs[j].focus();paint()});
+ o.mount.appendChild(el);
+ let key='';
+ function paint(){const r=o.get(),label=labels[o.lang?.()]||labels.zh,k=r+'|'+label;if(k===key)return;key=k;
+  el.setAttribute('aria-label',label);el.title=label;
+  bs.forEach(b=>{const on=Math.abs(+b.dataset.rate-r)<1e-3;b.setAttribute('aria-checked',String(on));b.tabIndex=on?0:-1;b.setAttribute('aria-label',label+' '+b.textContent)})}
+ paint();
+ return{el,paint};
+};
+// Schedule event onsets from narration time, converted to AudioContext seconds.
+function createSfxClock(media){
+ let next=null,anchor=null;
+ const pending=new Map();
+
+ function cancelPending(){
+  for(const [source,{at,index}] of pending){
+   if(at>source.context.currentTime){
+    source.stop();
+    source.disconnect();
+    if(next!==null)next=Math.min(next,index);
+   }
+  }
+  pending.clear();
+  anchor=null;
+ }
+ function reset(){
+  cancelPending();
+  next=null;
+ }
+ for(const event of ['ratechange','pause','waiting','ended'])media.addEventListener(event,cancelPending);
+ for(const event of ['seeking','emptied'])media.addEventListener(event,reset);
+
+ function tick(context,events,timeOf,start){
+  if(media.paused||media.seeking||media.readyState<3||context.state!=='running'){
+   if(anchor)cancelPending();
+   return;
+  }
+  const time=media.currentTime,now=context.currentTime,rate=media.playbackRate;
+  for(const [source,{at}] of pending)if(at<=now)pending.delete(source);
+  if(anchor&&anchor.rate!==rate)cancelPending();
+  if(anchor&&Math.abs(anchor.time+(now-anchor.now)*rate-time)>.1)cancelPending();
+  if(!anchor)anchor={time,now,rate};
+  if(next===null){
+   next=events.findIndex((event,index)=>timeOf(event,index)>=time-.05);
+   if(next<0)next=events.length;
+  }
+  while(next<events.length){
+   const onset=timeOf(events[next],next);
+   if(onset>time+.16*rate)break;
+   const index=next++;
+   if(onset<time-.05)continue;
+   const at=Math.max(now,anchor.now+(onset-anchor.time)/rate);
+   const source=start(events[index],at);
+   pending.set(source,{at,index});
+  }
+ }
+ return {tick,reset};
+}
+</script>
+</head>
 <body><div class="stage"><main class="card"><canvas id="c" width="1920" height="1080"></canvas><div class="top"><div><div class="title" id="title"></div><div class="sub" id="sub"></div></div><div class="badge" id="timer"></div></div><div id="soundHint" hidden></div><div class="bottom"><div class="lang" id="lang"></div><div class="caption" id="caption"></div></div><video id="narration" preload="auto" playsinline style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none"></video><div id="audioStatus" aria-hidden="true"></div></main></div>
 <!-- 位图槽:build.py 把 img/<slot>.png 内嵌成 data URI;没有图时 src 为空,场景画占位色块 -->
 
@@ -907,12 +1015,14 @@ function audioTick(tt){
  if(tt>=AUDIO_DUR){if(!live.done){live.done=true;live.amb.gain.setTargetAtTime(0,c.currentTime,.6)}return}
  if(narration.paused||window.__lang?.busy)return;
  if(SBUF.amb&&!live.src){const s=c.createBufferSource();s.buffer=SBUF.amb;s.loop=true;s.connect(live.amb);s.start();live.src=s}
- const off=c.currentTime-narration.currentTime;
- if(live.offset===null||Math.abs(off-live.offset)>.25){live.offset=off;live.next=EVENTS.findIndex(e=>e.t>=tt);if(live.next<0)live.next=EVENTS.length}else live.offset=live.offset*.92+off*.08;
- const now=c.currentTime-live.offset;
- while(live.next<EVENTS.length&&TMAP.s2a(EVENTS[live.next].t)<now+.16){const e=EVENTS[live.next++],ea=TMAP.s2a(e.t);if(ea<now-.03)continue;const s=c.createBufferSource();s.buffer=sbuf(e);connectSfxEvent(c,s,live.sfx,e);s.start(Math.max(c.currentTime,ea+live.offset))}
+ const clock=live.rateClock??=createSfxClock(narration);
+ clock.tick(c,EVENTS,e=>TMAP.s2a(e.t),(e,at)=>{
+  const s=c.createBufferSource();s.buffer=sbuf(e);connectSfxEvent(c,s,live.sfx,e);
+  s.start(at);
+  return s;
+ });
 }
-window.addEventListener('cv-lang',()=>{live.offset=null});
+window.addEventListener('cv-lang',()=>{live.rateClock?.reset()});
 // 离线渲染:templates/mix_calibrate.py 用,和实时走同一批缓冲区、同一个事件表
 window.__renderStems=async(unity=true)=>{
  await audioReady;const len=Math.ceil((AUDIO_DUR+2)*ASR),enc=r=>{const a=r.getChannelData(0),b=r.getChannelData(1),f=new Float32Array(len>>1);for(let i=0;i<f.length;i++)f[i]=(a[2*i]+a[2*i+1]+b[2*i]+b[2*i+1])/4;let bin='';const u=new Uint8Array(f.buffer);for(let i=0;i<u.length;i+=32768)bin+=String.fromCharCode.apply(null,u.subarray(i,i+32768));return btoa(bin)};
@@ -1175,7 +1285,32 @@ window.__cvControls={segments:SEG.slice(),version:1};
 <script>
 // josh-code-video 多语切换条(lang4,事号 832;J:「Kevin的可以选哈文俄文和英文 这个属于公共组建 咱们应该抄过来 多加一个中文 这样就可以取代字幕了」)。
 // 拆读对标:Kevin 的 Possibility-Tree-3D 顶部 data-lang 按钮(Қаз / Рус / Eng),切语言 = 界面文字 + 字幕 + 配音一起换、当前这一步从头播。本文件是自己重写的,没抄对标代码。
-// 注入:build.py 把本文件插在 </body> 前(包在 lang4:begin / lang4:end 两行注释之间);删掉那一段,片子退回只播基准语言。
+// 注入:build.py 把本文件插在 <script>
+(()=>{
+ const media=document.getElementById('narration'),bar=document.getElementById('cvBar');
+ if(new URLSearchParams(location.search).get('capture')==='1')return;
+ window.cvApplyRate(media,window.CV_RATE_DEFAULT);
+ const slot=document.createElement('span');
+ slot.dataset.cvSpeed='';
+ const end=bar.querySelector('[data-cv-ctl=min],#cvMin,#minBtn');
+ bar.insertBefore(slot,end);
+ bar.dataset.cvSpeedBar='';
+ const theme=typeof CFG==='undefined'?{}:CFG.theme||{};
+ const palette=theme.palette||{},cfg=theme.controls||{},sample=bar.querySelector('button');
+ const style=getComputedStyle(sample);
+ const look={look:cfg.look,bg:cfg.bg||palette.paper||style.backgroundColor,
+  fg:cfg.fg||palette.ink||style.color,chip:cfg.chip||style.backgroundColor,
+  accent:cfg.accent||palette.highlight||style.color,on_fg:cfg.on_fg||palette.paper||style.backgroundColor,
+  radius:cfg.radius,font:getComputedStyle(bar).fontFamily};
+
+ const speed=window.cvSpeed({mount:slot,look,get:()=>media.playbackRate,
+  set:rate=>window.cvApplyRate(media,rate),lang:()=>window.__lang?.cur||document.documentElement.lang});
+ const observer=new MutationObserver(speed.paint);
+ observer.observe(document.documentElement,{attributes:true,attributeFilter:['lang']});
+})();
+</script>
+<!-- t3299 speed end -->
+</body> 前(包在 lang4:begin / lang4:end 两行注释之间);删掉那一段,片子退回只播基准语言。
 // 依赖外壳(templates/shell.html)的全局:CFG Q L NARR LG TLG TMAP AUDIO AUDIO_DUR cues t narration sync frame sentence MIXG,可选 live SFXG AMBG(templates/sfx.js)。
 // 时间轴:画面一律按基准语言(CFG.lang_switch.base = langs[0])的 cues / beats 排;别的语言的配音秒经 TMAP 分段线性映射过去
 //   (每句句起点、每段有声段的起止一一对上,要求各语言每句的段数相同,qa H17 查)。所以任何风格包的场景文件都不用改。

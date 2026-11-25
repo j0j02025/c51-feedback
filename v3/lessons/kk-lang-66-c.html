@@ -53,6 +53,109 @@ html.cv-capture #cvBar,html.cv-capture #cvReplay,html.cv-capture #pick{display:n
 @media(max-width:460px){#cvBar{gap:4px}#cvBar .tools{gap:4px}#cvBar button{min-width:32px;padding:0 6px;height:32px}}
 </style>
 <style id="c51-no-bgm">[data-cv-ctl=bgm],#bgmToggle,#bgmBtn,#music{display:none!important}</style>
+<!-- t3299 speed begin -->
+<style>
+#cvBar[data-cv-speed-bar] [data-cv-speed]{flex:none}
+html.cv-compact #cvBar[data-cv-speed-bar] .cvsp button[data-cv-ctl=speed]{
+ height:26px;font-size:12px;padding:0 4px
+}
+@media(max-width:599px){
+ #cvBar[data-cv-speed-bar] .cvsp button[data-cv-ctl=speed]{height:28px;font-size:12px;padding:0 5px}
+}
+@media(max-width:599px){
+ #cvBar[data-cv-speed-bar]{gap:4px}
+ #cvBar[data-cv-speed-bar] #cvMin{margin-left:auto}
+}
+</style>
+<script>
+// ---- 语速(ccc-032,J 261122:「125% / 100% / 75%」,原速记作 125%,默认 100%)----
+// 标签 125% / 100% / 75% = 真实倍速 1.0 / 0.8 / 0.6,默认 0.8。只改配音媒体元素的 playbackRate(浏览器保持音高的变速),
+// 画面、字幕、音效都读这条时钟,所以一起变慢;时钟仍是课内秒(__state().t)。
+window.CV_RATES=[{label:'125%',rate:1},{label:'100%',rate:.8},{label:'75%',rate:.6}];
+window.CV_RATE_DEFAULT=.8;
+// 媒体元素设倍速:defaultPlaybackRate 也设,换 src(换语言)重新 load 时倍速不丢;preservesPitch = 不变调
+window.cvApplyRate=function(media,r){
+ for(const k of['preservesPitch','mozPreservesPitch','webkitPreservesPitch'])if(k in media)media[k]=true;
+ media.defaultPlaybackRate=r;media.playbackRate=r;
+ if(!media.__cvRate){media.__cvRate=true;media.addEventListener('loadedmetadata',()=>{if(media.playbackRate!==media.defaultPlaybackRate)media.playbackRate=media.defaultPlaybackRate})}
+};
+// o = {mount(须在 [data-cv-controls] 根里), get:()=>当前倍速, set:倍速=>void, lang:()=>语言, look:{look,bg,fg,chip,accent,on_fg,radius,font}}
+window.cvSpeed=function(o){
+ const labels={zh:'语速',kk:'Жылдамдық',ru:'Скорость',en:'Speed'};
+ const L=o.look||{},PAPER=L.look==='paper',FG=L.fg||'#222222',BG=L.bg||'#ffffff',CHIP=L.chip||BG,ACC=L.accent||FG,ON=L.on_fg||BG;
+ if(!document.getElementById('cvSpeedCss')){const s=document.createElement('style');s.id='cvSpeedCss';s.textContent=`
+.cvsp{display:inline-flex;align-items:center;gap:0;flex:none}
+:is(#cvBar,.controls) .cvsp button[data-cv-ctl=speed]{appearance:none;-webkit-appearance:none;margin:0;cursor:pointer;font:600 13px/1 var(--cvsp-font);height:32px;min-width:0;width:auto;max-width:none;aspect-ratio:auto;outline:none;padding:0 6px;color:var(--cvsp-fg);background:var(--cvsp-chip);border:1px solid var(--cvsp-fg);border-left-width:0;border-radius:0;box-shadow:none;white-space:nowrap}
+:is(#cvBar,.controls) .cvsp-paper button[data-cv-ctl=speed]{border-width:2px;border-left-width:0}
+:is(#cvBar,.controls) .cvsp button[data-cv-ctl=speed]:first-child{border-left-width:1px;border-radius:var(--cvsp-r) 0 0 var(--cvsp-r)}
+:is(#cvBar,.controls) .cvsp-paper button[data-cv-ctl=speed]:first-child{border-left-width:2px}
+:is(#cvBar,.controls) .cvsp button[data-cv-ctl=speed]:last-child{border-radius:0 var(--cvsp-r) var(--cvsp-r) 0}
+:is(#cvBar,.controls) .cvsp button[data-cv-ctl=speed][aria-checked=true]{background:var(--cvsp-acc);color:var(--cvsp-on)}
+:is(#cvBar,.controls) .cvsp button[data-cv-ctl=speed]:focus-visible{outline:2px dashed var(--cvsp-fg);outline-offset:2px}`;document.head.appendChild(s)}
+ const el=document.createElement('div');el.className='cvsp'+(PAPER?' cvsp-paper':'');el.setAttribute('role','radiogroup');
+ el.style.cssText=`--cvsp-fg:${FG};--cvsp-chip:${CHIP};--cvsp-acc:${ACC};--cvsp-on:${ON};--cvsp-r:${Math.min(L.radius??6,12)}px;--cvsp-font:${L.font||'sans-serif'}`;
+ const bs=window.CV_RATES.map(x=>{const b=document.createElement('button');b.type='button';b.dataset.cvCtl='speed';b.dataset.rate=String(x.rate);b.setAttribute('role','radio');b.textContent=x.label;
+  b.addEventListener('click',()=>{o.set(x.rate);paint()});el.appendChild(b);return b});
+ el.addEventListener('keydown',e=>{const i=window.CV_RATES.findIndex(x=>Math.abs(x.rate-o.get())<1e-3),d=e.key==='ArrowRight'?1:e.key==='ArrowLeft'?-1:0;
+  if(!d)return;e.preventDefault();e.stopPropagation();const j=Math.max(0,Math.min(bs.length-1,i+d));o.set(window.CV_RATES[j].rate);bs[j].focus();paint()});
+ o.mount.appendChild(el);
+ let key='';
+ function paint(){const r=o.get(),label=labels[o.lang?.()]||labels.zh,k=r+'|'+label;if(k===key)return;key=k;
+  el.setAttribute('aria-label',label);el.title=label;
+  bs.forEach(b=>{const on=Math.abs(+b.dataset.rate-r)<1e-3;b.setAttribute('aria-checked',String(on));b.tabIndex=on?0:-1;b.setAttribute('aria-label',label+' '+b.textContent)})}
+ paint();
+ return{el,paint};
+};
+// Schedule event onsets from narration time, converted to AudioContext seconds.
+function createSfxClock(media){
+ let next=null,anchor=null;
+ const pending=new Map();
+
+ function cancelPending(){
+  for(const [source,{at,index}] of pending){
+   if(at>source.context.currentTime){
+    source.stop();
+    source.disconnect();
+    if(next!==null)next=Math.min(next,index);
+   }
+  }
+  pending.clear();
+  anchor=null;
+ }
+ function reset(){
+  cancelPending();
+  next=null;
+ }
+ for(const event of ['ratechange','pause','waiting','ended'])media.addEventListener(event,cancelPending);
+ for(const event of ['seeking','emptied'])media.addEventListener(event,reset);
+
+ function tick(context,events,timeOf,start){
+  if(media.paused||media.seeking||media.readyState<3||context.state!=='running'){
+   if(anchor)cancelPending();
+   return;
+  }
+  const time=media.currentTime,now=context.currentTime,rate=media.playbackRate;
+  for(const [source,{at}] of pending)if(at<=now)pending.delete(source);
+  if(anchor&&anchor.rate!==rate)cancelPending();
+  if(anchor&&Math.abs(anchor.time+(now-anchor.now)*rate-time)>.1)cancelPending();
+  if(!anchor)anchor={time,now,rate};
+  if(next===null){
+   next=events.findIndex((event,index)=>timeOf(event,index)>=time-.05);
+   if(next<0)next=events.length;
+  }
+  while(next<events.length){
+   const onset=timeOf(events[next],next);
+   if(onset>time+.16*rate)break;
+   const index=next++;
+   if(onset<time-.05)continue;
+   const at=Math.max(now,anchor.now+(onset-anchor.time)/rate);
+   const source=start(events[index],at);
+   pending.set(source,{at,index});
+  }
+ }
+ return {tick,reset};
+}
+</script>
 </head><body><main><div class="topline"><div class="id"><i class="swatch" aria-hidden="true"></i><span id="course"></span></div><nav id="cvLang" data-cv-controls="languages" class="lang" aria-label="Тіл">
 <button type="button" data-cv-ctl="lang" lang="kk" data-lang="kk" aria-pressed="true">Қаз</button>
 <button type="button" data-cv-ctl="lang" lang="en" data-lang="en" aria-pressed="false" disabled>Eng</button>
@@ -692,7 +795,7 @@ function frame(stamp){
   const live=playing && gate<0 && !media.paused && !media.seeking;
   if(live && media.muted){
    // The silent preview follows wall time when the browser throttles a muted media track.
-   previewTime=Math.max(t,previewTime+Math.max(0,(stamp-previewStamp)/1000));
+   previewTime=Math.max(t,previewTime+Math.max(0,(stamp-previewStamp)/1000)*media.playbackRate);
    if(previewTime>t+.18){
     const stop=gates().find((v,i)=>!answered[i]&&v>=previous);
     t=Math.min(previewTime,stop??end(),end());media.currentTime=t;
@@ -858,4 +961,29 @@ Promise.all(Object.entries(sources).map(([k,src])=>new Promise((yes,no)=>{const 
  ready=true;setSource(lang,rows()[0].id,true);requestAnimationFrame(frame);
 });
 
-</script></body></html>
+</script><script>
+(()=>{
+ const media=document.getElementById('narration'),bar=document.getElementById('cvBar');
+ if(new URLSearchParams(location.search).get('capture')==='1')return;
+ window.cvApplyRate(media,window.CV_RATE_DEFAULT);
+ const slot=document.createElement('span');
+ slot.dataset.cvSpeed='';
+ const end=bar.querySelector('[data-cv-ctl=min],#cvMin,#minBtn');
+ bar.insertBefore(slot,end);
+ bar.dataset.cvSpeedBar='';
+ const theme=typeof CFG==='undefined'?{}:CFG.theme||{};
+ const palette=theme.palette||{},cfg=theme.controls||{},sample=bar.querySelector('button');
+ const style=getComputedStyle(sample);
+ const look={look:cfg.look,bg:cfg.bg||palette.paper||style.backgroundColor,
+  fg:cfg.fg||palette.ink||style.color,chip:cfg.chip||style.backgroundColor,
+  accent:cfg.accent||palette.highlight||style.color,on_fg:cfg.on_fg||palette.paper||style.backgroundColor,
+  radius:cfg.radius,font:getComputedStyle(bar).fontFamily};
+Object.assign(look,{look:'paper',fg:'#2f4a3c',bg:'#e8dcc4',chip:'#e8dcc4',accent:'#2a4a3c',on_fg:'#fff7e6'});
+ const speed=window.cvSpeed({mount:slot,look,get:()=>media.playbackRate,
+  set:rate=>window.cvApplyRate(media,rate),lang:()=>window.__lang?.cur||document.documentElement.lang});
+ const observer=new MutationObserver(speed.paint);
+ observer.observe(document.documentElement,{attributes:true,attributeFilter:['lang']});
+})();
+</script>
+<!-- t3299 speed end -->
+</body></html>

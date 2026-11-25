@@ -58,7 +58,7 @@
    "subject": "俄语数字素养",
    "title": "演示文稿所需的信息",
    "file": "lessons/ru-dl-16-c.html",
-   "sha": "0ad15fafb92a9ac4a04f806dcc9322b1d4b255ecff1ec844fbf7250e216e9b1a"
+   "sha": "c523143e71b7c166a3b32f66c0e4b3267243af599d7bd3be38dae90c683a2fc8"
   },
   {
    "id": "ru-math-81",
@@ -74,7 +74,7 @@
    "subject": "俄语数学",
    "title": "数量关系与圆形图",
    "file": "lessons/ru-math-81-c.html",
-   "sha": "d022bc4f3953423078cdbc590a6c7ec23adf66765f12d2e1dafd34fc26f7fbeb"
+   "sha": "38b73151c7410fa818f8171a084ae2f7bbb43850c4e24805ee9e801f19224e6c"
   },
   {
    "id": "ru-math-82",
@@ -106,7 +106,7 @@
    "subject": "俄语数学",
    "title": "图像",
    "file": "lessons/ru-math-84-c.html",
-   "sha": "20aa5bd1e84c22a37f331733dbfdb7aa02437c8dbafa5f2156df3efdf7007123"
+   "sha": "f5bf81e96a89efce0387def64f5885f9914361958fc3c5779658fc4d33d70d21"
   },
   {
    "id": "ru-math-85",
@@ -122,7 +122,7 @@
    "subject": "俄语数学",
    "title": "解决问题",
    "file": "lessons/ru-math-85-c.html",
-   "sha": "af5896e03f31ff5aee1fa3eedff0594acd9cb0d9db07c24355fec6a4e0c98048"
+   "sha": "c89f165f4b580ba2a7485b76c69f83fcb690d2b663a32ffaa1bef64447517ee0"
   },
   {
    "id": "kk-lang-65",
@@ -138,7 +138,7 @@
    "subject": "哈语",
    "title": "词法世界之旅",
    "file": "lessons/kk-lang-65-c.html",
-   "sha": "de69a30153921557edcb90474923e360e36e27f9a402178c9372fa239f0feccd"
+   "sha": "5c2672efd0d41fa2777055645b02015e4aa338ab5b48f148cf9be9c8f67fe369"
   },
   {
    "id": "kk-lang-66",
@@ -154,7 +154,7 @@
    "subject": "哈语",
    "title": "词类",
    "file": "lessons/kk-lang-66-c.html",
-   "sha": "90f7104e8957dd222b0cdcb65b23f6ebd0ccd4ccda0afb878c8a010e66bd94c4"
+   "sha": "20834e071b025705229719d3a864f6de4116f2c634c247b62843558dabb46593"
   },
   {
    "id": "kk-lang-67",
@@ -186,7 +186,7 @@
    "subject": "哈语数字素养",
    "title": "演示文稿所需的信息",
    "file": "lessons/kk-dl-17-c.html",
-   "sha": "b72e3ea39bbfd6b058b1443665f80b5c97f826090187d01976f1b27ef5be8d1a"
+   "sha": "8e04c46a5f6f60c7f4edb0eb66e1d2aac2eaedfc97f393bce72d72a96d0c01aa"
   },
   {
    "id": "kk-math-81",
@@ -194,7 +194,7 @@
    "subject": "哈语数学",
    "title": "数量关系与圆形图",
    "file": "lessons/kk-math-81.html",
-   "sha": "cd94025022f57f4167184509d8e30224ce3eb7209b01845c4de3774ec27c2982"
+   "sha": "596be886bebf1507fe828e2117e364b47a4877e84d22ca426c21c894d73a9636"
   },
   {
    "id": "kk-math-82",
@@ -242,7 +242,7 @@
    "subject": "哈语数学",
    "title": "图像",
    "file": "lessons/kk-math-84-c.html",
-   "sha": "466026b7e28b509b3a75952b958effa1572a4f9450b3135f9a2a29a78738ba3e"
+   "sha": "7bde5bb3025d2fcd9ca045cb8355f4e4f527633a9e717e9fd4abefe9517a80b6"
   },
   {
    "id": "kk-math-85",
@@ -258,7 +258,7 @@
    "subject": "哈语数学",
    "title": "解决问题",
    "file": "lessons/kk-math-85-c.html",
-   "sha": "f0b1b8c9fef74f42d4212cbf68fcc6c8ca3aa982c980bcdbe105168c00a9b715"
+   "sha": "ce853818606f07fb924038105f17704ef54bd4eec8e082b10e67e2bee1568957"
   },
   {
    "id": "ru-lang-66-c",
@@ -282,7 +282,7 @@
    "subject": "俄语",
    "title": "数词词组、句子与形态分析（第一课，含抄写）｜风的力量",
    "file": "lessons/ru-lang-68-c.html",
-   "sha": "6264d47fee242b1e6554036101df31c88d13ec9e1489f13ed7c92419561e7e67"
+   "sha": "ac72fc5555e002288defe823b3232f072222c40b4aad54950fa024fecb8562a5"
   },
   {
    "id": "ru-math-82-c",
@@ -298,7 +298,7 @@
    "subject": "俄语数学",
    "title": "单位面积产量（巩固）",
    "file": "lessons/ru-math-83-c.html",
-   "sha": "069c0e6e3b5cb20a1c987c2efa8ec1c1be8e426b0bcab8812f92cb98deb13185"
+   "sha": "b9e119149f848ea16abe469df1bc707b8e2e838b8b48be84176a3fb868a8f6f2"
   },
   {
    "id": "kk-lang-67-c",
