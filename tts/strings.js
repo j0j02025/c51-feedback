@@ -2,19 +2,27 @@ export const locales = { zh: "中", en: "EN", kk: "ҚАЗ", ru: "РУ" };
 
 const rows = {
   title: ["TTS 评审", "TTS review", "TTS бағалау", "Оценка TTS"],
+  instructions: [
+    "按你熟悉的语种试听。每种音色每个语种听完 7 段后，提交一份评审。",
+    "Listen in a language you know. Submit one review per voice and language after listening to all seven clips.",
+    "Өзіңіз білетін тілде тыңдаңыз. Бір дауыс пен тілдегі жеті үзіндіні тыңдап, бір бағалау жіберіңіз.",
+    "Слушайте на знакомом вам языке. Прослушайте семь фрагментов и отправьте одну оценку для каждого голоса и языка."
+  ],
+  oneReview: ["这份评审适用于当前语种的全部 7 段。", "This review covers all seven clips in this language.", "Бұл баға осы тілдегі жеті үзіндіге қатысты.", "Эта оценка относится ко всем семи фрагментам на этом языке."],
   login: ["飞书登录", "Sign in with Feishu", "Feishu арқылы кіру", "Войти через Feishu"],
-  loginNeeded: ["登录后可提交", "Sign in to submit", "Жіберу үшін кіріңіз", "Войдите, чтобы отправить"],
-  signedIn: ["已登录", "Signed in", "Кірдіңіз", "Вход выполнен"],
-  rating: ["自然度", "Naturalness", "Дауыс табиғилығы", "Естественность"],
-  conclusion: ["能直接上课吗？", "Ready to use in class?", "Сабақта бірден қолдануға бола ма?", "Можно ли сразу использовать на уроке?"],
-  legacy: ["已有的 7 段总评", "Previous review for all 7 clips", "Жеті үзіндіге берілген бұрынғы баға", "Предыдущая оценка всех 7 фрагментов"],
+  loginNeeded: ["登录后即可打分和提交评审。", "Sign in to rate and submit a review.", "Бағалау жіберу үшін жүйеге кіріңіз.", "Войдите, чтобы поставить оценку и отправить отзыв."],
+  back: ["返回列表", "Back to list", "Тізімге оралу", "К списку"],
+  transcript: ["原文", "Transcript", "Мәтін", "Исходный текст"],
+  download: ["下载本段", "Download clip", "Үзіндіні жүктеу", "Скачать фрагмент"],
+  review: ["评审", "Review", "Бағалау", "Оценка"],
+  overall: ["总体打分", "Overall rating", "Жалпы баға", "Общая оценка"],
+  conclusion: ["总体结论 · 能直接上课吗？", "Overall verdict · Ready to use in class?", "Қорытынды · Сабақта бірден қолдануға бола ма?", "Итог · Можно ли сразу использовать на уроке?"],
   yes: ["能", "Yes", "Иә", "Да"],
   fix: ["改一改能用", "After minor fixes", "Аздап түзеткен соң", "После небольших правок"],
   no: ["不能", "No", "Жоқ", "Нет"],
-  wrongThis: ["本段有错读", "This clip was misread", "Бұл үзіндіде қате оқылды", "В этом фрагменте есть ошибки чтения"],
-  notes: ["备注（选填）", "Notes (optional)", "Ескертпе (міндетті емес)", "Примечание (необязательно)"],
-  ready: ["尚未提交", "Not submitted", "Жіберілмеді", "Не отправлено"],
-  submit: ["提交本段", "Submit review", "Бағаны жіберу", "Отправить оценку"],
+  errors: ["哪几段读错了？", "Which clips were read incorrectly?", "Қай үзінділер қате оқылды?", "Какие фрагменты прочитаны с ошибками?"],
+  notes: ["问题说明", "Problem notes", "Қате туралы ескертпе", "Описание ошибок"],
+  submit: ["提交评审", "Submit review", "Бағаны жіберу", "Отправить оценку"],
   update: ["更新评审", "Update review", "Бағаны жаңарту", "Обновить оценку"],
   remove: ["删除评审", "Delete review", "Бағаны өшіру", "Удалить оценку"],
   confirmRemove: ["删除这份评审？", "Delete this review?", "Осы бағаны өшіру керек пе?", "Удалить эту оценку?"],
@@ -25,10 +33,8 @@ const rows = {
   dirty: ["草稿尚未提交", "Draft awaiting submission", "Нобай әлі жіберілген жоқ", "Черновик ещё не отправлен"],
   removed: ["评审已删除", "Review deleted", "Баға өшірілді", "Оценка удалена"],
   loading: ["正在加载…", "Loading…", "Жүктелуде…", "Загрузка…"],
-  saving: ["正在保存…", "Saving…", "Сақталуда…", "Сохранение…"],
   loadingFailed: ["无法加载，请刷新重试。", "Could not load. Refresh to retry.", "Жүктелмеді. Бетті жаңартып көріңіз.", "Не удалось загрузить. Обновите страницу."],
-  playbackFailed: ["音频加载失败。", "Could not load audio.", "Дыбыс жүктелмеді.", "Аудио не загрузилось."],
-  retryAudio: ["重试播放", "Retry audio", "Қайта ойнату", "Повторить воспроизведение"],
+  playbackFailed: ["音频加载失败。请重新选择本段，或下载试听。", "Could not load audio. Reselect this clip or download it.", "Дыбыс жүктелмеді. Үзіндіні қайта таңдаңыз немесе жүктеп алыңыз.", "Аудио не загрузилось. Выберите фрагмент ещё раз или скачайте его."],
   writeFailed: ["提交失败，可重试。本页保留当前填写内容。", "Could not save. You can retry with your current entries.", "Сақталмады. Толтырған деректермен қайта көріңіз.", "Сохранить не удалось. Повторите попытку с введёнными данными."],
   conflict: ["另一设备已修改这份评审。请先重新加载。", "This review changed on another device. Reload it first.", "Баға басқа құрылғыда өзгертілді. Алдымен қайта жүктеңіз.", "Оценка изменена на другом устройстве. Сначала перезагрузите её."],
   expired: ["请重新登录后继续。", "Sign in again to continue.", "Жалғастыру үшін қайта кіріңіз.", "Войдите снова, чтобы продолжить."],
@@ -48,7 +54,8 @@ const rows = {
   time: ["时间", "Time", "Уақыт", "Время"],
   abbreviations: ["英文缩写", "English abbreviations", "Ағылшын қысқартулары", "Английские сокращения"],
   intonation: ["语气", "Intonation", "Интонация", "Интонация"],
-  languages: ["界面语言", "Interface language", "Интерфейс тілі", "Язык интерфейса"]
+  languages: ["界面语言", "Interface language", "Интерфейс тілі", "Язык интерфейса"],
+  segments: ["试听段落", "Audio clips", "Дыбыс үзінділері", "Аудиофрагменты"]
 };
 
 export const strings = Object.fromEntries(Object.keys(locales).map((lang, index) => [
