@@ -1,0 +1,138 @@
+{
+  "groups": [
+    {
+      "id": "freedomspeech-tomiris-kk",
+      "revision": "7c9670c8be1a7fdff9caa8c1681cd9235e6de6a39979e46f5d2922e4f7bb6961",
+      "language": "kk",
+      "vendor": "FreedomSpeech",
+      "voice": "Tomiris",
+      "register": "female",
+      "emotion": "neutral",
+      "clips": [
+        {
+          "number": 1,
+          "topic": "currency",
+          "text": "Бұл не? Валюта. Бір жаттығу дәптері 245 теңге 50 тиын тұрады, 3 дәптер қанша тұрады? Тағы бір дәптер 3 доллар 75 цент тұрады.",
+          "src": "audio/freedomspeech-tomiris/kk-1-6cc32948d006.wav",
+          "sha256": "6cc32948d0061cf91271371fdf20d0968004bb8f3850d19ebc8b20c993d8d161",
+          "seconds": 11.28
+        },
+        {
+          "number": 2,
+          "topic": "numbers",
+          "text": "Бұл не? Сандар. Бүкіл қалада 1 250 000 адам бар, өсім 2.5%, шамамен 3/4 бөлігін құрайды. Температура -5 °C-тан 12 °C-қа көтерілді.",
+          "src": "audio/freedomspeech-tomiris/kk-2-e2bcd807e9ef.wav",
+          "sha256": "e2bcd807e9efe251489a200e007bd648328184407cef7ee6590be7257933da33",
+          "seconds": 14.32
+        },
+        {
+          "number": 3,
+          "topic": "formula",
+          "text": "Бұл не? Формула. v = 15 m/s, t = 2.5 s, s = v × t, 37.5 m-ге тең. Дөңгелектің ауданы S = πr².",
+          "src": "audio/freedomspeech-tomiris/kk-3-e49f55868cd1.wav",
+          "sha256": "e49f55868cd17512bdcb25abefff04e076b9feab152227d3edcfaa639170a093",
+          "seconds": 10.24
+        },
+        {
+          "number": 4,
+          "topic": "chemistry",
+          "text": "Бұл не? Химия. Су — H₂O, ас тұзы — NaCl.",
+          "src": "audio/freedomspeech-tomiris/kk-4-edfee6bf29ea.wav",
+          "sha256": "edfee6bf29eaba3773caa4c270581758e9946b519093384ce55f5e375e234e17",
+          "seconds": 2.68
+        },
+        {
+          "number": 5,
+          "topic": "time",
+          "text": "Бұл не? Уақыт. 3-сабақ 2026 жылғы 1 қыркүйекте 8:30-да басталады, 21-бетке аударыңыз.",
+          "src": "audio/freedomspeech-tomiris/kk-5-3ba2c64605df.wav",
+          "sha256": "3ba2c64605dfaf8a6466454bab4e095f9379ea89555331a948583281e3217edf",
+          "seconds": 10.09
+        },
+        {
+          "number": 6,
+          "topic": "abbreviations",
+          "text": "Бұл не? Ағылшын тілі. AI、DNA、USB、Wi-Fi қалай айтылады?",
+          "src": "audio/freedomspeech-tomiris/kk-6-8f282712217f.wav",
+          "sha256": "8f282712217f26d40663412768bb6dba2647584bc6007b1c160efda867d53fc3",
+          "seconds": 3.84
+        },
+        {
+          "number": 7,
+          "topic": "intonation",
+          "text": "Бұл не? Интонация. Дұрыс есептедің бе? Керемет! Бірінші, екінші, үшінші.",
+          "src": "audio/freedomspeech-tomiris/kk-7-9f80b6f3d8f1.wav",
+          "sha256": "9f80b6f3d8f1a136dabe636b1c4e3621488905ec4a4fc230abdfae3efbe87329",
+          "seconds": 4.96
+        }
+      ]
+    },
+    {
+      "id": "freedomspeech-tomiris-ru",
+      "revision": "071e1d94fc42f0442608440ad4916db84bee91b79f38d709f0bdf619c707bb47",
+      "language": "ru",
+      "vendor": "FreedomSpeech",
+      "voice": "Tomiris",
+      "register": "female",
+      "emotion": "neutral",
+      "clips": [
+        {
+          "number": 1,
+          "topic": "currency",
+          "text": "Что это? Валюта. Одна тетрадь стоит 245 рублей 50 копеек, сколько стоят 3 тетради? Другая стоит 3 рубля 75 копеек.",
+          "src": "audio/freedomspeech-tomiris/ru-1-1c43972a6b97.wav",
+          "sha256": "1c43972a6b97808a3d66ba3768719ab5b3a33b1e15ee6f367449578079bdc59b",
+          "seconds": 11.94
+        },
+        {
+          "number": 2,
+          "topic": "numbers",
+          "text": "Что это? Числа. Во всём городе 1 250 000 человек, рост составляет 2.5%, это примерно 3/4. Температура поднялась с -5 °C до 12 °C.",
+          "src": "audio/freedomspeech-tomiris/ru-2-6eecfb0319ab.wav",
+          "sha256": "6eecfb0319ab2ad85c5d04dce520d475339053927be28b064e6825e2fce91fc6",
+          "seconds": 18.08
+        },
+        {
+          "number": 3,
+          "topic": "formula",
+          "text": "Что это? Формула. v = 15 m/s, t = 2.5 s, s = v × t, равно 37.5 m. Площадь круга S = πr².",
+          "src": "audio/freedomspeech-tomiris/ru-3-3c58ce98affa.wav",
+          "sha256": "3c58ce98affacf8e591c30141f31b7932ec45eeb60c26a7f3216a2b5ca4bce5f",
+          "seconds": 14.52
+        },
+        {
+          "number": 4,
+          "topic": "chemistry",
+          "text": "Что это? Химия. Вода — H₂O, поваренная соль — NaCl.",
+          "src": "audio/freedomspeech-tomiris/ru-4-99aa58bdef36.wav",
+          "sha256": "99aa58bdef36ae49f9dad1c0ab7b05750829db91750822f4eac97172592f62a3",
+          "seconds": 3.76
+        },
+        {
+          "number": 5,
+          "topic": "time",
+          "text": "Что это? Время. Урок 3 начинается 1 сентября 2026 года в 8:30, откройте страницу 21.",
+          "src": "audio/freedomspeech-tomiris/ru-5-9549e6657b80.wav",
+          "sha256": "9549e6657b80b04f14f16a0476e8db409238a998e392a0287162428d6fe49e59",
+          "seconds": 10.78
+        },
+        {
+          "number": 6,
+          "topic": "abbreviations",
+          "text": "Что это? Английский язык. Как использовать AI、DNA、USB、Wi-Fi?",
+          "src": "audio/freedomspeech-tomiris/ru-6-a6a203a3086c.wav",
+          "sha256": "a6a203a3086cf121b97ea084d54a2e149432bcc2dfa2b3f374ca1eac668f5d8c",
+          "seconds": 4.48
+        },
+        {
+          "number": 7,
+          "topic": "intonation",
+          "text": "Что это? Интонация. Ты правильно посчитал? Как здорово! Первый, второй, третий.",
+          "src": "audio/freedomspeech-tomiris/ru-7-05e60b1fbf49.wav",
+          "sha256": "05e60b1fbf49d03654015a06555809f896ad28838c01203e7439aa55aa55e09f",
+          "seconds": 5.81
+        }
+      ]
+    }
+  ]
+}

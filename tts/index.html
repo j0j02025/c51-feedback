@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>TTS 评审</title>
+<link rel="stylesheet" href="style.css">
+<script type="module" src="app.js"></script>
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="./" data-t="title">TTS 评审</a>
+  <nav id="languages" aria-label="Language"></nav>
+</header>
+<main id="home">
+  <div class="intro">
+    <p data-t="instructions">按你熟悉的语种试听。每种音色每个语种听完 7 段后，提交一份评审。</p>
+    <a id="login-home" class="login" hidden data-t="login">飞书登录</a>
+  </div>
+  <p id="load-state" role="status"></p>
+  <div id="directory"></div>
+</main>
+<main id="player" hidden>
+  <div class="bar">
+    <button id="back" type="button" data-t="back">返回列表</button>
+    <strong id="player-title"></strong>
+  </div>
+  <div class="review-layout">
+    <section class="stage" aria-labelledby="clip-title">
+      <p class="meta" id="clip-meta"></p>
+      <h1 id="clip-title" tabindex="-1"></h1>
+      <audio id="audio" controls preload="metadata"></audio>
+      <p id="audio-state" role="status"></p>
+      <h2 data-t="transcript">原文</h2>
+      <p id="transcript" class="transcript"></p>
+      <nav id="segments" aria-label="Segments"></nav>
+      <a class="download" id="download" data-t="download" download>下载本段</a>
+    </section>
+    <section class="side" aria-labelledby="form-title">
+      <h2 id="form-title" data-t="review">评审</h2>
+      <p class="meta" data-t="oneReview">这份评审适用于当前语种的全部 7 段。</p>
+      <a id="login-player" class="login" hidden data-t="login">飞书登录</a>
+      <p id="review-state" role="status" aria-live="polite"></p>
+      <button type="button" id="reload" hidden data-t="reload">重新加载已提交评审</button>
+      <form id="form" hidden>
+        <fieldset>
+          <legend data-t="overall">总体打分</legend>
+          <div id="stars" class="stars"></div>
+          <p id="score-label" class="meta" aria-live="polite"></p>
+        </fieldset>
+        <fieldset>
+          <legend data-t="conclusion">总体结论 · 能直接上课吗？</legend>
+          <div id="verdicts" class="verdicts"></div>
+        </fieldset>
+        <fieldset>
+          <legend data-t="errors">哪几段读错了？</legend>
+          <div id="wrong-segments" class="wrong"></div>
+        </fieldset>
+        <label class="notes"><span data-t="notes">问题说明</span>
+          <textarea id="notes" rows="3" maxlength="2000"></textarea>
+        </label>
+        <div class="actions">
+          <button type="submit" class="primary" data-t="submit">提交评审</button>
+          <button type="button" id="remove" hidden data-t="remove">删除评审</button>
+        </div>
+      </form>
+    </section>
+  </div>
+</main>
+</body>
+</html>
