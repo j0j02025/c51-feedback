@@ -111,6 +111,7 @@ button{border:0;border-radius:12px;cursor:pointer;background:#eef1f5;color:var(-
 .history-badge{display:inline-block;border-radius:999px;padding:1px 7px;font-size:12px;font-weight:800}
 .history-badge.fixed{background:#d9f4df;color:#145c2e}
 .history-badge.nochange,.history-badge.old{background:#e3e8ef;color:#384352}
+.history-badge.sia{background:#eee7fa;color:#523480}
 .history-badge.wip{background:#fff0bd;color:#664600}
 .history-badge.unreplied{background:#fce2e1;color:#982a26}
 #dock{display:flex;flex-wrap:wrap;gap:6px;padding:6px 8px;background:#171c24;flex:0 0 auto}
@@ -511,7 +512,7 @@ const pickLang=()=>{try{const q=new URLSearchParams(location.search).get("lang")
 let LANG=pickLang();
 const REVIEW_UI={
   zh:{recheck:"待复查",stY:"没判",fixing:"修复中 · 意见将排入下一批",pending:"待处理",
-    queued:"排队下一批",queuedBy:b=>"批次 "+b+" 结束后转待处理",wip:"本批修复中",
+    queued:"排队下一批",queuedBy:b=>"批次 "+b+" 结束后转待处理",wip:"本批修复中",sia:"待 Sia 判断",
     avatarPending:"待世昆处理",avatarQueuedBy:b=>"批次 "+b+" 结束后转待世昆处理",
     batchLabel:b=>"批次 "+b,mergedInto:(sub,idx)=>"合并至 #"+sub+":"+idx,
     openCount:n=>n+" 条意见还没修",fixedCount:n=>n+" 条已修，等你复查",
@@ -529,7 +530,7 @@ const REVIEW_UI={
   en:{recheck:"Ready for recheck",stY:"Not reviewed",fixing:"Fixes in progress · New feedback goes to the next batch",
     pending:"Pending",queued:"Queued for the next batch",queuedBy:b=>"Pending once batch "+b+" closes",
     avatarPending:"Awaiting action by Shikun",avatarQueuedBy:b=>"Awaiting action by Shikun once batch "+b+" closes",
-    wip:"Being fixed in this batch",batchLabel:b=>"Batch "+b,mergedInto:(sub,idx)=>"Merged into #"+sub+":"+idx,
+    wip:"Being fixed in this batch",sia:"Awaiting Sia’s decision",batchLabel:b=>"Batch "+b,mergedInto:(sub,idx)=>"Merged into #"+sub+":"+idx,
     openCount:n=>n+(n===1?" comment still needs a fix":" comments still need fixes"),fixedCount:n=>n+(n===1?" fixed comment awaits your recheck":" fixed comments await your recheck"),
     followupButton:"Still an issue? Follow up",
     followup:"Follow-up",
@@ -545,7 +546,7 @@ const REVIEW_UI={
   ru:{recheck:"На повторной проверке",stY:"Не оценено",fixing:"Идёт исправление · Новые замечания войдут в следующий пакет",
     pending:"Ожидает обработки",queued:"В очереди на следующий пакет",queuedBy:b=>"Ожидает завершения пакета "+b,
     avatarPending:"Ожидает действий Шикуна",avatarQueuedBy:b=>"Ожидает действий Шикуна после завершения пакета "+b,
-    wip:"Исправляется в текущем пакете",batchLabel:b=>"Пакет "+b,mergedInto:(sub,idx)=>"Объединено с #"+sub+":"+idx,
+    wip:"Исправляется в текущем пакете",sia:"Ожидает решения Sia",batchLabel:b=>"Пакет "+b,mergedInto:(sub,idx)=>"Объединено с #"+sub+":"+idx,
     openCount:n=>"Ещё не исправлено замечаний: "+n,fixedCount:n=>"Исправлено замечаний для вашей повторной проверки: "+n,
     followupButton:"Не устраивает? Уточнить",
     followup:"Уточнение",
@@ -561,7 +562,7 @@ const REVIEW_UI={
   kk:{recheck:"Қайта тексеруге дайын",stY:"Бағаланбаған",fixing:"Түзетіліп жатыр · Жаңа пікірлер келесі топтамаға қосылады",
     pending:"Өңдеуді күтуде",queued:"Келесі топтама кезегінде",queuedBy:b=>b+" топтамасы аяқталғанын күтуде",
     avatarPending:"Шикунның өңдеуін күтуде",avatarQueuedBy:b=>b+" топтамасы аяқталған соң Шикунның өңдеуін күтуде",
-    wip:"Осы топтамада түзетіліп жатыр",batchLabel:b=>"Топтама "+b,mergedInto:(sub,idx)=>"#"+sub+":"+idx+" пікірімен біріктірілді",
+    wip:"Осы топтамада түзетіліп жатыр",sia:"Sia шешімі күтілуде",batchLabel:b=>"Топтама "+b,mergedInto:(sub,idx)=>"#"+sub+":"+idx+" пікірімен біріктірілді",
     openCount:n=>n+" пікір әлі түзетілмеді",fixedCount:n=>n+" пікір түзетілді, қайта тексеруіңізді күтіп тұр",
     followupButton:"Жауап қанағаттандырмады ма? Нақтылау",
     followup:"Нақтылау",
@@ -1708,7 +1709,7 @@ function submitChange(l,sha,verdict,payload,action,id){
   return true;
 }
 const RESOLVED_STATES=["fixed","nochange","merged","conflict"];
-const HISTORY_STATES=["pending","queued","fixed","nochange","wip","merged","conflict"];
+const HISTORY_STATES=["pending","queued","fixed","nochange","wip","merged","conflict","sia"];
 let summary={}, summaryRequest=0, historyView=null;
 
 async function loadReviewStatus(){
