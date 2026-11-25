@@ -855,6 +855,9 @@ function seekSentence(k){const s=rows(),i=clip(s.indexOf(cue(timeNow()))+k,0,s.l
 $('prev').onclick=()=>seekSentence(-1);$('next').onclick=()=>seekSentence(1);
 $('music').onclick=()=>{audioSetup();music=!music;bgmSync(true);lastKey='';draw()};
 function unlock(event){
+ // Keep the controls in place until the speed click completes; the sound prompt
+ // stays available for an explicit sound gesture.
+ if(event.target.closest?.('[data-cv-ctl="speed"]'))return;
  if(event.target.closest&&event.target.closest('#music')){audioSetup();return}
  if(unlocked)return;unlocked=true;audioSetup();if(media.muted&&event.target.closest&&event.target.closest('#sfx'))skipSound=true;
  if(media.muted){
