@@ -1610,7 +1610,11 @@ function discardDraft(l,it){
   st.c[lid(l)]=(st.c[lid(l)]||[]).filter(comment=>comment!==it);
   save();renderList();
 }
+// 封版(J 261125 om_x100b7f5e3ee6a4a0b0bffba4f5ad051):本轮评论窗口关闭,评论 / 判定 / 追评一律弹窗拦下。
+const REVIEW_FROZEN=true;
+function frozenBlock(){if(!REVIEW_FROZEN)return false;alert("已封版，此轮评论窗口关闭。\nThis review round is closed. / Бұл кезеңде пікір қабылдау жабылды.");return true}
 function openComment(it=null){
+  if(frozenBlock())return;
   const l=curLesson();if(!l||(!it&&!viewing?.ready))return;
   if(!AUTH_SITE){location.assign("https://review.ooii.top/auth/login");return}
   if(!accountKey)return;
@@ -1650,6 +1654,7 @@ function closeComment(){
   resumeAfter=false;
 }
 async function saveFollowup(draft,text){
+  if(frozenBlock())return;
   const {account,...target}=draft;
   const saveButton=$("cSave");
   saveButton.disabled=true;
@@ -1698,6 +1703,7 @@ function reviewRecord(lesson,sha,verdict,comments){
     request_id:crypto.randomUUID(),account_key:accountKey};
 }
 function submitChange(l,sha,verdict,payload,action,id){
+  if(frozenBlock())return false;
   if(!accountKey)return false;
   if(!sha){toast(T("noSha"));return false}
   if(JSON.stringify(payload).length>20000){toast(T("tooLarge"));return false}
