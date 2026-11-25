@@ -13,25 +13,22 @@ const writeLocal = (key, value) => {
   } catch { /* Storage can be disabled. Keep the draft in this tab. */ }
 };
 
-const sessionLink = new URL(location.href);
-const requestedLang = sessionLink.searchParams.get("lang") || readLocal("c51-tts-lang");
+const url = new URL(location.href);
+const requestedLang = url.searchParams.get("lang") || readLocal("c51-tts-lang");
 let lang = Object.hasOwn(locales, requestedLang) ? requestedLang : "zh";
-let groups = [];
-let active;
+let returnClip = url.searchParams.get("clip");
 let account;
 let reviews = new Map();
-let drafts = new Map();
-let busy = false;
-let writeState = "";
 let loadState = "loading";
-let audioState = "";
-let needsRefresh = false;
-
+let sessionState = "loading";
+let retrying = false;
+let playing;
+const cards = [];
+const legacyGroups = [];
 const t = key => strings[lang][key];
 const clipId = (group, clip) => group.id + "-" + clip.number;
-const reviewKey = group => group.id + ":" + group.revision;
-const localKey = group => "c51-tts-draft:" + account + ":" + reviewKey(group);
-const voiceLabel = group => [group.vendor, group.voice, t(group.register), t(group.emotion)].join(" · ");
+const reviewKey = card => card.sample + ":" + card.revision;
+const localKey = card => "c51-tts-draft:" + account + ":" + reviewKey(card);
 
 function el(tag, text, attrs = {}) {
   const item = document.createElement(tag);
@@ -40,183 +37,195 @@ function el(tag, text, attrs = {}) {
   return item;
 }
 
-function linkFor(id) {
-  const u = new URL("./", location.href);
-  u.searchParams.set("lang", lang);
-  if (id) u.searchParams.set("clip", id);
-  return u;
+function updateLogin() {
+  const params = new URLSearchParams({ lang });
+  if (returnClip) params.set("clip", returnClip);
+  const next = "/tts/?" + params;
+  const login = $("login");
+  login.href = pages ? canonical + next : "/auth/login?" + new URLSearchParams({ next });
+  login.textContent = t(sessionState === "expired" ? "expired" : "login");
+  login.hidden = Boolean(account) || sessionState === "loading";
+  $("session-status").textContent = account ? t("signedIn") :
+    sessionState === "loading" ? t("loading") : "";
 }
 
-function loginLink(id) {
-  const u = linkFor(id);
-  if (pages) return canonical + "/tts/" + u.search;
-  return "/auth/login?" + new URLSearchParams({ next: "/tts/" + u.search });
-}
-
-function updateLanguage() {
+function translate() {
   document.documentElement.lang = lang;
   document.title = t("title");
   document.querySelectorAll("[data-t]").forEach(node => { node.textContent = t(node.dataset.t); });
   $("languages").setAttribute("aria-label", t("languages"));
-  $("segments").setAttribute("aria-label", t("segments"));
-  $("languages").replaceChildren(...Object.entries(locales).map(([code, label]) => {
-    const button = el("button", label, { type: "button", lang: code, "aria-pressed": String(lang === code) });
-    button.onclick = () => {
-      lang = code;
-      writeLocal("c51-tts-lang", lang);
-      history.replaceState(null, "", linkFor(active && clipId(active.group, active.clip)));
-      render();
-      $("languages").querySelector('[aria-pressed="true"]').focus();
-    };
-    return button;
-  }));
-}
-
-function renderList() {
-  $("load-state").textContent = loadState ? t(loadState) : "";
-  $("login-home").hidden = Boolean(account) || !pages;
-  $("login-home").href = loginLink();
-  $("directory").replaceChildren(...groups.map(group => {
-    const section = el("section", "", { class: "group" });
-    const saved = reviews.get(reviewKey(group));
-    const title = el("h2", t(group.language));
-    if (saved) title.append(el("span", t("saved") + " · " + t(saved.verdict), { class: "status " + saved.verdict }));
-    const cards = el("div", "", { class: "cards" });
-    for (const clip of group.clips) {
-      const open = el("a", "", { class: "card", href: linkFor(clipId(group, clip)) });
-      open.append(el("span", group.language.toUpperCase() + " " + clip.number, { class: "number" }),
-        el("strong", t(clip.topic)), el("span", "▶", { class: "play", "aria-hidden": "true" }));
-      open.onclick = event => {
-        if (event.button || event.metaKey || event.ctrlKey || event.altKey || event.shiftKey) return;
-        event.preventDefault();
-        navigate(clipId(group, clip));
-        $("clip-title").focus({ preventScroll: true });
-      };
-      cards.append(open);
-    }
-    section.append(title, el("p", voiceLabel(group), { class: "meta" }), cards);
-    return section;
-  }));
-}
-
-function renderPlayer() {
-  const { group, clip } = active;
-  $("player-title").textContent = t(group.language) + " · " + group.voice;
-  $("clip-meta").textContent = voiceLabel(group);
-  $("clip-title").textContent = group.language.toUpperCase() + " " + clip.number + " · " + t(clip.topic);
-  $("transcript").textContent = clip.text;
-  $("transcript").lang = group.language;
-  $("download").href = clip.src;
-  $("audio").setAttribute("aria-label", $("clip-title").textContent);
-  $("audio-state").textContent = audioState ? t(audioState) : "";
-  $("segments").replaceChildren(...group.clips.map(item => {
-    const button = el("button", item.number, {
-      type: "button", "aria-label": item.number + " · " + t(item.topic), "aria-pressed": String(item === clip)
-    });
-    button.onclick = () => {
-      if (item === clip && audioState) {
-        audioState = "";
-        $("audio-state").textContent = "";
-        $("audio").load();
-      } else if (item !== clip) {
-        navigate(clipId(group, item), false);
-        $("segments").querySelector('[aria-pressed="true"]').focus();
-      }
-    };
-    return button;
-  }));
-
-  $("login-player").hidden = Boolean(account);
-  $("login-player").href = loginLink(clipId(group, clip));
-  $("review-state").textContent = writeState ? t(writeState) : account ? "" : t("loginNeeded");
-  $("form").hidden = !account;
-  if (account) renderForm(group);
-}
-
-function getDraft(group) {
-  const key = reviewKey(group);
-  if (!drafts.has(key)) {
-    const stored = readLocal(localKey(group));
-    const saved = reviews.get(key);
-    drafts.set(key, stored ?? { score: saved?.score ?? 0, verdict: saved?.verdict ?? "",
-      wrong: saved?.wrong ?? [], notes: saved?.notes ?? "", base: saved?.version ?? null, request: null });
+  for (const button of $("languages").children) {
+    button.setAttribute("aria-pressed", String(button.lang === lang));
   }
-  return drafts.get(key);
+  $("load-state").textContent = loadState ? t(loadState) : "";
+  updateLogin();
+  cards.forEach(updateCard);
 }
 
-function choices(id, name, values, type, required = false) {
-  $(id).replaceChildren(...values.flatMap(([value, label, description]) => {
-    const inputId = name + "-" + value;
-    const input = el("input", "", { id: inputId, type, name, value });
-    input.required = required;
-    if (description) input.setAttribute("aria-label", description);
-    return [input, el("label", label, { for: inputId })];
-  }));
+for (const [code, label] of Object.entries(locales)) {
+  const button = el("button", label, { type: "button", lang: code });
+  button.onclick = () => {
+    lang = code;
+    writeLocal("c51-tts-lang", lang);
+    const locationUrl = new URL(location.href);
+    locationUrl.searchParams.set("lang", lang);
+    history.replaceState(null, "", locationUrl);
+    translate();
+  };
+  $("languages").append(button);
 }
 
-function setScoreLabel(score) {
-  for (const label of $("stars").querySelectorAll("label")) {
-    const filled = Number(label.control.value) <= score;
+function addChoice(card, container, name, value, type) {
+  const id = card.sample + "-" + name + "-" + value;
+  const input = el("input", "", { id, type, name, value });
+  input.required = type === "radio";
+  const label = el("label", "", { for: id });
+  container.append(input, label);
+  return { input, label, value };
+}
+
+function hydrate(card) {
+  if (!account) return;
+  const saved = reviews.get(reviewKey(card));
+  const stored = readLocal(localKey(card));
+  // A timed-out request can already be committed when the page is reopened.
+  if (stored?.request && stored.request === saved?.version) writeLocal(localKey(card), null);
+  const draft = stored?.request && stored.request === saved?.version ? null : stored;
+  card.draft = draft ?? {
+    score: saved?.score ?? 0, verdict: saved?.verdict ?? "", wrong: saved?.wrong ?? [],
+    notes: saved?.notes ?? "", base: saved?.version ?? null, request: null, queued: false
+  };
+  card.state = draft ? draft.base !== (saved?.version ?? null) ? "conflict" :
+    draft.queued ? "queued" : "dirty" : saved ? "saved" : "ready";
+}
+
+function updateCard(card) {
+  const { group, clip, node, form, draft } = card;
+  const title = clip ? group.language.toUpperCase() + " " + clip.number + " · " + t(clip.topic) : t("legacy");
+  node.querySelector("h3").textContent = title;
+  if (clip) node.querySelector("audio").setAttribute("aria-label", title);
+  const saved = reviews.has(reviewKey(card));
+  const blocked = !account || card.busy;
+  form.inert = blocked;
+  for (const { input, label, value } of card.stars) {
+    const filled = value <= draft?.score;
+    input.checked = value === draft?.score;
+    input.setAttribute("aria-label", value + "/5 · " + t("score" + value));
     label.textContent = filled ? "★" : "☆";
     label.classList.toggle("filled", filled);
   }
-  $("score-label").textContent = score ? score + "/5 · " + t("score" + score) : "";
-}
-
-function renderForm(group) {
-  const draft = getDraft(group);
-  choices("stars", "score", [1, 2, 3, 4, 5].map(n => [n, "☆", n + "/5 · " + t("score" + n)]), "radio", true);
-  choices("verdicts", "verdict", ["yes", "fix", "no"].map(key => [key, t(key)]), "radio", true);
-  choices("wrong-segments", "wrong", group.clips.map(clip => [clip.number, clip.number + " · " + t(clip.topic)]), "checkbox");
-  for (const score of $("stars").querySelectorAll("input")) score.checked = Number(score.value) === draft.score;
-  for (const verdict of $("verdicts").querySelectorAll("input")) verdict.checked = verdict.value === draft.verdict;
-  for (const wrong of $("wrong-segments").querySelectorAll("input")) wrong.checked = draft.wrong.includes(Number(wrong.value));
-  $("notes").value = draft.notes;
-  setScoreLabel(draft.score);
-  const saved = reviews.has(reviewKey(group));
-  $("remove").hidden = !saved;
-  $("reload").hidden = !needsRefresh;
-  $("form").querySelector(".primary").textContent = t(saved ? "update" : "submit");
-  $("form").inert = busy;
-}
-
-function render() {
-  updateLanguage();
-  $("home").hidden = Boolean(active);
-  $("player").hidden = !active;
-  if (active) renderPlayer();
-  else renderList();
-}
-
-function openLocation() {
-  const id = new URL(location.href).searchParams.get("clip");
-  const group = groups.find(candidate => candidate.clips.some(clip => clipId(candidate, clip) === id));
-  const clip = group?.clips.find(item => clipId(group, item) === id);
-  if (active?.clip !== clip) {
-    $("audio").pause();
-    audioState = "";
-    if (clip) $("audio").src = clip.src;
-    else $("audio").removeAttribute("src");
+  for (const { input, label, value } of card.verdicts) {
+    input.checked = value === draft?.verdict;
+    label.textContent = t(value);
   }
-  if (group !== active?.group) {
-    const draft = group && account ? getDraft(group) : null;
-    const saved = group && reviews.get(reviewKey(group));
-    needsRefresh = Boolean(draft && draft.base !== (saved?.version ?? null));
-    writeState = needsRefresh ? "conflict" : draft?.queued ? "queued" :
-      group && account && readLocal(localKey(group)) ? "dirty" : saved ? "saved" : "";
+  for (const { input, text, value } of card.wrong) {
+    input.checked = Boolean(draft?.wrong.includes(value));
+    text.textContent = clip ? t("wrongThis") : value + " · " + t(group.clips.find(item => item.number === value).topic);
   }
-  active = group && { group, clip };
-  render();
+  const textarea = form.querySelector("textarea");
+  if (textarea.value !== (draft?.notes ?? "")) textarea.value = draft?.notes ?? "";
+  const submit = form.querySelector(".primary");
+  submit.textContent = t(saved ? "update" : "submit");
+  submit.disabled = blocked || card.conflicted || card.state === "conflict";
+  const remove = form.querySelector("[data-remove]");
+  remove.hidden = !saved || !account;
+  remove.disabled = blocked || card.conflicted || card.state === "conflict";
+  const reload = form.querySelector("[data-reload]");
+  reload.hidden = !account || (!card.conflicted && card.state !== "conflict");
+  reload.disabled = blocked;
+  const status = node.querySelector(".status");
+  const state = !account ? "loginNeeded" : card.busy ? "saving" : card.state;
+  status.dataset.state = state;
+  if (status.textContent !== t(state)) status.textContent = t(state);
 }
 
-function navigate(id, addHistory = true) {
-  history[addHistory ? "pushState" : "replaceState"](null, "", linkFor(id));
-  openLocation();
-  if (addHistory) window.scrollTo(0, 0);
+function addCard(group, clip, section) {
+  const node = $("clip-template").content.firstElementChild.cloneNode(true);
+  const card = { group, clip, node, form: node.querySelector("form"),
+    sample: clip ? clipId(group, clip) : group.id, revision: group.revision, state: "ready" };
+  const { form } = card;
+  if (clip) {
+    node.id = card.sample;
+    const transcript = node.querySelector(".transcript");
+    transcript.textContent = clip.text;
+    transcript.lang = group.language;
+    const audio = node.querySelector("audio");
+    const error = node.querySelector(".audio-error");
+    audio.src = clip.src;
+    audio.addEventListener("play", () => {
+      if (playing && playing !== audio) playing.pause();
+      playing = audio;
+      returnClip = card.sample;
+      updateLogin();
+    });
+    audio.addEventListener("error", () => { error.hidden = false; });
+    node.querySelector("[data-audio-retry]").onclick = () => {
+      error.hidden = true;
+      audio.load();
+      audio.play().catch(() => { error.hidden = false; });
+    };
+  } else {
+    node.querySelector(".transcript").hidden = true;
+    node.querySelector("audio").hidden = true;
+  }
+  const stars = form.querySelector(".stars");
+  card.stars = [1, 2, 3, 4, 5].map(score => addChoice(card, stars, "score", score, "radio"));
+  const verdicts = form.querySelector(".verdicts");
+  card.verdicts = ["yes", "fix", "no"].map(value => addChoice(card, verdicts, "verdict", value, "radio"));
+  const wrong = form.querySelector(".wrong");
+  card.wrong = (clip ? [clip] : group.clips).map(item => {
+    const choice = addChoice(card, wrong, "wrong", item.number, "checkbox");
+    const text = el("span");
+    choice.label.append(el("span", "", { class: "checkmark", "aria-hidden": "true" }), text);
+    return { ...choice, text };
+  });
+  form.addEventListener("input", () => {
+    const fields = new FormData(form);
+    Object.assign(card.draft, { score: Number(fields.get("score") || 0), verdict: fields.get("verdict") || "",
+      wrong: fields.getAll("wrong").map(Number), notes: form.querySelector("textarea").value,
+      request: null, queued: false });
+    writeLocal(localKey(card), card.draft);
+    if (card.state === "conflict") card.conflicted = true;
+    card.state = card.conflicted ? "conflict" : "dirty";
+    updateCard(card);
+  });
+  form.onsubmit = event => { event.preventDefault(); void writeReview(card); };
+  form.querySelector("[data-remove]").onclick = () => {
+    if (confirm(t("confirmRemove"))) void writeReview(card, true);
+  };
+  form.querySelector("[data-reload]").onclick = () => {
+    if (confirm(t("confirmReload"))) void reloadReview(card);
+  };
+  hydrate(card);
+  cards.push(card);
+  section.append(node);
 }
 
-async function api(path, method = "GET", body) {
-  const response = await fetch("api/" + path, {
+function renderGroups(groups) {
+  for (const group of groups) {
+    const section = el("section", "", { class: "group" });
+    const voice = el("p", "", { class: "voice" });
+    voice.append(group.vendor + " · " + group.voice + " · ", el("span", "", { "data-t": group.register }),
+      " · ", el("span", "", { "data-t": group.emotion }));
+    section.append(el("h2", "", { "data-t": group.language }), voice);
+    for (const clip of group.clips) addCard(group, clip, section);
+    legacyGroups.push({ group, section });
+    $("reviews").append(section);
+  }
+  ensureLegacyCards();
+}
+
+function ensureLegacyCards() {
+  if (!account) return;
+  for (const { group, section } of legacyGroups) {
+    const key = { sample: group.id, revision: group.revision };
+    if (!cards.some(card => card.sample === group.id) &&
+        (reviews.has(reviewKey(key)) || readLocal(localKey(key)))) addCard(group, null, section);
+  }
+}
+
+async function api(method = "GET", body) {
+  const response = await fetch("api/reviews", {
     method, credentials: "same-origin", cache: "no-store",
     ...(body && { headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) })
   });
@@ -225,133 +234,114 @@ async function api(path, method = "GET", body) {
 }
 
 async function refresh() {
-  const state = await api("reviews");
-  if (account && account !== state.account) {
-    account = null;
-    drafts.clear();
-    reviews.clear();
-    throw Object.assign(new Error("account changed"), { status: 401 });
-  }
+  const state = await api();
+  if (account && account !== state.account) throw Object.assign(new Error("account changed"), { status: 401 });
   account = state.account;
+  sessionState = "signedIn";
   reviews = new Map(state.reviews.map(row => [row.sample + ":" + row.revision, row]));
 }
 
-$("form").addEventListener("input", () => {
-  const group = active.group;
-  const draft = getDraft(group);
-  const fields = new FormData($("form"));
-  Object.assign(draft, { score: Number(fields.get("score") || 0), verdict: fields.get("verdict") || "",
-    wrong: fields.getAll("wrong").map(Number), notes: $("notes").value, request: null, queued: false });
-  writeLocal(localKey(group), draft);
-  setScoreLabel(draft.score);
-  writeState = needsRefresh ? "conflict" : "dirty";
-  $("review-state").textContent = t(writeState);
-});
+function expireSession() {
+  account = null;
+  reviews.clear();
+  sessionState = "expired";
+  for (const card of cards) {
+    card.draft = null;
+    card.node.hidden = !card.clip;
+    updateCard(card);
+  }
+  updateLogin();
+}
 
-async function writeReview(remove, group = active?.group) {
-  if (busy || !account || !group || (remove && needsRefresh)) return;
-  const editing = () => active?.group === group;
-  const key = reviewKey(group);
-  const draft = getDraft(group);
-  if (remove && !confirm(t("confirmRemove"))) return;
-  const { score, verdict, wrong, notes } = draft;
+const authError = error => error.status === 401 || error.status === 403;
+
+async function writeReview(card, remove = false) {
+  if (!account || card.busy || card.conflicted || card.state === "conflict") return;
+  const key = reviewKey(card);
+  const draft = card.draft;
+  const signedIn = account;
+  const storedKey = localKey(card);
   const base = remove ? reviews.get(key)?.version : draft.base;
-  if (base !== (reviews.get(key)?.version ?? null) && draft.request !== reviews.get(key)?.version) return;
+  if (remove && !base) return;
   if (!remove) {
     if (!draft.request) {
       draft.request = crypto.randomUUID();
       draft.language = lang;
     }
     draft.queued = true;
-    writeLocal(localKey(group), draft);
+    writeLocal(storedKey, draft);
   }
-  busy = true;
-  if (editing()) writeState = "loading";
-  if (active) renderPlayer();
+  card.busy = true;
+  updateCard(card);
   try {
-    const result = await api("reviews", remove ? "DELETE" : "POST", {
-      account, sample: group.id, revision: group.revision, base,
-      ...(!remove && { version: draft.request, score, verdict, wrong, notes: notes.trim(), lang: draft.language })
+    const result = await api(remove ? "DELETE" : "POST", {
+      account: signedIn, sample: card.sample, revision: card.revision, base,
+      ...(!remove && { version: draft.request, score: draft.score, verdict: draft.verdict,
+        wrong: draft.wrong, notes: draft.notes.trim(), lang: draft.language })
     });
+    writeLocal(storedKey, null);
+    if (account !== signedIn) return;
     if (remove) reviews.delete(key);
     else reviews.set(key, result.review);
-    drafts.delete(key);
-    writeLocal(localKey(group), null);
-    if (editing()) {
-      needsRefresh = false;
-      writeState = remove ? "removed" : "saved";
+    hydrate(card);
+    if (remove) {
+      card.state = "removed";
+      card.node.hidden = !card.clip;
     }
   } catch (error) {
-    if (error.status === 401 || error.status === 403) {
-      account = null;
-      drafts.clear();
-      reviews.clear();
-      writeState = "expired";
+    if (account !== signedIn) return;
+    if (authError(error)) {
+      if (card.clip) returnClip = card.sample;
+      expireSession();
     } else {
       if (!remove) {
         draft.queued = !error.status || error.status >= 500;
-        writeLocal(localKey(group), draft);
+        writeLocal(storedKey, draft);
       }
-      if (editing()) {
-        needsRefresh = error.status === 409;
-        writeState = needsRefresh ? "conflict" : !remove && draft.queued ? "queued" : "writeFailed";
-      }
+      card.conflicted = error.status === 409;
+      card.state = card.conflicted ? "conflict" : !remove && draft.queued ? "queued" : "writeFailed";
     }
   } finally {
-    busy = false;
-    render();
+    card.busy = false;
+    updateCard(card);
   }
 }
 
-$("form").onsubmit = event => { event.preventDefault(); writeReview(false); };
-$("remove").onclick = () => writeReview(true);
-$("reload").onclick = async () => {
-  if (!active || !account || !confirm(t("confirmReload"))) return;
-  const group = active.group;
+async function reloadReview(card) {
+  if (!account || card.busy) return;
+  card.busy = true;
+  updateCard(card);
   try {
     await refresh();
-    drafts.delete(reviewKey(group));
-    writeLocal(localKey(group), null);
-    if (active?.group === group) {
-      needsRefresh = false;
-      writeState = reviews.has(reviewKey(group)) ? "saved" : "";
-    }
+    writeLocal(localKey(card), null);
+    card.conflicted = false;
+    hydrate(card);
+    if (!card.clip && !reviews.has(reviewKey(card))) card.node.hidden = true;
   } catch (error) {
-    if (error.status === 401 || error.status === 403) {
-      account = null;
-      drafts.clear();
-      reviews.clear();
-      writeState = "expired";
-    } else writeState = "loadingFailed";
+    if (authError(error)) expireSession();
+    else card.state = "loadingFailed";
+  } finally {
+    card.busy = false;
+    updateCard(card);
   }
-  render();
-};
-
-$("audio").addEventListener("error", () => {
-  if (!active) return;
-  audioState = "playbackFailed";
-  $("audio-state").textContent = t(audioState);
-});
-$("back").onclick = () => {
-  const id = clipId(active.group, active.clip);
-  navigate(null, false);
-  [...$("directory").querySelectorAll("a")].find(link => new URL(link.href).searchParams.get("clip") === id)?.focus();
-};
-window.addEventListener("popstate", openLocation);
+}
 
 async function retryQueued() {
-  for (const group of groups) {
-    if (!account || busy || !navigator.onLine) return;
-    if (getDraft(group).queued) await writeReview(false, group);
+  if (retrying || !account || !navigator.onLine) return;
+  retrying = true;
+  try {
+    for (const card of cards) {
+      if (!account || !navigator.onLine) break;
+      if (card.draft?.queued) await writeReview(card);
+    }
+  } finally {
+    retrying = false;
   }
 }
 window.addEventListener("online", retryQueued);
-document.addEventListener("keydown", event => {
-  if (event.key === "Escape" && active && !busy) $("back").click();
-});
 
 async function start() {
-  render();
+  translate();
   const [manifest, session] = await Promise.allSettled([
     fetch("samples.json", { cache: "no-store" }).then(response => {
       if (!response.ok) throw new Error("catalogue unavailable");
@@ -359,12 +349,13 @@ async function start() {
     }),
     pages ? Promise.resolve() : refresh()
   ]);
-  if (manifest.status === "fulfilled") {
-    groups = manifest.value.groups;
-    loadState = "";
-  } else loadState = "loadingFailed";
-  if (session.status === "rejected" && session.reason.status !== 401) loadState = "loadingFailed";
-  openLocation();
+  if (!account) sessionState = "signedOut";
+  const failed = manifest.status === "rejected" ||
+    (session.status === "rejected" && !authError(session.reason));
+  loadState = failed ? "loadingFailed" : "";
+  if (manifest.status === "fulfilled") renderGroups(manifest.value.groups);
+  translate();
+  if (returnClip) $(returnClip)?.scrollIntoView();
   await retryQueued();
 }
 start();
