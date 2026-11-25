@@ -883,32 +883,7 @@ window.__cvControls={get segments(){return SEG.slice()},version:1};
 <script>
 // josh-code-video 多语切换条(lang4,事号 832;J:「Kevin的可以选哈文俄文和英文 这个属于公共组建 咱们应该抄过来 多加一个中文 这样就可以取代字幕了」)。
 // 拆读对标:Kevin 的 Possibility-Tree-3D 顶部 data-lang 按钮(Қаз / Рус / Eng),切语言 = 界面文字 + 字幕 + 配音一起换、当前这一步从头播。本文件是自己重写的,没抄对标代码。
-// 注入:build.py 把本文件插在 <script>
-(()=>{
- const media=document.getElementById('narration'),bar=document.getElementById('cvBar');
- if(new URLSearchParams(location.search).get('capture')==='1')return;
- window.cvApplyRate(media,window.CV_RATE_DEFAULT);
- const slot=document.createElement('span');
- slot.dataset.cvSpeed='';
- const end=bar.querySelector('[data-cv-ctl=min],#cvMin,#minBtn');
- bar.insertBefore(slot,end);
- bar.dataset.cvSpeedBar='';
- const theme=typeof CFG==='undefined'?{}:CFG.theme||{};
- const palette=theme.palette||{},cfg=theme.controls||{},sample=bar.querySelector('button');
- const style=getComputedStyle(sample);
- const look={look:cfg.look,bg:cfg.bg||palette.paper||style.backgroundColor,
-  fg:cfg.fg||palette.ink||style.color,chip:cfg.chip||style.backgroundColor,
-  accent:cfg.accent||palette.highlight||style.color,on_fg:cfg.on_fg||palette.paper||style.backgroundColor,
-  radius:cfg.radius,font:getComputedStyle(bar).fontFamily};
-
- const speed=window.cvSpeed({mount:slot,look,get:()=>media.playbackRate,
-  set:rate=>window.cvApplyRate(media,rate),lang:()=>window.__lang?.cur||document.documentElement.lang});
- const observer=new MutationObserver(speed.paint);
- observer.observe(document.documentElement,{attributes:true,attributeFilter:['lang']});
-})();
-</script>
-<!-- t3299 speed end -->
-</body> 前(包在 lang4:begin / lang4:end 两行注释之间);删掉那一段,片子退回只播基准语言。
+// 注入:build.py 把本文件插在 </body> 前(包在 lang4:begin / lang4:end 两行注释之间);删掉那一段,片子退回只播基准语言。
 // 依赖外壳(templates/shell.html)的全局:CFG Q L NARR LG TLG TMAP AUDIO AUDIO_DUR cues t narration sync frame sentence MIXG,可选 live SFXG(templates/sfx.js)。
 // 时间轴:画面一律按基准语言(CFG.lang_switch.base = langs[0])的 cues / beats 排;别的语言的配音秒经 TMAP 分段线性映射过去
 //   (每句句起点、每段有声段的起止一一对上,要求各语言每句的段数相同,qa H17 查)。所以任何风格包的场景文件都不用改。
@@ -1111,4 +1086,29 @@ window.__kitcapf1={id:'kitfix-caption-f1',ver:'v1',fit:fitCaption};fitCaption(tr
 })();
 </script>
 <!-- /kitfix-caption-f1 v1 -->
+<script>
+(()=>{
+ const media=document.getElementById('narration'),bar=document.getElementById('cvBar');
+ if(new URLSearchParams(location.search).get('capture')==='1')return;
+ window.cvApplyRate(media,window.CV_RATE_DEFAULT);
+ const slot=document.createElement('span');
+ slot.dataset.cvSpeed='';
+ const end=bar.querySelector('[data-cv-ctl=min],#cvMin,#minBtn');
+ bar.insertBefore(slot,end);
+ bar.dataset.cvSpeedBar='';
+ const theme=typeof CFG==='undefined'?{}:CFG.theme||{};
+ const palette=theme.palette||{},cfg=theme.controls||{},sample=bar.querySelector('button');
+ const style=getComputedStyle(sample);
+ const look={look:cfg.look,bg:cfg.bg||palette.paper||style.backgroundColor,
+  fg:cfg.fg||palette.ink||style.color,chip:cfg.chip||style.backgroundColor,
+  accent:cfg.accent||palette.highlight||style.color,on_fg:cfg.on_fg||palette.paper||style.backgroundColor,
+  radius:cfg.radius,font:getComputedStyle(bar).fontFamily};
+
+ const speed=window.cvSpeed({mount:slot,look,get:()=>media.playbackRate,
+  set:rate=>window.cvApplyRate(media,rate),lang:()=>window.__lang?.cur||document.documentElement.lang});
+ const observer=new MutationObserver(speed.paint);
+ observer.observe(document.documentElement,{attributes:true,attributeFilter:['lang']});
+})();
+</script>
+<!-- t3299 speed end -->
 </body></html>
