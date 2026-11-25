@@ -512,6 +512,7 @@ let LANG=pickLang();
 const REVIEW_UI={
   zh:{recheck:"待复查",stY:"没判",fixing:"修复中 · 意见将排入下一批",pending:"待处理",
     queued:"排队下一批",queuedBy:b=>"批次 "+b+" 结束后转待处理",wip:"本批修复中",
+    avatarPending:"待世昆处理",avatarQueuedBy:b=>"批次 "+b+" 结束后转待世昆处理",
     batchLabel:b=>"批次 "+b,mergedInto:(sub,idx)=>"合并至 #"+sub+":"+idx,
     openCount:n=>n+" 条意见还没修",fixedCount:n=>n+" 条已修，等你复查",
     followupButton:"不满意，追问",
@@ -527,6 +528,7 @@ const REVIEW_UI={
     docT:(g,r,c,a)=>"看课评审 · 通过 "+g+" · 不通过 "+r+" · 待复查 "+c+" / "+a},
   en:{recheck:"Ready for recheck",stY:"Not reviewed",fixing:"Fixes in progress · New feedback goes to the next batch",
     pending:"Pending",queued:"Queued for the next batch",queuedBy:b=>"Pending once batch "+b+" closes",
+    avatarPending:"Awaiting action by Shikun",avatarQueuedBy:b=>"Awaiting action by Shikun once batch "+b+" closes",
     wip:"Being fixed in this batch",batchLabel:b=>"Batch "+b,mergedInto:(sub,idx)=>"Merged into #"+sub+":"+idx,
     openCount:n=>n+(n===1?" comment still needs a fix":" comments still need fixes"),fixedCount:n=>n+(n===1?" fixed comment awaits your recheck":" fixed comments await your recheck"),
     followupButton:"Still an issue? Follow up",
@@ -542,6 +544,7 @@ const REVIEW_UI={
     docT:(g,r,c,a)=>"Lesson review · Passed "+g+" · Failed "+r+" · Ready for recheck "+c+" / "+a},
   ru:{recheck:"На повторной проверке",stY:"Не оценено",fixing:"Идёт исправление · Новые замечания войдут в следующий пакет",
     pending:"Ожидает обработки",queued:"В очереди на следующий пакет",queuedBy:b=>"Ожидает завершения пакета "+b,
+    avatarPending:"Ожидает действий Шикуна",avatarQueuedBy:b=>"Ожидает действий Шикуна после завершения пакета "+b,
     wip:"Исправляется в текущем пакете",batchLabel:b=>"Пакет "+b,mergedInto:(sub,idx)=>"Объединено с #"+sub+":"+idx,
     openCount:n=>"Ещё не исправлено замечаний: "+n,fixedCount:n=>"Исправлено замечаний для вашей повторной проверки: "+n,
     followupButton:"Не устраивает? Уточнить",
@@ -557,6 +560,7 @@ const REVIEW_UI={
     docT:(g,r,c,a)=>"Оценка уроков · Принято "+g+" · Не принято "+r+" · На повторной проверке "+c+" / "+a},
   kk:{recheck:"Қайта тексеруге дайын",stY:"Бағаланбаған",fixing:"Түзетіліп жатыр · Жаңа пікірлер келесі топтамаға қосылады",
     pending:"Өңдеуді күтуде",queued:"Келесі топтама кезегінде",queuedBy:b=>b+" топтамасы аяқталғанын күтуде",
+    avatarPending:"Шикунның өңдеуін күтуде",avatarQueuedBy:b=>b+" топтамасы аяқталған соң Шикунның өңдеуін күтуде",
     wip:"Осы топтамада түзетіліп жатыр",batchLabel:b=>"Топтама "+b,mergedInto:(sub,idx)=>"#"+sub+":"+idx+" пікірімен біріктірілді",
     openCount:n=>n+" пікір әлі түзетілмеді",fixedCount:n=>n+" пікір түзетілді, қайта тексеруіңізді күтіп тұр",
     followupButton:"Жауап қанағаттандырмады ма? Нақтылау",
@@ -1810,27 +1814,30 @@ function reviewDate(value){
     ?date.toLocaleDateString("sv-SE",{timeZone:"Asia/Shanghai"}):"";
 }
 
-function replyDetails(reply){
+const historyStatusLabel=(status,isAvatar)=>T(status==="pending"&&isAvatar?"avatarPending":status);
+function replyDetails(reply,isAvatar){
   if(reply?.status==="conflict")return [T("conflictWith")(reviewText(reply.with)),reviewText(reply.text)];
   const batch=reviewText(reply?.batch), version=reviewText(reply?.version);
-  if(reply?.status==="queued")return [batch?T("queuedBy")(batch):T("fixing")];
+  if(reply?.status==="queued")return [batch?T(isAvatar?"avatarQueuedBy":"queuedBy")(batch):T("fixing")];
   if(reply?.status==="wip")return [batch?T("batchLabel")(batch):version,reviewText(reply.text)];
   if(reply?.status==="merged")return [
     reply.target_sub_id!=null?T("mergedInto")(reply.target_sub_id,reply.target_idx):"",reviewText(reply.text)];
   return [reviewText(reply?.text),reply?.status==="fixed"&&version?T("fixedIn")(version):version];
 }
-function appendHistoryReply(entry,reply,effective){
+function appendHistoryReply(entry,reply,effective,isAvatar){
   const status=HISTORY_STATES.includes(reply?.status)?reply.status:"pending";
   const row=document.createElement("div");
   row.className="history-reply";
   row.innerHTML='<span class="history-badge cmt-state"></span> <span class="history-answer"></span>';
   const badge=row.firstElementChild;
   badge.classList.add(status);
-  badge.textContent=T(status);
-  row.lastElementChild.textContent=[...replyDetails(reply),...(effective?[T(effective.status),...replyDetails(effective)]:[])].filter(Boolean).join(" · ");
+  badge.textContent=historyStatusLabel(status,isAvatar);
+  row.lastElementChild.textContent=[...replyDetails(reply,isAvatar),
+    ...(effective?[historyStatusLabel(effective.status,isAvatar),...replyDetails(effective,isAvatar)]:[])
+  ].filter(Boolean).join(" · ");
   entry.appendChild(row);
 }
-function appendHistoryEntry(group,text,seconds,replies,effective,comment=null){
+function appendHistoryEntry(group,text,seconds,replies,effective,isAvatar,comment=null){
   const latest=lastReply(replies);
   const entry=document.createElement("div");
   const timed=Number.isFinite(seconds)&&seconds>=0;
@@ -1851,7 +1858,7 @@ function appendHistoryEntry(group,text,seconds,replies,effective,comment=null){
   const timeline=comment?(replies??[]):[];
   for(const reply of timeline){
     if(reply!==currentReply&&reply.by==="system"&&!RESOLVED_STATES.includes(reply.status))continue;
-    appendHistoryReply(entry,reply,reply===currentReply?effective:null);
+    appendHistoryReply(entry,reply,reply===currentReply?effective:null,isAvatar);
     const followup=followups.get(reply.id);
     if(followup){
       const row=document.createElement("div");
@@ -1862,7 +1869,7 @@ function appendHistoryEntry(group,text,seconds,replies,effective,comment=null){
       entry.appendChild(row);
     }
   }
-  if(!comment||currentReply!==latest)appendHistoryReply(entry,currentReply,effective);
+  if(!comment||currentReply!==latest)appendHistoryReply(entry,currentReply,effective,isAvatar);
   group.appendChild(entry);
   return entry;
 }
@@ -1871,6 +1878,7 @@ function renderHistory(l){
   const list=$("historyList");
   list.replaceChildren();
   const id=lid(l), currentSha=viewedSha(l);
+  const isAvatar=id.startsWith("aiavatar-");
   const pending=new Set(queueGet().filter(record=>record.lesson===id).map(record=>record.comment_id));
   for(const item of historyView?.items||[]){
     if(!item||typeof item!=="object")continue;
@@ -1896,9 +1904,9 @@ function renderHistory(l){
       meta.append(" · ",old);
     }
     group.appendChild(meta);
-    if(showNote)appendHistoryEntry(group,note===generated?note.split("\n")[0]:note,null,item.note_replies,item.note_effective_reply);
+    if(showNote)appendHistoryEntry(group,note===generated?note.split("\n")[0]:note,null,item.note_replies,item.note_effective_reply,isAvatar);
     for(const comment of visible){
-      const entry=appendHistoryEntry(group,comment.c,comment.s,comment.replies,comment.effective_reply,comment);
+      const entry=appendHistoryEntry(group,comment.c,comment.s,comment.replies,comment.effective_reply,isAvatar,comment);
       const reply=lastReply(comment.replies);
       if(item.own&&reply?.id&&RESOLVED_STATES.includes(comment.status)){
         const button=document.createElement("button");
