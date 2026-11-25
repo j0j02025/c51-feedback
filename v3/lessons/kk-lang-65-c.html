@@ -27,7 +27,114 @@ button[aria-pressed=true][data-paper]{background-color:#edd991;color:#2c513d}
 #soundHint{z-index:3;position:absolute;right:4%;top:6.0%;background:#184c41f0;border:1px solid #d6b879;color:#fff8de;font-size:1.25cqw;border-radius:2cqw;padding:.45cqw 1.2cqw}
 #narration{display:none}#durationbar{z-index:2;position:absolute;left:5.7%;right:4%;bottom:1.04%;height:.24cqw;background:#e0c29844;border-radius:.2cqw;overflow:hidden}#durationbar i{display:block;height:100%;background:#ddb765;transform-origin:left center}
 #cvBar{z-index:3;position:relative;left:auto;right:auto;top:auto;width:var(--stw);height:var(--cvh);display:flex;gap:6px;align-items:center;justify-content:flex-start;padding:0 8px;color:#fff8de;font-family:"PingFang SC","Microsoft YaHei",Arial,sans-serif;user-select:none;-webkit-user-select:none}#cvBar button{flex:none;width:36px;height:34px;max-width:none;aspect-ratio:auto;padding:3px;border-radius:8px;font-size:16px}#cvBar button[data-paper]{border:2px solid #ab8a56;box-shadow:inset 0 0 0 1.5px #eed5a0}#cvBar button:focus-visible,#cvReplay:focus-visible{outline:2px solid #eaba59;outline-offset:2px}#cvBar button:disabled{opacity:.4;cursor:default}#cvBar button[hidden]{display:none}#cvBar #fsBtn svg,#cvBar #minBtn svg{fill:none;stroke:#13504c;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}#cvSeg{flex:none;min-width:7.6em;text-align:center;font-size:14px;font-weight:700;white-space:nowrap}#cvTrack{flex:1;min-width:80px;height:16px;display:flex;gap:4px;align-items:stretch;cursor:pointer}#cvTrack b{position:relative;display:block;min-width:6px;border-radius:8px;overflow:hidden;background:#e0c29840;box-shadow:inset 0 0 0 1.5px #ab8a56}#cvTrack b:nth-child(even){background:#e0c29866}#cvTrack b[data-now]{box-shadow:inset 0 0 0 2px #eaba59,0 0 0 1.5px #eaba59}#cvTrack b u{position:absolute;left:0;top:0;bottom:0;width:0;background:#ddb765}#cvBar #minBtn{margin-left:auto}html.cv-min #cvBar>*:not(#minBtn){display:none}html.cv-min #cvBar button#minBtn{height:20px;width:30px;padding:1px}#cvReplay{position:absolute;z-index:4;left:50%;top:44%;width:7cqw;height:7cqw;max-width:none;aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;background:#f7e1b6 center/62% no-repeat;border:.2cqw solid #ab8a56;box-shadow:inset 0 0 0 .14cqw #eed5a0}#cvReplay[hidden]{display:none}
-</style></head><body>
+</style><!-- t3299 speed begin -->
+<style>
+#cvBar[data-cv-speed-bar] [data-cv-speed]{flex:none}
+html.cv-compact #cvBar[data-cv-speed-bar] .cvsp button[data-cv-ctl=speed]{
+ height:26px;font-size:12px;padding:0 4px
+}
+@media(max-width:599px){
+ #cvBar[data-cv-speed-bar] .cvsp button[data-cv-ctl=speed]{height:28px;font-size:12px;padding:0 5px}
+}
+@media(max-width:599px){
+ html:not(.cv-min){--cvh:58px}
+ html:not(.cv-min) #cvBar[data-cv-speed-bar]{flex-wrap:wrap;gap:2px 4px;padding:2px 6px}
+ html:not(.cv-min) #cvBar[data-cv-speed-bar]::after{content:'';flex:0 0 100%;order:1;height:0}
+ #cvBar[data-cv-speed-bar] #cvSeg{order:2;min-width:0;font-size:12px}
+ #cvBar[data-cv-speed-bar] #cvTrack{order:3;flex:1 1 64px;min-width:0}
+ #cvBar[data-cv-speed-bar]>button:not([data-rate]){width:28px;height:28px}
+}
+</style>
+<script>
+// ---- 语速(ccc-032,J 261122:「125% / 100% / 75%」,原速记作 125%,默认 100%)----
+// 标签 125% / 100% / 75% = 真实倍速 1.0 / 0.8 / 0.6,默认 0.8。只改配音媒体元素的 playbackRate(浏览器保持音高的变速),
+// 画面、字幕、音效都读这条时钟,所以一起变慢;时钟仍是课内秒(__state().t)。
+window.CV_RATES=[{label:'125%',rate:1},{label:'100%',rate:.8},{label:'75%',rate:.6}];
+window.CV_RATE_DEFAULT=.8;
+// 媒体元素设倍速:defaultPlaybackRate 也设,换 src(换语言)重新 load 时倍速不丢;preservesPitch = 不变调
+window.cvApplyRate=function(media,r){
+ for(const k of['preservesPitch','mozPreservesPitch','webkitPreservesPitch'])if(k in media)media[k]=true;
+ media.defaultPlaybackRate=r;media.playbackRate=r;
+ if(!media.__cvRate){media.__cvRate=true;media.addEventListener('loadedmetadata',()=>{if(media.playbackRate!==media.defaultPlaybackRate)media.playbackRate=media.defaultPlaybackRate})}
+};
+// o = {mount(须在 [data-cv-controls] 根里), get:()=>当前倍速, set:倍速=>void, lang:()=>语言, look:{look,bg,fg,chip,accent,on_fg,radius,font}}
+window.cvSpeed=function(o){
+ const labels={zh:'语速',kk:'Жылдамдық',ru:'Скорость',en:'Speed'};
+ const L=o.look||{},PAPER=L.look==='paper',FG=L.fg||'#222222',BG=L.bg||'#ffffff',CHIP=L.chip||BG,ACC=L.accent||FG,ON=L.on_fg||BG;
+ if(!document.getElementById('cvSpeedCss')){const s=document.createElement('style');s.id='cvSpeedCss';s.textContent=`
+.cvsp{display:inline-flex;align-items:center;gap:0;flex:none}
+:is(#cvBar,.controls) .cvsp button[data-cv-ctl=speed]{appearance:none;-webkit-appearance:none;margin:0;cursor:pointer;font:600 13px/1 var(--cvsp-font);height:32px;min-width:0;width:auto;max-width:none;aspect-ratio:auto;outline:none;padding:0 6px;color:var(--cvsp-fg);background:var(--cvsp-chip);border:1px solid var(--cvsp-fg);border-left-width:0;border-radius:0;box-shadow:none;white-space:nowrap}
+:is(#cvBar,.controls) .cvsp-paper button[data-cv-ctl=speed]{border-width:2px;border-left-width:0}
+:is(#cvBar,.controls) .cvsp button[data-cv-ctl=speed]:first-child{border-left-width:1px;border-radius:var(--cvsp-r) 0 0 var(--cvsp-r)}
+:is(#cvBar,.controls) .cvsp-paper button[data-cv-ctl=speed]:first-child{border-left-width:2px}
+:is(#cvBar,.controls) .cvsp button[data-cv-ctl=speed]:last-child{border-radius:0 var(--cvsp-r) var(--cvsp-r) 0}
+:is(#cvBar,.controls) .cvsp button[data-cv-ctl=speed][aria-checked=true]{background:var(--cvsp-acc);color:var(--cvsp-on)}
+:is(#cvBar,.controls) .cvsp button[data-cv-ctl=speed]:focus-visible{outline:2px dashed var(--cvsp-fg);outline-offset:2px}`;document.head.appendChild(s)}
+ const el=document.createElement('div');el.className='cvsp'+(PAPER?' cvsp-paper':'');el.setAttribute('role','radiogroup');
+ el.style.cssText=`--cvsp-fg:${FG};--cvsp-chip:${CHIP};--cvsp-acc:${ACC};--cvsp-on:${ON};--cvsp-r:${Math.min(L.radius??6,12)}px;--cvsp-font:${L.font||'sans-serif'}`;
+ const bs=window.CV_RATES.map(x=>{const b=document.createElement('button');b.type='button';b.dataset.cvCtl='speed';b.dataset.rate=String(x.rate);b.setAttribute('role','radio');b.textContent=x.label;
+  b.addEventListener('click',()=>{o.set(x.rate);paint()});el.appendChild(b);return b});
+ el.addEventListener('keydown',e=>{const i=window.CV_RATES.findIndex(x=>Math.abs(x.rate-o.get())<1e-3),d=e.key==='ArrowRight'?1:e.key==='ArrowLeft'?-1:0;
+  if(!d)return;e.preventDefault();e.stopPropagation();const j=Math.max(0,Math.min(bs.length-1,i+d));o.set(window.CV_RATES[j].rate);bs[j].focus();paint()});
+ o.mount.appendChild(el);
+ let key='';
+ function paint(){const r=o.get(),label=labels[o.lang?.()]||labels.zh,k=r+'|'+label;if(k===key)return;key=k;
+  el.setAttribute('aria-label',label);el.title=label;
+  bs.forEach(b=>{const on=Math.abs(+b.dataset.rate-r)<1e-3;b.setAttribute('aria-checked',String(on));b.tabIndex=on?0:-1;b.setAttribute('aria-label',label+' '+b.textContent)})}
+ paint();
+ return{el,paint};
+};
+// Schedule event onsets from narration time, converted to AudioContext seconds.
+function createSfxClock(media){
+ let next=null,anchor=null;
+ const pending=new Map();
+
+ function cancelPending(){
+  for(const [source,{at,index}] of pending){
+   if(at>source.context.currentTime){
+    source.stop();
+    source.disconnect();
+    if(next!==null)next=Math.min(next,index);
+   }
+  }
+  pending.clear();
+  anchor=null;
+ }
+ function reset(){
+  cancelPending();
+  next=null;
+ }
+ for(const event of ['ratechange','pause','waiting','ended'])media.addEventListener(event,cancelPending);
+ for(const event of ['seeking','emptied'])media.addEventListener(event,reset);
+
+ function tick(context,events,timeOf,start){
+  if(media.paused||media.seeking||media.readyState<3||context.state!=='running'){
+   if(anchor)cancelPending();
+   return;
+  }
+  const time=media.currentTime,now=context.currentTime,rate=media.playbackRate;
+  for(const [source,{at}] of pending)if(at<=now)pending.delete(source);
+  if(anchor&&anchor.rate!==rate)cancelPending();
+  if(anchor&&Math.abs(anchor.time+(now-anchor.now)*rate-time)>.1)cancelPending();
+  if(!anchor)anchor={time,now,rate};
+  if(next===null){
+   next=events.findIndex((event,index)=>timeOf(event,index)>=time-.05);
+   if(next<0)next=events.length;
+  }
+  while(next<events.length){
+   const onset=timeOf(events[next],next);
+   if(onset>time+.16*rate)break;
+   const index=next++;
+   if(onset<time-.05)continue;
+   const at=Math.max(now,anchor.now+(onset-anchor.time)/rate);
+   const source=start(events[index],at);
+   pending.set(source,{at,index});
+  }
+ }
+ return {tick,reset};
+}
+</script>
+</head><body>
 <div id="languages" data-cv-controls role="group" aria-label="Тіл">
 <button type="button" data-cv-ctl="lang" data-lang="kk" data-paper lang="kk" aria-pressed="true">Қаз</button>
 <button type="button" data-cv-ctl="lang" data-lang="en" data-paper lang="en" aria-pressed="false">Eng</button>
@@ -1024,22 +1131,15 @@ function makeMasterLimiter(ctx){return new AudioWorkletNode(ctx,'ccc-master-limi
       const c = live.ctx;
       if (live.bus) live.bus.gain.value = audible ? 1 : 0;
       if (live.mix) { const tg = live.nsrc ? trimGain() : 1; if (live.mix.gain.value !== Math.fround(tg)) live.mix.gain.value = tg; }
-      if (!audible || !bufs || !c || c.state !== "running" || !events.length) { live.offset = null; return; }
-      const mt = media.currentTime, off = c.currentTime - mt, am = audioTimes();
-      if (live.offset === null || Math.abs(off - live.offset) > 0.25) {
-        live.offset = off;
-        live.next = am.findIndex((a) => a >= mt - 0.02);
-        if (live.next < 0) live.next = am.length;
-      } else live.offset = live.offset * 0.92 + off * 0.08;
-      const now = c.currentTime - live.offset;
-      while (live.next < events.length && am[live.next] < now + 0.16) {
-        const e = events[live.next], ea = am[live.next++];
-        if (ea < now - 0.25) continue;
-        const s = c.createBufferSource(), g = c.createGain();
-        s.buffer = bufs[e.id]; g.gain.value = playedGain(e);
+      if (!audible || !bufs || !c || c.state !== "running" || !events.length) { live.rateClock?.reset(); return; }
+      const schedule=live.rateClock??=createSfxClock(media), times=audioTimes();
+      schedule.tick(c,events,(_,index)=>times[index],(e,at)=>{
+        const s=c.createBufferSource(), g=c.createGain();
+        s.buffer=bufs[e.id]; g.gain.value=playedGain(e);
         s.connect(g).connect(live.bus);
-        s.start(Math.max(c.currentTime, ea + live.offset));
-      }
+        s.start(at);
+        return s;
+      });
     }
     // offline as-played render for the meters (same buffers, gains, times and limiter code as the live chain)
     window.__sfxRender = async (opts = {}) => {
@@ -1067,7 +1167,7 @@ function makeMasterLimiter(ctx){return new AudioWorkletNode(ctx,'ccc-master-limi
       const u = new Uint8Array(f.buffer); let bin = ""; for (let i = 0; i < u.length; i += 32768) bin += String.fromCharCode.apply(null, u.subarray(i, i + 32768));
       return { rate, channels: 2, pcm: btoa(bin) };
     };
-    return { kick, tick: tick2, ready, setEvents, reset() { live.offset = null; } };
+    return { kick, tick: tick2, ready, setEvents, reset() { live.rateClock?.reset(); } };
   }
 
   // audit.js
@@ -1206,11 +1306,11 @@ function makeMasterLimiter(ctx){return new AudioWorkletNode(ctx,'ccc-master-limi
   var silentClock = null;
   var internalSeek = null;
   function anchorSilent(seconds) {
-    silentClock = { seconds, since: media.paused ? null : performance.now() };
+    silentClock = { seconds, since: media.paused ? null : performance.now(), rate: media.playbackRate };
   }
   function silentSeconds() {
-    const { seconds, since } = silentClock;
-    return Math.min(track.duration, seconds + (since === null ? 0 : (performance.now() - since) / 1e3));
+    const { seconds, since, rate } = silentClock;
+    return Math.min(track.duration, seconds + (since === null ? 0 : (performance.now() - since) * rate / 1e3));
   }
   function setMuted(value) {
     if (value === media.muted) return;
@@ -1244,6 +1344,9 @@ function makeMasterLimiter(ctx){return new AudioWorkletNode(ctx,'ccc-master-limi
   });
   media.addEventListener("play", () => {
     if (!pending && silentClock) anchorSilent(silentClock.seconds);
+  });
+  media.addEventListener("ratechange", () => {
+    if (!pending && silentClock) anchorSilent(silentSeconds());
   });
   function finishSwitch() {
     if (!pending || media.readyState < 1 || media.seeking) return;
@@ -1541,4 +1644,29 @@ function makeMasterLimiter(ctx){return new AudioWorkletNode(ctx,'ccc-master-limi
   }).catch(console.error);
 })();
 </script>
+<script>
+(()=>{
+ const media=document.getElementById('narration'),bar=document.getElementById('cvBar');
+ if(new URLSearchParams(location.search).get('capture')==='1')return;
+ window.cvApplyRate(media,window.CV_RATE_DEFAULT);
+ const slot=document.createElement('span');
+ slot.dataset.cvSpeed='';
+ const end=bar.querySelector('[data-cv-ctl=min],#cvMin,#minBtn');
+ bar.insertBefore(slot,end);
+ bar.dataset.cvSpeedBar='';
+ const theme=typeof CFG==='undefined'?{}:CFG.theme||{};
+ const palette=theme.palette||{},cfg=theme.controls||{},sample=bar.querySelector('button');
+ const style=getComputedStyle(sample);
+ const look={look:cfg.look,bg:cfg.bg||palette.paper||style.backgroundColor,
+  fg:cfg.fg||palette.ink||style.color,chip:cfg.chip||style.backgroundColor,
+  accent:cfg.accent||palette.highlight||style.color,on_fg:cfg.on_fg||palette.paper||style.backgroundColor,
+  radius:cfg.radius,font:getComputedStyle(bar).fontFamily};
+Object.assign(look,{look:'paper',fg:'#13504c',bg:'#f7e1b6',chip:'#f7e1b6',accent:'#13504c',on_fg:'#fff8de'});
+ const speed=window.cvSpeed({mount:slot,look,get:()=>media.playbackRate,
+  set:rate=>window.cvApplyRate(media,rate),lang:()=>window.__lang?.cur||document.documentElement.lang});
+ const observer=new MutationObserver(speed.paint);
+ observer.observe(document.documentElement,{attributes:true,attributeFilter:['lang']});
+})();
+</script>
+<!-- t3299 speed end -->
 </body></html>
