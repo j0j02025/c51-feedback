@@ -1120,7 +1120,7 @@ function routeNarration(){if(!live.ctx||live.nsrc||!live.lim||live.ctx.state!=='
 window.__masterInfo=()=>({state:live.ctx?live.ctx.state:null,rate:live.ctx?live.ctx.sampleRate:null,limiter:!!live.lim,voiceRouted:!!live.nsrc,ceiling_db:MASTER_LIM.ceiling_db,knee:SFX_KNEE,sfxBus:live.sfx?live.sfx.gain.value:null,master:live.master?live.master.gain.value:null,muted:narration.muted,volume:narration.volume});
 window.__masterStats=()=>live.lim?new Promise(r=>{live.lim.port.onmessage=m=>r(m.data);live.lim.port.postMessage('stats')}):Promise.resolve(null);
 function audioKick(){if(!window.AudioContext)return;if(!live.ctx){const c=live.ctx=new AudioContext({latencyHint:'interactive'});live.master=c.createGain();live.master.gain.value=0;live.master.connect(c.destination);live.sfx=c.createGain();live.sfx.gain.value=SFXG();connectSfxBus(c,live.sfx,live.master);live.amb=c.createGain();live.amb.gain.value=0;syncAudioGates();live.amb.connect(live.master);
- masterLimiterModule(c).then(()=>{const n=makeMasterLimiter(c);live.master.disconnect();live.master.connect(n);n.connect(c.destination);live.lim=n;routeNarration()}).catch(e=>console.log('master limiter unavailable',e&&e.message));
+ masterLimiterModule(c).then(()=>{const n=makeMasterLimiter(c);live.master.disconnect();live.master.connect(n);n.connect(c.destination);live.lim=n;routeNarration()}).catch(e=>{console.log('master limiter unavailable',e&&e.message);live.fbGain=Math.pow(10,-3/20)}); // c0131: fallback -3 dB kept in live.fbGain, out of the per-frame gate (c0129 wrote master.gain, syncAudioGates reset it every frame)
  c.addEventListener('statechange',routeNarration)}if(live.ctx.state!=='running')live.ctx.resume().catch(()=>{});routeNarration()}
 const s2a=x=>typeof TMAP==='object'?TMAP.s2a(x):x;   // 事件表是画面秒;多语片(lang4.js)要换成当前语言的配音秒才排得准,单语片恒等
 function audioTick(tt){
@@ -1191,7 +1191,7 @@ const hasAmbience=AMBG()>0&&typeof renderAmbience==='function'&&
  (typeof SFXCFG==='undefined'||!!SFXCFG.ambience)&&CFG.langs.some(lg=>CFG.mix?.[lg]?.ambience!==0);
 function syncAudioGates(){
  if(typeof live!=='object'||!live.ctx)return;
- live.master.gain.value=narration.muted?0:1;
+ live.master.gain.value=narration.muted?0:(live.fbGain||1); // c0131: fallback headroom survives the per-frame gate
  const gain=live.amb.gain;
  if(gain.value!==0||live.done){gain.cancelScheduledValues(live.ctx.currentTime);gain.value=0}
 }
