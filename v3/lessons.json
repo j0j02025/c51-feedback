@@ -33,7 +33,7 @@
         "kk": "Презентация жасауды әр қадамды ретімен көргенде түсіну оңай."
       },
       "formatVoteId": "ru-dl-16",
-      "style": "暖纸 · 返修 11-22 · b2f935ef · 删两键 + 删环境声 + 音效 −4 dB 限幅 + 去 BGM · qa 100 · CCC2 复审 PASS",
+      "style": "暖纸 · 返修 11-22 · b2f935ef · 删两键 + 删环境声 + 音效 −4 dB 限幅 + 去 BGM · qa 100 · CCC2 复审 PASS · 11-26 返修(音效按有声段口径 −4 dB 重配 + 总限幅 · 旁白不变 · 三路真峰值 ≤ −3.8 dBTP)· a56a5091 · qa 俄 100 · 独立复审 PASS(t3417 Air Codex)",
       "status": "待评审",
       "file": "lessons/ru-dl-16-c.html",
       "thumb": "thumbs/ru-dl-16-c.jpg?c51-sha=9cbfda2437d9b233380dcad74f0ef96757c31bf6cf574ad63b3af0604280fde1",
