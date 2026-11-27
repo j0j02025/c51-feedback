@@ -419,6 +419,14 @@
    "title": "同向追及（俄哈双语一节）",
    "file": "lessons/ru-math-87.html",
    "sha": "3cc54df3bbda6856d492dbe59601b9c95bc61cf1cdb1243c9806957b951e2a5f"
+  },
+  {
+   "id": "ru-math-88",
+   "no": 88,
+   "subject": "俄语数学",
+   "title": "读懂运动图像的相交点",
+   "file": "lessons/ru-math-88.html",
+   "sha": "3ba767928ebdea178306b50b97dc06c8f75b25d41b378438ec2a300bd3690069"
   }
  ]
 }

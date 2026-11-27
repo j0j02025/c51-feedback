@@ -298,6 +298,24 @@
       "status": "待评审",
       "file": "lessons/ru-math-87.html",
       "thumb": "thumbs/ru-math-87.jpg?c51-sha=6fca2ba79379afcb92953e92d3ad299e22652e550db70a5344bd706584a47914"
+    },
+    {
+      "no": 88,
+      "subject": "俄语数学",
+      "title": "读懂运动图像的相交点",
+      "styleShort": "暖纸 · W2 新课 11-27",
+      "format": "c2v",
+      "formatWhy": {
+        "zh": "看图像读出两人何时相遇,有先后步骤,适合在纸面上一步步画给孩子看",
+        "en": "Reading when two people meet from a motion graph takes several steps, which work well drawn out step by step on paper.",
+        "ru": "Чтобы по графику понять, когда двое встретятся, нужно несколько шагов — их удобно показать по порядку на бумаге.",
+        "kk": "Графиктен екеуінің қашан кездесетінін табу бірнеше қадамнан тұрады — оны қағаз бетінде ретімен көрсеткен ыңғайлы."
+      },
+      "formatVoteId": "ru-math-88",
+      "style": "暖纸 · 俄 / 英 / 中三轨 · R32 Gemini Leda 正式配音 · qa 俄 100 · 英 100 · 中 100 · 合跑 100 · t3528 3ba76792",
+      "status": "待评审",
+      "file": "lessons/ru-math-88.html",
+      "thumb": "thumbs/ru-math-88.jpg?c51-sha=b3ccb5bbd0610d10211d02790bb9857a73728b5b61f6fb8e398c6efc44c1606f"
     }
   ]
 }
