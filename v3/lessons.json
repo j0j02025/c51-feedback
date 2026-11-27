@@ -316,6 +316,24 @@
       "status": "待评审",
       "file": "lessons/ru-math-88.html",
       "thumb": "thumbs/ru-math-88.jpg?c51-sha=b3ccb5bbd0610d10211d02790bb9857a73728b5b61f6fb8e398c6efc44c1606f"
+    },
+    {
+      "no": 17,
+      "subject": "俄语数字素养",
+      "title": "查找植树素材并规划三页演示",
+      "styleShort": "暖纸 · W2 新课 11-27",
+      "format": "c2v",
+      "formatWhy": {
+        "zh": "在电脑上找素材、排演示页是一步步的软件操作,适合在纸面窗口里演示",
+        "en": "Finding materials and planning slides are step-by-step computer tasks that show well in a paper-style window.",
+        "ru": "Поиск материалов и план слайдов — пошаговые действия на компьютере, их удобно показать в бумажном окне.",
+        "kk": "Материал іздеу мен слайд жоспарлау — компьютердегі қадамдық әрекеттер, оларды қағаз терезеде көрсеткен ыңғайлы."
+      },
+      "formatVoteId": "ru-dl-17",
+      "style": "暖纸 · 俄 / 英 / 中三轨 · R32 Gemini Leda 正式配音 · qa 俄 100 · 英 100 · 中 100 · 合跑 100 · t3529 b88d7fa5",
+      "status": "待评审",
+      "file": "lessons/ru-dl-17.html",
+      "thumb": "thumbs/ru-dl-17.jpg?c51-sha=f198a59ca4374f66a356e984185dab1699339570ee43d7f4a8ee55bd7961a696"
     }
   ]
 }
