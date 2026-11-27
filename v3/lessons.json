@@ -370,6 +370,24 @@
       "status": "待评审",
       "file": "lessons/kk-dl-18.html",
       "thumb": "thumbs/kk-dl-18.jpg?c51-sha=0aaf247ffda89305171393330c0c0b9edea0a2c02bdfbd1a3387819e75c33141"
+    },
+    {
+      "no": 90,
+      "subject": "俄哈数学",
+      "title": "同向远离（俄哈双语一节）",
+      "styleShort": "小绿人 · W2 新课 11-27",
+      "format": "c2v",
+      "formatWhy": {
+        "zh": "两人从同一处同向出发、距离一步步拉开,适合讲成小故事",
+        "en": "Two people leave the same place in the same direction and the gap grows step by step, which works well as a short story.",
+        "ru": "Двое выходят из одного места в одном направлении, и расстояние растёт по шагам — это удобно показать короткой историей.",
+        "kk": "Екеуі бір жерден бір бағытта шығады, арақашықтық қадам-қадаммен өседі — мұны қысқа оқиғамен көрсеткен ыңғайлы."
+      },
+      "formatVoteId": "math-90",
+      "style": "小绿人 · 俄哈双语一节(俄 / 哈 / 英 / 中四轨)· R32 Gemini Leda 正式配音(英 edge-tts)· qa 俄 100 · 哈 100 · 英 100 · 中 100 · 合跑 100 · t3535 9d7934bd",
+      "status": "待评审",
+      "file": "lessons/ru-math-90.html",
+      "thumb": "thumbs/ru-math-90.jpg?c51-sha=cd857b703ba9deec559402d9c3d820ddcdc5f2c0f1c56c39e062e860df974b53"
     }
   ]
 }
