@@ -280,6 +280,24 @@
       "file": "lessons/aiavatar-shikun-ru68.html",
       "thumb": "thumbs/aiavatar-shikun-ru68.jpg?c51-sha=15b376d01299021b540e955dfcbd2d3edc32077ae3bada515e04ddc30491ea00",
       "by": "世昆"
+    },
+    {
+      "no": 87,
+      "subject": "俄哈数学",
+      "title": "同向追及（俄哈双语一节）",
+      "styleShort": "小绿人 · W2 新课 11-27",
+      "format": "c2v",
+      "formatWhy": {
+        "zh": "两人同向走路、距离变化有先后步骤,适合讲成小故事",
+        "en": "Two people moving the same way, with the gap changing step by step, works well as a short story.",
+        "ru": "Двое движутся в одном направлении, расстояние меняется по шагам — это удобно показать короткой историей.",
+        "kk": "Екеуі бір бағытта қозғалады, арақашықтық қадам-қадаммен өзгереді — мұны қысқа оқиғамен көрсеткен ыңғайлы."
+      },
+      "formatVoteId": "math-87",
+      "style": "小绿人 · 俄哈双语一节(俄 / 哈 / 英 / 中四轨)· R32 Gemini Leda 正式配音 · qa 俄 100 · 哈 100 · 英 95.5 · 中 100 · t3514 3cc54df3",
+      "status": "待评审",
+      "file": "lessons/ru-math-87.html",
+      "thumb": "thumbs/ru-math-87.jpg?c51-sha=6fca2ba79379afcb92953e92d3ad299e22652e550db70a5344bd706584a47914"
     }
   ]
 }
