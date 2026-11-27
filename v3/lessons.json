@@ -334,6 +334,24 @@
       "status": "待评审",
       "file": "lessons/ru-dl-17.html",
       "thumb": "thumbs/ru-dl-17.jpg?c51-sha=f198a59ca4374f66a356e984185dab1699339570ee43d7f4a8ee55bd7961a696"
+    },
+    {
+      "no": 70,
+      "subject": "哈语",
+      "title": "名词的变格(Зат есімнің септелуі)",
+      "styleShort": "白板板书 · 字母「А」 · W2 新课 11-27",
+      "format": "noc2v",
+      "formatWhy": {
+        "zh": "讲的是词形变化,一块板书加分色词尾就讲清,走白板板书版",
+        "en": "This lesson is about word endings, so a whiteboard with colour-coded endings explains it clearly.",
+        "ru": "Урок о формах слова: доски с выделенными цветом окончаниями достаточно.",
+        "kk": "Сабақ сөз формалары туралы: жалғаулары түспен белгіленген тақта жеткілікті."
+      },
+      "formatVoteId": "kk-lang-70",
+      "style": "白板板书 · 字母「А」引导 · 哈 / 英 / 中三轨 · R32 Gemini Leda 正式配音(哈 / 中)· qa 哈 100(放行有声起播的测法,t3533 对照)· t3531 80003d47 · 第 14 句先念答案、板书后揭晓待 Sia 判",
+      "status": "待评审",
+      "file": "lessons/kk-lang-70.html",
+      "thumb": "thumbs/kk-lang-70.jpg?c51-sha=e71e8be43ac4714a2b31b4bd83ba2baf74a63c886f92dc4d6f3f3dc2382946dc"
     }
   ]
 }
