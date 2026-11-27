@@ -459,6 +459,14 @@
    "title": "同向远离（俄哈双语一节）",
    "file": "lessons/ru-math-90.html",
    "sha": "e9f8a1a198fd2e76454638c2c4c428333ed10b3c4b92f9448d5ecbf367fa10ad"
+  },
+  {
+   "id": "ru-lang-70",
+   "no": 70,
+   "subject": "俄语",
+   "title": "人称代词(Личные местоимения)",
+   "file": "lessons/ru-lang-70.html",
+   "sha": "305d4f8bb1e8a247154a600730ae04ab01e71fd3a530d16d649a764c6354cd68"
   }
  ]
 }

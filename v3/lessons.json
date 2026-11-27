@@ -388,6 +388,24 @@
       "status": "待评审",
       "file": "lessons/ru-math-90.html",
       "thumb": "thumbs/ru-math-90.jpg?c51-sha=cd857b703ba9deec559402d9c3d820ddcdc5f2c0f1c56c39e062e860df974b53"
+    },
+    {
+      "no": 70,
+      "subject": "俄语",
+      "title": "人称代词(Личные местоимения)",
+      "styleShort": "白板板书 · 字母「А」 · W2 新课 11-27",
+      "format": "noc2v",
+      "formatWhy": {
+        "zh": "讲的是代词和词尾,一块板书加分色词尾就讲清,走白板板书版",
+        "en": "This lesson is about pronouns and endings, so a whiteboard with colour-coded endings explains it clearly.",
+        "ru": "Урок о местоимениях и окончаниях: доски с выделенными цветом окончаниями достаточно.",
+        "kk": "Сабақ есімдіктер мен жалғаулар туралы: жалғаулары түспен белгіленген тақта жеткілікті."
+      },
+      "formatVoteId": "ru-lang-70",
+      "style": "白板板书 · 字母「А」引导 · 俄 / 英 / 中三轨 · R32 Gemini Leda 正式配音(俄 / 中)· qa 俄 100 · 英 100 · 中 100 · 合跑 100 · t3537 a023f877 · s36 «оно» / s22 放 71 课 / 7 秒 vs 3 秒停顿待 Sia 判",
+      "status": "待评审",
+      "file": "lessons/ru-lang-70.html",
+      "thumb": "thumbs/ru-lang-70.jpg?c51-sha=d8ad7bd77016f10eb62168c0e3cff97786e35dfb061e4780d7c6dc86cc33280c"
     }
   ]
 }
