@@ -352,6 +352,24 @@
       "status": "待评审",
       "file": "lessons/kk-lang-70.html",
       "thumb": "thumbs/kk-lang-70.jpg?c51-sha=e71e8be43ac4714a2b31b4bd83ba2baf74a63c886f92dc4d6f3f3dc2382946dc"
+    },
+    {
+      "no": 18,
+      "subject": "哈语数字素养",
+      "title": "找到冬不拉素材并规划三页演示",
+      "styleShort": "暖纸 · W2 新课 11-27",
+      "format": "c2v",
+      "formatWhy": {
+        "zh": "在电脑上找素材、排演示页是一步步的软件操作,适合在纸面窗口里演示",
+        "en": "Finding materials and planning slides are step-by-step computer tasks that show well in a paper-style window.",
+        "ru": "Поиск материалов и план слайдов — пошаговые действия на компьютере, их удобно показать в бумажном окне.",
+        "kk": "Материал іздеу мен слайд жоспарлау — компьютердегі қадамдық әрекеттер, оларды қағаз терезеде көрсеткен ыңғайлы."
+      },
+      "formatVoteId": "kk-dl-18",
+      "style": "暖纸 · 哈 / 英 / 中三轨 · R32 Gemini Leda 正式配音 · qa 哈 100 · 英 100 · 中 100 · 合跑 100 · t3534 762ca6ec · 分镜要的 45 秒系统录屏源件里没有,用暖纸窗口演示代替",
+      "status": "待评审",
+      "file": "lessons/kk-dl-18.html",
+      "thumb": "thumbs/kk-dl-18.jpg?c51-sha=0aaf247ffda89305171393330c0c0b9edea0a2c02bdfbd1a3387819e75c33141"
     }
   ]
 }
